@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.50 (2026-11-15)
+
+**Features**
+
+- **core** A node that accepts the handshake and then stays silent is dropped after one connection, so a dead line becomes a quick reconnect instead of a stall; a stuck attempt now gives up after 1.5 s and the first probe result arrives within 300 ms. (4b169c7)
+
 ## v1.0.49 (2026-11-14)
 
 **Features**
