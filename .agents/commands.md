@@ -140,9 +140,11 @@ monochrome icon turned off, macOS loads the color PNGs from `assets/images/tray/
 wreath without its core, because a filled core would flatten into a solid disc; its band keeps the weight of the
 Android monochrome layer, and the notification drawables `android/service/src/main/res/drawable/ic.xml` and
 `ic_service.xml` repeat that geometry at 24 dp, so change them together. The launcher itself comes from
-`assets_source/images/icon/wreath.svg`: that 1024 canvas is the master of `assets/images/icon.png`, both `.ico`
-files, the macOS `appiconset`, the legacy `mipmap-*/ic_launcher*.webp` and the TV banner, while the adaptive
-foreground, monochrome and background vectors in `android/app/src/main/res/drawable/` repeat the same geometry.
+`assets_source/images/icon/launcher.png`: that 1254 canvas is the master of `assets/images/icon.png`, both `.ico`
+files, the macOS `appiconset`, the legacy `mipmap-*/ic_launcher*.webp`, the adaptive foreground bitmaps in
+`android/app/src/main/res/drawable-*dpi/ic_launcher_foreground.png` and the TV banner, while the monochrome layer,
+the notification drawables and the TV foreground keep the `wreath.svg` geometry. The phone adaptive background is
+the flat `@color/ic_launcher_background_black`, because the raster master is drawn on black.
 `pubspec.yaml` declares the three tray directories with `platforms:` so each build only bundles the formats its
 tray loads; a new status icon needs a source SVG and an entry in the script's `statusIconNames`, nothing in
 `pubspec.yaml`.
