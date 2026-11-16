@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.51 (2026-11-16)
+
+**Features**
+
+- **core** A node that died after the last sweep no longer takes the next connection down, one silent incident no longer escalates to the five-minute cap in a second, and the emergency test now reaches the whole node list. (832be1c)
+- **icon** The app wears the supplied glowing wreath, larger on the home screen and in the recents card, and the desktop and window icons match it (8476b75)
+
 ## v1.0.50 (2026-11-15)
 
 **Features**

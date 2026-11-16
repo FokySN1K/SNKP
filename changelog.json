@@ -2,6 +2,29 @@
   "schemaVersion": 2,
   "versions": [
     {
+      "version": "1.0.51",
+      "tag": "v1.0.51",
+      "date": "2026-11-16",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "feat",
+          "entries": [
+            {
+              "id": "832be1c",
+              "scope": "core",
+              "text": "A node that died after the last sweep no longer takes the next connection down, one silent incident no longer escalates to the five-minute cap in a second, and the emergency test now reaches the whole node list."
+            },
+            {
+              "id": "8476b75",
+              "scope": "icon",
+              "text": "The app wears the supplied glowing wreath, larger on the home screen and in the recents card, and the desktop and window icons match it"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.50",
       "tag": "v1.0.50",
       "date": "2026-11-15",
