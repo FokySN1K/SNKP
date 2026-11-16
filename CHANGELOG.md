@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.0.53 (2026-11-16)
+
+**Features**
+
+- **core** Cold url-test-pool checks can be ordered with `ordered`. A pool a connection is waiting for moves its check to the front of the queue, and `probe-order: parallel` returns to the previous all-at-once sweep. (46040ce)
+- **logs** The exported log now includes [NET] and [VPN] lines — network switches, DNS changes, the tun handshake and a revoked VPN — so a dropped connection can be traced to the event that started it. (58c81b3)
+- **icon** The status-bar and Quick Settings marks carry a heavier ring and a larger orb, so the wreath keeps its shape when Android draws it small. (25213b2)
+
 ## v1.0.52 (2026-11-16)
 
 **Features**

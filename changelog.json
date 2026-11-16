@@ -2,6 +2,34 @@
   "schemaVersion": 2,
   "versions": [
     {
+      "version": "1.0.53",
+      "tag": "v1.0.53",
+      "date": "2026-11-16",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "feat",
+          "entries": [
+            {
+              "id": "46040ce",
+              "scope": "core",
+              "text": "Cold url-test-pool checks can be ordered with `ordered`. A pool a connection is waiting for moves its check to the front of the queue, and `probe-order: parallel` returns to the previous all-at-once sweep."
+            },
+            {
+              "id": "58c81b3",
+              "scope": "logs",
+              "text": "The exported log now includes [NET] and [VPN] lines — network switches, DNS changes, the tun handshake and a revoked VPN — so a dropped connection can be traced to the event that started it."
+            },
+            {
+              "id": "25213b2",
+              "scope": "icon",
+              "text": "The status-bar and Quick Settings marks carry a heavier ring and a larger orb, so the wreath keeps its shape when Android draws it small."
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.52",
       "tag": "v1.0.52",
       "date": "2026-11-16",
