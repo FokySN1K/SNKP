@@ -2,6 +2,24 @@
   "schemaVersion": 2,
   "versions": [
     {
+      "version": "1.0.52",
+      "tag": "v1.0.52",
+      "date": "2026-11-16",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "feat",
+          "entries": [
+            {
+              "id": "c75168b",
+              "scope": "core",
+              "text": "A group that starts with nothing measured looks for a working member ahead of a running sweep and stops holding the queue once one answers, so the startup check reaches a live line sooner when several groups share the same providers."
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.51",
       "tag": "v1.0.51",
       "date": "2026-11-16",

@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.52 (2026-11-16)
+
+**Features**
+
+- **core** A group that starts with nothing measured looks for a working member ahead of a running sweep and stops holding the queue once one answers, so the startup check reaches a live line sooner when several groups share the same providers. (c75168b)
+
 ## v1.0.51 (2026-11-16)
 
 **Features**
