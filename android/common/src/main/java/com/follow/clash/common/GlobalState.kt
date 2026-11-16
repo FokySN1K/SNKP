@@ -4,6 +4,7 @@ import android.app.ActivityManager
 import android.app.Application
 import android.os.Build
 import android.util.Log
+import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -13,6 +14,7 @@ object GlobalState : CoroutineScope by CoroutineScope(SupervisorJob() + Dispatch
     const val NOTIFICATION_ID = 1
     private const val ANY_PID = 0
     private const val EVERY_EXIT_RECORD = 0
+    private const val LOG_TAG = "FlClash"
 
     val packageName: String
         get() = application.packageName
@@ -25,13 +27,21 @@ object GlobalState : CoroutineScope by CoroutineScope(SupervisorJob() + Dispatch
 
     @Volatile
     private var appInstance: Application? = null
+    private val logSink = AtomicReference<((String) -> Unit)?>(null)
 
     fun init(application: Application) {
         appInstance = application
     }
 
+    // The exported log is the Core's event stream collected by Dart, so a
+    // line that stops at logcat never reaches the file worth reading.
+    fun setLogSink(sink: ((String) -> Unit)?) {
+        logSink.set(sink)
+    }
+
     fun log(text: String) {
-        Log.d("FlClash", text)
+        Log.d(LOG_TAG, text)
+        logSink.get()?.invoke(text)
     }
 
     fun lastExitInfo(): Map<String, Any?>? {

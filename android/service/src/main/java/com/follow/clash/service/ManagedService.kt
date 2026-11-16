@@ -14,12 +14,12 @@ interface ManagedService {
 }
 
 internal fun Service.notifyVpnStartRequested() {
-    GlobalState.log("VPN start requested")
+    GlobalState.log("[VPN] start requested by the system")
     BroadcastAction.VPN_START_REQUESTED.sendBroadcast()
 }
 
 internal fun Service.notifyVpnRevoked() {
-    GlobalState.log("VPN permission revoked")
+    GlobalState.log("[VPN] permission revoked by the system")
     BroadcastAction.VPN_REVOKED.sendBroadcast()
 }
 

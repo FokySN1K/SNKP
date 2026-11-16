@@ -19,6 +19,7 @@ import java.net.InetAddress
 import java.util.concurrent.ConcurrentHashMap
 
 private data class NetworkInfo(
+    val name: String,
     @Volatile var losingUntilMillis: Long = 0,
     @Volatile var dnsList: List<InetAddress> = emptyList(),
 ) {
@@ -52,13 +53,16 @@ object NetworkObserver {
 
     private val callback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
-            networkInfos[network] = NetworkInfo()
+            val info = NetworkInfo(describe(network))
+            networkInfos[network] = info
+            GlobalState.log("[NET] ${info.name} available")
             scheduleUpdateDns()
         }
 
         override fun onLosing(network: Network, maxMsToLive: Int) {
             val info = networkInfos[network] ?: return
             info.losingUntilMillis = System.currentTimeMillis() + maxMsToLive
+            GlobalState.log("[NET] ${info.name} losing, ${maxMsToLive}ms left")
             scheduleUpdateDns()
             if (maxMsToLive > 0) {
                 handler.postDelayed({
@@ -70,12 +74,20 @@ object NetworkObserver {
         }
 
         override fun onLost(network: Network) {
-            networkInfos.remove(network)
+            val info = networkInfos.remove(network)
+            if (info != null) {
+                GlobalState.log("[NET] ${info.name} lost")
+            }
             scheduleUpdateDns()
         }
 
         override fun onLinkPropertiesChanged(network: Network, linkProperties: LinkProperties) {
-            networkInfos[network]?.dnsList = linkProperties.dnsServers
+            val info = networkInfos[network]
+            val dns = linkProperties.dnsServers
+            if (info != null && dns != info.dnsList) {
+                GlobalState.log("[NET] ${info.name} dns ${describeDns(dns)}")
+            }
+            info?.dnsList = dns
             scheduleUpdateDns()
         }
     }
@@ -89,12 +101,30 @@ object NetworkObserver {
         handler.postDelayed(updateDnsTask, DNS_UPDATE_DELAY_MILLIS)
     }
 
+    // A bare Network{100} handle says nothing a month later, so the log
+    // carries the transport the handle came from.
+    private fun describe(network: Network): String {
+        val capabilities = connectivity?.getNetworkCapabilities(network)
+        val transport = when {
+            capabilities == null -> "gone"
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> "wifi"
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> "ethernet"
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_BLUETOOTH) -> "bluetooth"
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> "cellular"
+            else -> "other"
+        }
+        return "$transport $network"
+    }
+
+    private fun describeDns(addresses: List<InetAddress>): String =
+        addresses.joinToString(",") { it.asSocketAddressText(DNS_PORT) }.ifEmpty { "none" }
+
     @Synchronized
     fun start() {
         if (started) return
         runCatching { requireNotNull(connectivity).registerNetworkCallback(request, callback) }
             .onSuccess { started = true }
-            .onFailure { error -> GlobalState.log("Unable to observe networks: $error") }
+            .onFailure { error -> GlobalState.log("[NET] unable to observe networks: $error") }
     }
 
     private fun networkPriority(entry: Map.Entry<Network, NetworkInfo>): Int {
@@ -127,12 +157,21 @@ object NetworkObserver {
             .distinct()
         if (dnsList != currentDnsList) {
             currentDnsList = dnsList
+            val nameservers = dnsList.joinToString(",").ifEmpty { "none" }
+            GlobalState.log("[NET] dns -> $nameservers")
             Core.updateDNS(dnsList.joinToString(","))
         }
-        val network = preferred?.key ?: return
+        if (preferred == null) {
+            if (currentNetwork != null) {
+                GlobalState.log("[NET] no network left")
+            }
+            return
+        }
+        val network = preferred.key
         // Sockets protected onto the network we left stay bound to it; closing
         // them makes apps reconnect now instead of after a TCP timeout.
         if (currentNetwork != null && currentNetwork != network) {
+            GlobalState.log("[NET] ${preferred.value.name} is preferred now, resetting connections")
             Core.resetNetwork()
         }
         currentNetwork = network

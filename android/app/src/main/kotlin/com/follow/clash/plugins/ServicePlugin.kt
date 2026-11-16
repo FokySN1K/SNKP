@@ -3,6 +3,7 @@ package com.follow.clash.plugins
 import com.follow.clash.ServiceController
 import com.follow.clash.ServiceState
 import com.follow.clash.common.Components
+import com.follow.clash.common.GlobalState
 import com.follow.clash.models.SharedState
 import com.follow.clash.service.NetworkObserver
 import com.google.gson.Gson
@@ -39,6 +40,7 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
             messenger.makeBackgroundTaskQueue(),
         )
         coreChannel.setMethodCallHandler(::onCoreMethodCall)
+        GlobalState.setLogSink(::sendLog)
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
@@ -46,6 +48,7 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         coreChannel.setMethodCallHandler(null)
         scope.cancel()
         ServiceController.setEventListener(null)
+        GlobalState.setLogSink(null)
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
@@ -135,6 +138,18 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
                 false
             }
             result.success(settled)
+        }
+    }
+
+    // A network switch or a revoked VPN never passes through the Core's own
+    // log stream, and without them a shared log cannot say what moved first.
+    private fun sendLog(text: String) {
+        scope.launch(Dispatchers.Main) {
+            // A line queued as the engine detaches would otherwise
+            // throw from a messenger already gone and crash the app.
+            runCatching {
+                channel.invokeMethod("log", text)
+            }
         }
     }
 

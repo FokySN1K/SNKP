@@ -7,6 +7,8 @@ import 'package:fl_clash/core/method.dart';
 import 'package:fl_clash/core/spill.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/providers/app.dart';
+import 'package:fl_clash/state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -76,6 +78,20 @@ class Service {
           }
           _startRequested = false;
           _dispatch('stop report', (listener) => listener.onServiceStopped());
+          break;
+        // The service sees what the Core cannot: a switched network or a
+        // revoked VPN. They belong in the list the log export reads.
+        case 'log':
+          final text = call.arguments;
+          if (text is String && text.isNotEmpty) {
+            try {
+              globalState.container
+                  .read(logsProvider.notifier)
+                  .add(Log.app(text));
+            } catch (_) {
+              // An always-on VPN can speak before the container exists.
+            }
+          }
           break;
         default:
           throw MissingPluginException();

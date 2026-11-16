@@ -123,6 +123,10 @@ class VpnService : SystemVpnService(), ManagedService {
     }
 
     private fun handleStart(options: VpnOptions) {
+        GlobalState.log(
+            "[VPN] establishing ${options.tunAddress}, dns ${options.tunDns}, " +
+                "stack ${options.stack}, mtu ${options.tunMtu}",
+        )
         val fd = with(Builder()) {
             addAddressAndRoutes(options)
             addDnsServers(options)
@@ -157,19 +161,20 @@ class VpnService : SystemVpnService(), ManagedService {
                 // longer keeps its own sockets out of them: every connection
                 // then hangs until it times out. Tear the VPN down instead of
                 // reporting a start that only looks successful.
-                check(
-                    Core.startTun(
-                        fd = fd,
-                        protect = this::protect,
-                        resolveUid = this::resolveUid,
-                        resolvePackage = this::resolvePackage,
-                        stack = options.stack,
-                        address = options.tunAddress,
-                        dns = options.tunDns,
-                        options = options.tunOptions,
-                    ),
-                ) { "Core rejected the tun file descriptor" }
+                val accepted = Core.startTun(
+                    fd = fd,
+                    protect = this::protect,
+                    resolveUid = this::resolveUid,
+                    resolvePackage = this::resolvePackage,
+                    stack = options.stack,
+                    address = options.tunAddress,
+                    dns = options.tunDns,
+                    options = options.tunOptions,
+                )
+                check(accepted) { "Core rejected the tun file descriptor" }
+                GlobalState.log("[VPN] tun fd $fd is up")
             } catch (error: Exception) {
+                GlobalState.log("[VPN] start failed: ${error.message}")
                 stopTunLocked()
                 throw error
             }
@@ -297,6 +302,7 @@ class VpnService : SystemVpnService(), ManagedService {
         if (tunRunning) {
             Core.stopTun()
             tunRunning = false
+            GlobalState.log("[VPN] tun down")
         }
     }
 
