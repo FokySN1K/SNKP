@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.54 (2026-11-16)
+
+**Bug Fixes**
+
+- **core** url-test, fallback and load-balance groups no longer deadlock their own health check, so a failed node cannot hang the group's traffic. (21ca768)
+
 ## v1.0.53 (2026-11-16)
 
 **Features**

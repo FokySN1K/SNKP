@@ -2,6 +2,24 @@
   "schemaVersion": 2,
   "versions": [
     {
+      "version": "1.0.54",
+      "tag": "v1.0.54",
+      "date": "2026-11-16",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "fix",
+          "entries": [
+            {
+              "id": "21ca768",
+              "scope": "core",
+              "text": "url-test, fallback and load-balance groups no longer deadlock their own health check, so a failed node cannot hang the group's traffic."
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.53",
       "tag": "v1.0.53",
       "date": "2026-11-16",
