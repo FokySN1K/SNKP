@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.59 (2026-11-18)
+
+**Bug Fixes**
+
+- **proxies** Proxy delays stay on the cards after the app is closed and reopened (418c5cb)
+
 ## v1.0.58 (2026-11-18)
 
 **Bug Fixes**

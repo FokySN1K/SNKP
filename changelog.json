@@ -2,6 +2,24 @@
   "schemaVersion": 2,
   "versions": [
     {
+      "version": "1.0.59",
+      "tag": "v1.0.59",
+      "date": "2026-11-18",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "fix",
+          "entries": [
+            {
+              "id": "418c5cb",
+              "scope": "proxies",
+              "text": "Proxy delays stay on the cards after the app is closed and reopened"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.58",
       "tag": "v1.0.58",
       "date": "2026-11-18",
