@@ -2,6 +2,24 @@
   "schemaVersion": 2,
   "versions": [
     {
+      "version": "1.0.55",
+      "tag": "v1.0.55",
+      "date": "2026-11-18",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "feat",
+          "entries": [
+            {
+              "id": "a44c832",
+              "scope": "core",
+              "text": "The core now splits a connection's dial time between the cascade candidates, so an empty or rejecting candidate can no longer hang or kill the first connection, and every group can explain why it routes through the current node."
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.54",
       "tag": "v1.0.54",
       "date": "2026-11-16",

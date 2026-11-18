@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.55 (2026-11-18)
+
+**Features**
+
+- **core** The core now splits a connection's dial time between the cascade candidates, so an empty or rejecting candidate can no longer hang or kill the first connection, and every group can explain why it routes through the current node. (a44c832)
+
 ## v1.0.54 (2026-11-16)
 
 **Bug Fixes**
