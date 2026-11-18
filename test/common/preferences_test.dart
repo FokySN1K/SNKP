@@ -138,6 +138,40 @@ void main() {
     expect(await preferences.isInit, isTrue);
   });
 
+  group('proxy delays', () {
+    test('saveDelays then getDelays round-trips the positive values', () async {
+      await preferences.saveDelays({
+        'https://one': {'HK-01': 120, 'HK-02': null},
+        'https://two': {'HK-01': 0, 'HK-02': -2, 'HK-03': 80},
+      });
+
+      expect(await preferences.getDelays(), {
+        'https://one': {'HK-01': 120},
+        'https://two': {'HK-03': 80},
+      });
+    });
+
+    test('getDelays survives a corrupt entry', () async {
+      await store.setString(proxyDelaysKey, 'not json');
+
+      expect(await preferences.getDelays(), isEmpty);
+    });
+
+    test('getDelays skips a value of the wrong shape', () async {
+      await store.setString(
+        proxyDelaysKey,
+        json.encode({
+          'https://one': {'HK-01': 'fast'},
+          'https://two': {'HK-02': 55},
+        }),
+      );
+
+      expect(await preferences.getDelays(), {
+        'https://two': {'HK-02': 55},
+      });
+    });
+  });
+
   group('boot record', () {
     test('getBootRecord returns null when nothing is stored', () async {
       expect(await preferences.getBootRecord(), isNull);

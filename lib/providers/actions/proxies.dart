@@ -78,6 +78,8 @@ class ProxiesAction extends _$ProxiesAction {
 
   final Map<String, String> _pendingSelectedRollback = {};
 
+  Map<String, Map<String, int>>? _savedDelays;
+
   @override
   void build() {
     ref.onDispose(() {
@@ -150,6 +152,7 @@ class ProxiesAction extends _$ProxiesAction {
       // The value lands first, so a card that drops its spinner in the same
       // frame already shows the number it was waiting for.
       ref.read(delayDataSourceProvider.notifier).setDelays(delays);
+      _scheduleDelaysSave();
       for (final job in _groupDelayTestJobs) {
         for (final delay in delays) {
           job.settleMember(delay.name);
@@ -173,6 +176,26 @@ class ProxiesAction extends _$ProxiesAction {
           .read(pendingDelayTestsProvider.notifier)
           .apply(started: started, finished: finished);
     }
+  }
+
+  Future<Map<String, Map<String, int>>> _readSavedDelays() async {
+    return _savedDelays ??= await preferences.getDelays();
+  }
+
+  void _scheduleDelaysSave() {
+    debouncer.call(
+      FunctionTag.saveDelays,
+      saveDelays,
+      duration: delayCacheSaveInterval,
+    );
+  }
+
+  /// Writes the last values where the next launch reads them.
+  Future<void> saveDelays() async {
+    debouncer.cancel(FunctionTag.saveDelays);
+    final delayMap = ref.read(delayDataSourceProvider);
+    if (delayMap.isEmpty) return;
+    await preferences.saveDelays(delayMap);
   }
 
   void updateGroupsDebounce([Duration? duration]) {
@@ -218,9 +241,9 @@ class ProxiesAction extends _$ProxiesAction {
             // The Core keeps its own measurements, so the pull hands them to
             // the page before the groups are built: both the first render and
             // the sort read the values the cards then show.
-            ref
-                .read(delayDataSourceProvider.notifier)
-                .seedDelays(proxiesData.lastDelays);
+            final delaySource = ref.read(delayDataSourceProvider.notifier);
+            delaySource.seedDelays(proxiesData.lastDelays);
+            delaySource.seedDelays(await _readSavedDelays());
             return await toGroupsTask(
               ComputeGroupsState(
                 proxiesData: proxiesData,

@@ -494,6 +494,7 @@ enum FunctionTag {
   updateGroups,
   applyProfile,
   savePreferences,
+  saveDelays,
   changeProxy,
   updateDelay,
   autoLaunch,

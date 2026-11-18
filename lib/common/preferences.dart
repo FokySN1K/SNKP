@@ -135,6 +135,55 @@ class Preferences {
     return preferences?.setString(configKey, json.encode(config)) ?? false;
   }
 
+  /// The last positive measurement of every node, by test URL: a restart that
+  /// takes the Core's own history with it leaves the page with these.
+  Future<Map<String, Map<String, int>>> getDelays() async {
+    try {
+      final store = await _store.value;
+      final raw = store?.getString(proxyDelaysKey);
+      if (raw == null) return {};
+      final decoded = json.decode(raw);
+      if (decoded is! Map) return {};
+      final delays = <String, Map<String, int>>{};
+      for (final entry in decoded.entries) {
+        final url = entry.key;
+        final values = entry.value;
+        if (url is! String || values is! Map) continue;
+        final urlDelays = <String, int>{};
+        for (final delay in values.entries) {
+          final name = delay.key;
+          final value = delay.value;
+          if (name is! String || value is! int || value <= 0) continue;
+          urlDelays[name] = value;
+        }
+        if (urlDelays.isNotEmpty) {
+          delays[url] = urlDelays;
+        }
+      }
+      return delays;
+    } catch (e) {
+      commonPrint.log(
+        'getDelays error ${e.toString()}',
+        logLevel: LogLevel.warning,
+      );
+      return {};
+    }
+  }
+
+  Future<void> saveDelays(DelayMap delays) async {
+    final store = await _store.value;
+    if (store == null) return;
+    final measured = <String, Map<String, int>>{};
+    for (final entry in delays.entries) {
+      for (final delay in entry.value.entries) {
+        final value = delay.value;
+        if (value == null || value <= 0) continue;
+        (measured[entry.key] ??= {})[delay.key] = value;
+      }
+    }
+    await store.setString(proxyDelaysKey, json.encode(measured));
+  }
+
   Future<SystemDnsRecord?> getSystemDnsRecord() async {
     try {
       final sharedPreferencesIns = await _store.value;

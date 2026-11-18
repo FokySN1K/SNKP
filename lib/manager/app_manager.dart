@@ -87,6 +87,10 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     _updateVisible(state);
+    if (state != AppLifecycleState.resumed &&
+        state != AppLifecycleState.inactive) {
+      unawaited(ref.read(proxiesActionProvider.notifier).saveDelays());
+    }
     if (state == AppLifecycleState.resumed) {
       unawaited(ref.read(locationPermissionsProvider.notifier).refresh());
       WidgetsBinding.instance.addPostFrameCallback((_) {

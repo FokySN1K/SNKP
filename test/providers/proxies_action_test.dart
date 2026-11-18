@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:drift/native.dart';
 import 'package:fl_clash/common/common.dart';
@@ -20,6 +21,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:riverpod/riverpod.dart';
 
+import '../helpers/preferences.dart';
 import '../helpers/test_profiles.dart';
 
 class MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {}
@@ -172,6 +174,37 @@ void main() {
       when(
         core.getProxies,
       ).thenAnswer((_) async => _proxiesDataKeeping(120, 0));
+      final container = _delayContainer(buildContainer);
+      container
+          .read(delayDataSourceProvider.notifier)
+          .setDelay(const Delay(name: 'HK-01', url: _testUrl, value: -2));
+
+      await actionOf(container).updateGroups();
+
+      expect(container.read(delayDataSourceProvider)[_testUrl]?['HK-01'], -2);
+    });
+
+    test('restores the delays the previous launch wrote down', () async {
+      await mockPreferences({
+        proxyDelaysKey: json.encode({
+          _testUrl: {'HK-01': 90, 'HK-02': -1},
+        }),
+      });
+      when(core.getProxies).thenAnswer((_) async => _proxiesDataKeeping(0, 0));
+      final container = _delayContainer(buildContainer);
+
+      await actionOf(container).updateGroups();
+
+      expect(container.read(delayDataSourceProvider)[_testUrl], {'HK-01': 90});
+    });
+
+    test('a live value outranks the one the previous launch wrote', () async {
+      await mockPreferences({
+        proxyDelaysKey: json.encode({
+          _testUrl: {'HK-01': 90},
+        }),
+      });
+      when(core.getProxies).thenAnswer((_) async => _proxiesDataKeeping(0, 0));
       final container = _delayContainer(buildContainer);
       container
           .read(delayDataSourceProvider.notifier)
@@ -537,6 +570,37 @@ void main() {
       expect(container.read(delayDataSourceProvider), isEmpty);
       expect(container.read(pendingDelayTestsProvider), isEmpty);
       verifyNever(() => core.asyncTestDelay(any(), any(), any()));
+    });
+  });
+
+  group('saved delays', () {
+    test(
+      'writes the measured values where the next launch reads them',
+      () async {
+        await mockPreferences();
+        final container = _delayContainer(buildContainer);
+        container.read(delayDataSourceProvider.notifier).setDelays(const [
+          Delay(name: 'HK-01', url: _testUrl, value: 42),
+        ]);
+
+        await actionOf(container).saveDelays();
+
+        expect(await preferences.getDelays(), {
+          _testUrl: {'HK-01': 42},
+        });
+      },
+    );
+
+    test('keeps a failed check out of the saved values', () async {
+      await mockPreferences();
+      final container = _delayContainer(buildContainer);
+      container
+          .read(delayDataSourceProvider.notifier)
+          .setDelay(const Delay(name: 'HK-01', url: _testUrl, value: -1));
+
+      await actionOf(container).saveDelays();
+
+      expect(await preferences.getDelays(), isEmpty);
     });
   });
 

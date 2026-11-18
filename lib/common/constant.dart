@@ -108,6 +108,10 @@ const maxConcurrentIconLoads = 8;
 
 const renderThrottleDuration = Duration(milliseconds: 300);
 
+/// A check lands a batch every [renderThrottleDuration]; the saved copy
+/// follows slower so a wave writes once instead of per batch.
+const delayCacheSaveInterval = Duration(seconds: 3);
+
 /// How often the page re-pulls the groups while a pool reports itself
 /// recovering. The Core publishes the state and re-decides the group's route on
 /// its own, but the app only learns that route by pulling again: without this
@@ -134,6 +138,7 @@ const configKey = 'config';
 const systemDnsRecordKey = 'system_dns_record';
 const bootRecordKey = 'boot_record';
 const appliedConfigMd5Key = 'applied_config_md5';
+const proxyDelaysKey = 'proxy_delays';
 const defaultSystemDnsFallback = '223.5.5.5';
 const repository = 'FokySN1K/SNKP';
 const maxMobileWidth = 600;
