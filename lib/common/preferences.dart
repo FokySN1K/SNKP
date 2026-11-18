@@ -135,8 +135,8 @@ class Preferences {
     return preferences?.setString(configKey, json.encode(config)) ?? false;
   }
 
-  /// The last positive measurement of every node, by test URL: a restart that
-  /// takes the Core's own history with it leaves the page with these.
+  /// The last state of every node, by test URL: a restart that takes the
+  /// Core's own history with it leaves the page with the same picture.
   Future<Map<String, Map<String, int>>> getDelays() async {
     try {
       final store = await _store.value;
@@ -153,7 +153,7 @@ class Preferences {
         for (final delay in values.entries) {
           final name = delay.key;
           final value = delay.value;
-          if (name is! String || value is! int || value <= 0) continue;
+          if (name is! String || value is! int || value == 0) continue;
           urlDelays[name] = value;
         }
         if (urlDelays.isNotEmpty) {
@@ -170,6 +170,8 @@ class Preferences {
     }
   }
 
+  /// Writes what the cards show, a failed check included, so the next
+  /// launch does not blank a node the last run had already measured.
   Future<void> saveDelays(DelayMap delays) async {
     final store = await _store.value;
     if (store == null) return;
@@ -177,7 +179,7 @@ class Preferences {
     for (final entry in delays.entries) {
       for (final delay in entry.value.entries) {
         final value = delay.value;
-        if (value == null || value <= 0) continue;
+        if (value == null || value == 0) continue;
         (measured[entry.key] ??= {})[delay.key] = value;
       }
     }

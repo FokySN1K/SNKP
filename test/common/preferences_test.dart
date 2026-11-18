@@ -139,15 +139,15 @@ void main() {
   });
 
   group('proxy delays', () {
-    test('saveDelays then getDelays round-trips the positive values', () async {
+    test('saveDelays then getDelays round-trips the last values', () async {
       await preferences.saveDelays({
-        'https://one': {'HK-01': 120, 'HK-02': null},
+        'https://one': {'HK-01': 120, 'HK-02': null, 'HK-03': -1},
         'https://two': {'HK-01': 0, 'HK-02': -2, 'HK-03': 80},
       });
 
       expect(await preferences.getDelays(), {
-        'https://one': {'HK-01': 120},
-        'https://two': {'HK-03': 80},
+        'https://one': {'HK-01': 120, 'HK-03': -1},
+        'https://two': {'HK-02': -2, 'HK-03': 80},
       });
     });
 

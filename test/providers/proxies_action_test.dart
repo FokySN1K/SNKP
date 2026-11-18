@@ -184,7 +184,7 @@ void main() {
       expect(container.read(delayDataSourceProvider)[_testUrl]?['HK-01'], -2);
     });
 
-    test('restores the delays the previous launch wrote down', () async {
+    test('restores the last values the previous launch wrote down', () async {
       await mockPreferences({
         proxyDelaysKey: json.encode({
           _testUrl: {'HK-01': 90, 'HK-02': -1},
@@ -195,7 +195,26 @@ void main() {
 
       await actionOf(container).updateGroups();
 
-      expect(container.read(delayDataSourceProvider)[_testUrl], {'HK-01': 90});
+      expect(container.read(delayDataSourceProvider)[_testUrl], {
+        'HK-01': 90,
+        'HK-02': -1,
+      });
+    });
+
+    test('a value the Core kept outranks the saved failure', () async {
+      await mockPreferences({
+        proxyDelaysKey: json.encode({
+          _testUrl: {'HK-01': -1},
+        }),
+      });
+      when(
+        core.getProxies,
+      ).thenAnswer((_) async => _proxiesDataKeeping(120, 0));
+      final container = _delayContainer(buildContainer);
+
+      await actionOf(container).updateGroups();
+
+      expect(container.read(delayDataSourceProvider)[_testUrl]?['HK-01'], 120);
     });
 
     test('a live value outranks the one the previous launch wrote', () async {
@@ -591,17 +610,22 @@ void main() {
       },
     );
 
-    test('keeps a failed check out of the saved values', () async {
-      await mockPreferences();
-      final container = _delayContainer(buildContainer);
-      container
-          .read(delayDataSourceProvider.notifier)
-          .setDelay(const Delay(name: 'HK-01', url: _testUrl, value: -1));
+    test(
+      'keeps a failed check so the card stays red after a restart',
+      () async {
+        await mockPreferences();
+        final container = _delayContainer(buildContainer);
+        container
+            .read(delayDataSourceProvider.notifier)
+            .setDelay(const Delay(name: 'HK-01', url: _testUrl, value: -1));
 
-      await actionOf(container).saveDelays();
+        await actionOf(container).saveDelays();
 
-      expect(await preferences.getDelays(), isEmpty);
-    });
+        expect(await preferences.getDelays(), {
+          _testUrl: {'HK-01': -1},
+        });
+      },
+    );
   });
 
   group('delayTest', () {
