@@ -164,9 +164,18 @@ class SetupAction extends _$SetupAction {
     }
   }
 
-  Future<bool> setRunning(bool running, {bool initialize = false}) {
+  Future<bool> setRunning(bool running, {bool initialize = false}) async {
     if (running && !initialize && !ref.read(initProvider)) {
-      return Future.value(true);
+      return true;
+    }
+    // A share link can carry telemetry, a spent quota or a revoked device; the
+    // tunnel is not built until the user has seen what the link means.
+    if (running) {
+      if (!await SublinkManager.instance.prepareStart()) {
+        return false;
+      }
+    } else {
+      await SublinkManager.instance.stopSession();
     }
     return _run(running, initialize: running && initialize);
   }

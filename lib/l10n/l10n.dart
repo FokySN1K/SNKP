@@ -8038,8 +8038,7 @@ class AppLocalizations {
   String customImportDroppedSubRules(num count, Object label) {
     return Intl.plural(
       count,
-      one:
-          '1 SUB-RULE rule was dropped, since custom profiles do not support sub-rules',
+      one: '1 SUB-RULE rule was dropped, since custom profiles do not support sub-rules',
       other:
           '$label SUB-RULE rules were dropped, since custom profiles do not support sub-rules',
       name: 'customImportDroppedSubRules',
@@ -8708,14 +8707,9 @@ class AppLocalizations {
     );
   }
 
-  /// `In rotation`
+  /// `In pool`
   String get poolRotation {
-    return Intl.message(
-      'In rotation',
-      name: 'poolRotation',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('In pool', name: 'poolRotation', desc: '', args: []);
   }
 
   /// `Silent nodes`
@@ -8813,6 +8807,116 @@ class AppLocalizations {
     return Intl.message(
       'Rotation',
       name: 'historyEventPool',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Telemetry is on`
+  String get sublinkTelemetryTitle {
+    return Intl.message(
+      'Telemetry is on',
+      name: 'sublinkTelemetryTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The owner of this subscription receives the volume of traffic you use. Site names and request contents are never sent.`
+  String get sublinkTelemetryMessage {
+    return Intl.message(
+      'The owner of this subscription receives the volume of traffic you use. Site names and request contents are never sent.',
+      name: 'sublinkTelemetryMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Continue`
+  String get sublinkTelemetryAccept {
+    return Intl.message(
+      'Continue',
+      name: 'sublinkTelemetryAccept',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The subscription has expired.`
+  String get sublinkExpired {
+    return Intl.message(
+      'The subscription has expired.',
+      name: 'sublinkExpired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The subscription traffic limit is exhausted.`
+  String get sublinkQuotaExhausted {
+    return Intl.message(
+      'The subscription traffic limit is exhausted.',
+      name: 'sublinkQuotaExhausted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The subscription owner has not allowed this device.`
+  String get sublinkDeviceBlocked {
+    return Intl.message(
+      'The subscription owner has not allowed this device.',
+      name: 'sublinkDeviceBlocked',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The subscription owner has to approve this device.`
+  String get sublinkDevicePending {
+    return Intl.message(
+      'The subscription owner has to approve this device.',
+      name: 'sublinkDevicePending',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The link is no longer served by the subscription owner.`
+  String get sublinkLinkUnavailable {
+    return Intl.message(
+      'The link is no longer served by the subscription owner.',
+      name: 'sublinkLinkUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The subscription status is unavailable.`
+  String get sublinkStatusUnavailable {
+    return Intl.message(
+      'The subscription status is unavailable.',
+      name: 'sublinkStatusUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Left`
+  String get sublinkRemaining {
+    return Intl.message('Left', name: 'sublinkRemaining', desc: '', args: []);
+  }
+
+  /// `d left`
+  String get sublinkDaysLeft {
+    return Intl.message('d left', name: 'sublinkDaysLeft', desc: '', args: []);
+  }
+
+  /// `The subscription owner has hidden the configuration details.`
+  String get sublinkHiddenConfig {
+    return Intl.message(
+      'The subscription owner has hidden the configuration details.',
+      name: 'sublinkHiddenConfig',
       desc: '',
       args: [],
     );

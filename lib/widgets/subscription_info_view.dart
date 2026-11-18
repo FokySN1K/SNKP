@@ -31,29 +31,46 @@ class SubscriptionInfoView extends StatelessWidget {
     }
     final use = info.upload + info.download;
     final total = info.total;
+    final remaining = (total - use).clamp(0, total).toInt();
     final progress = (use / total).clamp(0.0, 1.0).toDouble();
 
-    final useShow = use.traffic.show;
+    final appLocalizations = context.appLocalizations;
+    final expireAt = info.expire;
+    final secondsLeft =
+        expireAt - DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    final daysLeft = secondsLeft > 0
+        ? (secondsLeft / Duration.secondsPerDay).ceil()
+        : 0;
+    final remainingShow = remaining.traffic.show;
     final totalShow = total.traffic.show;
-    final expireShow = info.expire != 0
-        ? DateTime.fromMillisecondsSinceEpoch(info.expire * 1000).show
-        : context.appLocalizations.infiniteTime;
+    final expireShow = expireAt != 0
+        ? '$daysLeft ${appLocalizations.sublinkDaysLeft}'
+        : appLocalizations.infiniteTime;
+    final expireDateShow = expireAt != 0
+        ? DateTime.fromMillisecondsSinceEpoch(expireAt * 1000).show
+        : appLocalizations.infiniteTime;
     final valueStyle = AppTextStyle.subheadline
         .of(context, emphasized: true)
         .copyWith(color: context.colorScheme.onSurfaceVariant);
     final metaStyle = AppTextStyle.footnote.of(context).toLight;
-    final trafficLabel = '$useShow / $totalShow';
-    final trafficText = Text(
-      trafficLabel,
-      style: valueStyle,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
+    final trafficLabel = remainingShow;
+    final trafficText = Tooltip(
+      message: '$remainingShow / $totalShow',
+      child: Text(
+        trafficLabel,
+        style: valueStyle,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
     );
-    final expireText = Text(
-      expireShow,
-      style: metaStyle,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
+    final expireText = Tooltip(
+      message: expireDateShow,
+      child: Text(
+        expireShow,
+        style: metaStyle,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
     );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,6 +120,9 @@ class SubscriptionInfoDetailView extends StatelessWidget {
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     final used = subscriptionInfo.upload + subscriptionInfo.download;
+    final remaining = (subscriptionInfo.total - used)
+        .clamp(0, subscriptionInfo.total)
+        .toInt();
     final expire = subscriptionInfo.expire != 0
         ? DateTime.fromMillisecondsSinceEpoch(
             subscriptionInfo.expire * 1000,
@@ -118,6 +138,10 @@ class SubscriptionInfoDetailView extends StatelessWidget {
               _buildItem(
                 label: appLocalizations.usedTraffic,
                 value: used.traffic.show,
+              ),
+              _buildItem(
+                label: appLocalizations.sublinkRemaining,
+                value: remaining.traffic.show,
               ),
               _buildItem(
                 label: appLocalizations.totalTraffic,

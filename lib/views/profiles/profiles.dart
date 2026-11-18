@@ -301,6 +301,10 @@ class ProfileItem extends ConsumerWidget {
   }
 
   Future<void> _handlePreview(BuildContext context) async {
+    if (_isConfigHidden()) {
+      await _showHiddenConfig();
+      return;
+    }
     unawaited(
       BaseNavigator.push<String>(context, PreviewProfileView(profile: profile)),
     );
@@ -329,7 +333,9 @@ class ProfileItem extends ConsumerWidget {
     final info = _subscriptionInfo;
     if (info != null && info.usage != null) {
       final used = info.upload + info.download;
-      return '${used.traffic.show} / ${info.total.traffic.show}';
+      final remaining = (info.total - used).clamp(0, info.total).toInt();
+      return '${context.appLocalizations.sublinkRemaining} ${remaining.traffic.show}'
+          ' / ${info.total.traffic.show}';
     }
     final appLocalizations = context.appLocalizations;
     return switch (profile.type) {
@@ -357,7 +363,19 @@ class ProfileItem extends ConsumerWidget {
     );
   }
 
+  bool _isConfigHidden() => SublinkManager.instance.hiddenFor(profile.url);
+
+  Future<void> _showHiddenConfig() async {
+    await dialogs.showAlert(
+      message: TextSpan(text: currentAppLocalizations.sublinkHiddenConfig),
+    );
+  }
+
   Future<void> _handleCopyLink(BuildContext context) async {
+    if (_isConfigHidden()) {
+      await _showHiddenConfig();
+      return;
+    }
     await Clipboard.setData(ClipboardData(text: profile.url));
     if (context.mounted) {
       context.showNotifier(
@@ -368,6 +386,10 @@ class ProfileItem extends ConsumerWidget {
   }
 
   Future<void> _handleExportFile(BuildContext context) async {
+    if (_isConfigHidden()) {
+      await _showHiddenConfig();
+      return;
+    }
     final appLocalizations = context.appLocalizations;
     final res = await globalState.safeRun<bool>(() async {
       final mFile = await profile.file;
@@ -468,6 +490,10 @@ class ProfileItem extends ConsumerWidget {
                 glyph: AppGlyphs.qrCode,
                 label: appLocalizations.qrcode,
                 onPressed: () {
+                  if (_isConfigHidden()) {
+                    unawaited(_showHiddenConfig());
+                    return;
+                  }
                   dialogs.showQrCode(
                     title: profile.realLabel,
                     data: profile.url,

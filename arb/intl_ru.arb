@@ -1043,5 +1043,17 @@
   "historyEventSuspicious": "Выведен из игры",
   "historyEventRecovered": "Снова в игре",
   "historyEventDataSilent": "Молчит",
-  "historyEventPool": "Ротация"
+  "historyEventPool": "Ротация",
+  "sublinkTelemetryTitle": "Телеметрия включена",
+  "sublinkTelemetryMessage": "Владелец подписки получает объём использованного трафика. Имена сайтов и содержимое запросов не отправляются.",
+  "sublinkTelemetryAccept": "Продолжить",
+  "sublinkExpired": "Срок действия подписки истёк.",
+  "sublinkQuotaExhausted": "Лимит трафика подписки исчерпан.",
+  "sublinkDeviceBlocked": "Владелец подписки не разрешил это устройство.",
+  "sublinkDevicePending": "Владельцу подписки нужно подтвердить это устройство.",
+  "sublinkLinkUnavailable": "Ссылка больше не обслуживается владельцем подписки.",
+  "sublinkStatusUnavailable": "Статус подписки недоступен.",
+  "sublinkRemaining": "Осталось",
+  "sublinkDaysLeft": "дн.",
+  "sublinkHiddenConfig": "Владелец подписки скрыл параметры конфигурации."
 }

@@ -1043,5 +1043,17 @@
   "historyEventSuspicious": "除外中",
   "historyEventRecovered": "復帰",
   "historyEventDataSilent": "無応答",
-  "historyEventPool": "ローテーション"
+  "historyEventPool": "ローテーション",
+  "sublinkTelemetryTitle": "Telemetry is on",
+  "sublinkTelemetryMessage": "The owner of this subscription receives the volume of traffic you use. Site names and request contents are never sent.",
+  "sublinkTelemetryAccept": "Continue",
+  "sublinkExpired": "The subscription has expired.",
+  "sublinkQuotaExhausted": "The subscription traffic limit is exhausted.",
+  "sublinkDeviceBlocked": "The subscription owner has not allowed this device.",
+  "sublinkDevicePending": "The subscription owner has to approve this device.",
+  "sublinkLinkUnavailable": "The link is no longer served by the subscription owner.",
+  "sublinkStatusUnavailable": "The subscription status is unavailable.",
+  "sublinkRemaining": "Left",
+  "sublinkDaysLeft": "d left",
+  "sublinkHiddenConfig": "The subscription owner has hidden the configuration details."
 }

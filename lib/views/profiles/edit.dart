@@ -312,6 +312,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
           if (isUrl)
             _ProfileUrlField(
               controller: _urlController,
+              hidden: SublinkManager.instance.hiddenFor(widget.profile.url),
               invalid: issue?.field == _ProfileField.url,
               onChanged: _handleChanged,
             ),
@@ -445,17 +446,27 @@ class _ProfileNameField extends StatelessWidget {
 class _ProfileUrlField extends StatelessWidget {
   const _ProfileUrlField({
     required this.controller,
+    required this.hidden,
     required this.invalid,
     required this.onChanged,
   });
 
   final TextEditingController controller;
+  final bool hidden;
   final bool invalid;
   final ValueChanged<String> onChanged;
 
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
+    if (hidden) {
+      // The receiver may still refresh the link, but reading it would hand
+      // over the token the owner chose to keep on their side.
+      return FormRow(
+        title: appLocalizations.url,
+        trailing: const Text('••••••••'),
+      );
+    }
     return FormRow(
       title: appLocalizations.url,
       invalid: invalid,

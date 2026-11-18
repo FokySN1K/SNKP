@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:dio/dio.dart' show Headers;
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -184,8 +185,16 @@ extension ProfileExtension on Profile {
     return _getFile();
   }
 
-  Future<Profile> update({required ValidateConfig validate}) async {
-    final response = await request.getFileResponseForUrl(url);
+  Future<Profile> update({
+    required ValidateConfig validate,
+    Map<String, String>? headers,
+    void Function(Headers headers)? onHeaders,
+  }) async {
+    final response = await request.getFileResponseForUrl(
+      url,
+      headers: headers,
+    );
+    onHeaders?.call(response.headers);
     final disposition = response.headers.value('content-disposition');
     final userinfo = response.headers.value('subscription-userinfo');
     return copyWith(

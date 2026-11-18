@@ -1195,9 +1195,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Introduce el contenido de la regla",
     ),
     "installNow": MessageLookupByLibrary.simpleMessage("Instalar"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Se denegó el permiso de lista de apps, por lo que no se pueden mostrar las apps instaladas. Concédelo manualmente en los ajustes del sistema.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Se denegó el permiso de lista de apps, por lo que no se pueden mostrar las apps instaladas. Concédelo manualmente en los ajustes del sistema.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Este sistema oculta la lista de apps instaladas hasta que se concede el permiso. Autorízalo para configurar el proxy por app.",
     ),
@@ -2110,6 +2111,36 @@ class MessageLookup extends MessageLookupByLibrary {
       "La ruta estricta evita que el tráfico, como el DNS, eluda TUN y, con IPv6 desactivado, bloquea las conexiones IPv6 de este dispositivo.",
     ),
     "style": MessageLookupByLibrary.simpleMessage("Estilo"),
+    "sublinkDaysLeft": MessageLookupByLibrary.simpleMessage("d left"),
+    "sublinkDeviceBlocked": MessageLookupByLibrary.simpleMessage(
+      "The subscription owner has not allowed this device.",
+    ),
+    "sublinkDevicePending": MessageLookupByLibrary.simpleMessage(
+      "The subscription owner has to approve this device.",
+    ),
+    "sublinkExpired": MessageLookupByLibrary.simpleMessage(
+      "The subscription has expired.",
+    ),
+    "sublinkHiddenConfig": MessageLookupByLibrary.simpleMessage(
+      "The subscription owner has hidden the configuration details.",
+    ),
+    "sublinkLinkUnavailable": MessageLookupByLibrary.simpleMessage(
+      "The link is no longer served by the subscription owner.",
+    ),
+    "sublinkQuotaExhausted": MessageLookupByLibrary.simpleMessage(
+      "The subscription traffic limit is exhausted.",
+    ),
+    "sublinkRemaining": MessageLookupByLibrary.simpleMessage("Left"),
+    "sublinkStatusUnavailable": MessageLookupByLibrary.simpleMessage(
+      "The subscription status is unavailable.",
+    ),
+    "sublinkTelemetryAccept": MessageLookupByLibrary.simpleMessage("Continue"),
+    "sublinkTelemetryMessage": MessageLookupByLibrary.simpleMessage(
+      "The owner of this subscription receives the volume of traffic you use. Site names and request contents are never sent.",
+    ),
+    "sublinkTelemetryTitle": MessageLookupByLibrary.simpleMessage(
+      "Telemetry is on",
+    ),
     "submit": MessageLookupByLibrary.simpleMessage("Enviar"),
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Información de la suscripción",

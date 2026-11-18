@@ -1158,9 +1158,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Введите содержимое правила",
     ),
     "installNow": MessageLookupByLibrary.simpleMessage("Установить"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Эта система не выдаёт список установленных приложений без разрешения. Предоставьте его, чтобы настроить прокси для отдельных приложений.",
     ),
@@ -2047,6 +2048,38 @@ class MessageLookup extends MessageLookupByLibrary {
       "Строгая маршрутизация не даёт трафику вроде DNS обходить TUN, а при выключенном IPv6 блокирует IPv6-соединения этого устройства.",
     ),
     "style": MessageLookupByLibrary.simpleMessage("Стиль"),
+    "sublinkDaysLeft": MessageLookupByLibrary.simpleMessage("дн."),
+    "sublinkDeviceBlocked": MessageLookupByLibrary.simpleMessage(
+      "Владелец подписки не разрешил это устройство.",
+    ),
+    "sublinkDevicePending": MessageLookupByLibrary.simpleMessage(
+      "Владельцу подписки нужно подтвердить это устройство.",
+    ),
+    "sublinkExpired": MessageLookupByLibrary.simpleMessage(
+      "Срок действия подписки истёк.",
+    ),
+    "sublinkHiddenConfig": MessageLookupByLibrary.simpleMessage(
+      "Владелец подписки скрыл параметры конфигурации.",
+    ),
+    "sublinkLinkUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Ссылка больше не обслуживается владельцем подписки.",
+    ),
+    "sublinkQuotaExhausted": MessageLookupByLibrary.simpleMessage(
+      "Лимит трафика подписки исчерпан.",
+    ),
+    "sublinkRemaining": MessageLookupByLibrary.simpleMessage("Осталось"),
+    "sublinkStatusUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Статус подписки недоступен.",
+    ),
+    "sublinkTelemetryAccept": MessageLookupByLibrary.simpleMessage(
+      "Продолжить",
+    ),
+    "sublinkTelemetryMessage": MessageLookupByLibrary.simpleMessage(
+      "Владелец подписки получает объём использованного трафика. Имена сайтов и содержимое запросов не отправляются.",
+    ),
+    "sublinkTelemetryTitle": MessageLookupByLibrary.simpleMessage(
+      "Телеметрия включена",
+    ),
     "submit": MessageLookupByLibrary.simpleMessage("Отправить"),
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Информация о подписке",

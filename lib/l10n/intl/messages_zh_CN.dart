@@ -1549,6 +1549,30 @@ class MessageLookup extends MessageLookupByLibrary {
       "严格路由防止 DNS 等流量绕过虚拟网卡，关闭 IPv6 时会阻断本机的 IPv6 连接。",
     ),
     "style": MessageLookupByLibrary.simpleMessage("风格"),
+    "sublinkDaysLeft": MessageLookupByLibrary.simpleMessage("天"),
+    "sublinkDeviceBlocked": MessageLookupByLibrary.simpleMessage(
+      "订阅所有者未允许此设备。",
+    ),
+    "sublinkDevicePending": MessageLookupByLibrary.simpleMessage(
+      "订阅所有者需要批准此设备。",
+    ),
+    "sublinkExpired": MessageLookupByLibrary.simpleMessage("订阅已过期。"),
+    "sublinkHiddenConfig": MessageLookupByLibrary.simpleMessage(
+      "订阅所有者隐藏了配置详情。",
+    ),
+    "sublinkLinkUnavailable": MessageLookupByLibrary.simpleMessage(
+      "订阅所有者已停止提供此链接。",
+    ),
+    "sublinkQuotaExhausted": MessageLookupByLibrary.simpleMessage("订阅流量额度已用尽。"),
+    "sublinkRemaining": MessageLookupByLibrary.simpleMessage("剩余"),
+    "sublinkStatusUnavailable": MessageLookupByLibrary.simpleMessage(
+      "订阅状态不可用。",
+    ),
+    "sublinkTelemetryAccept": MessageLookupByLibrary.simpleMessage("继续"),
+    "sublinkTelemetryMessage": MessageLookupByLibrary.simpleMessage(
+      "订阅所有者会收到你使用的流量总量。不会发送网站名称和请求内容。",
+    ),
+    "sublinkTelemetryTitle": MessageLookupByLibrary.simpleMessage("遥测已开启"),
     "submit": MessageLookupByLibrary.simpleMessage("提交"),
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage("订阅信息"),
     "sudoPasswordTitle": MessageLookupByLibrary.simpleMessage("输入 sudo 密码"),

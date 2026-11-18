@@ -161,6 +161,18 @@ class Bootstrap {
   ProviderContainer get _container => globalState.container;
 
   Future<void> _initApp() async {
+    SublinkManager.instance.attach(
+      core: _container.read(coreHandlerProvider),
+      activeUrl: () {
+        final profile = _container
+            .read(profilesProvider)
+            .getProfile(_container.read(currentProfileIdProvider));
+        return profile?.url;
+      },
+      onlyStatisticsProxy: () =>
+          _container.read(appSettingProvider).onlyStatisticsProxy,
+    );
+    unawaited(SublinkManager.instance.refreshActive());
     unawaited(_container.read(systemActionProvider.notifier).updateTray());
     unawaited(
       _container.read(profilesActionProvider.notifier).autoUpdateProfiles(),

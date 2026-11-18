@@ -1671,6 +1671,36 @@ class MessageLookup extends MessageLookupByLibrary {
       "엄격한 라우팅은 DNS 등의 트래픽이 TUN을 우회하지 못하게 하며, IPv6가 꺼져 있으면 이 기기의 IPv6 연결을 차단합니다.",
     ),
     "style": MessageLookupByLibrary.simpleMessage("스타일"),
+    "sublinkDaysLeft": MessageLookupByLibrary.simpleMessage("d left"),
+    "sublinkDeviceBlocked": MessageLookupByLibrary.simpleMessage(
+      "The subscription owner has not allowed this device.",
+    ),
+    "sublinkDevicePending": MessageLookupByLibrary.simpleMessage(
+      "The subscription owner has to approve this device.",
+    ),
+    "sublinkExpired": MessageLookupByLibrary.simpleMessage(
+      "The subscription has expired.",
+    ),
+    "sublinkHiddenConfig": MessageLookupByLibrary.simpleMessage(
+      "The subscription owner has hidden the configuration details.",
+    ),
+    "sublinkLinkUnavailable": MessageLookupByLibrary.simpleMessage(
+      "The link is no longer served by the subscription owner.",
+    ),
+    "sublinkQuotaExhausted": MessageLookupByLibrary.simpleMessage(
+      "The subscription traffic limit is exhausted.",
+    ),
+    "sublinkRemaining": MessageLookupByLibrary.simpleMessage("Left"),
+    "sublinkStatusUnavailable": MessageLookupByLibrary.simpleMessage(
+      "The subscription status is unavailable.",
+    ),
+    "sublinkTelemetryAccept": MessageLookupByLibrary.simpleMessage("Continue"),
+    "sublinkTelemetryMessage": MessageLookupByLibrary.simpleMessage(
+      "The owner of this subscription receives the volume of traffic you use. Site names and request contents are never sent.",
+    ),
+    "sublinkTelemetryTitle": MessageLookupByLibrary.simpleMessage(
+      "Telemetry is on",
+    ),
     "submit": MessageLookupByLibrary.simpleMessage("제출"),
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage("구독 정보"),
     "sudoPasswordTitle": MessageLookupByLibrary.simpleMessage(

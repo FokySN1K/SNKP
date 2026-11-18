@@ -1702,6 +1702,36 @@ class MessageLookup extends MessageLookupByLibrary {
       "厳格なルーティングは DNS などの通信が TUN を迂回するのを防ぎます。IPv6 がオフの場合、この端末の IPv6 通信は遮断されます。",
     ),
     "style": MessageLookupByLibrary.simpleMessage("スタイル"),
+    "sublinkDaysLeft": MessageLookupByLibrary.simpleMessage("d left"),
+    "sublinkDeviceBlocked": MessageLookupByLibrary.simpleMessage(
+      "The subscription owner has not allowed this device.",
+    ),
+    "sublinkDevicePending": MessageLookupByLibrary.simpleMessage(
+      "The subscription owner has to approve this device.",
+    ),
+    "sublinkExpired": MessageLookupByLibrary.simpleMessage(
+      "The subscription has expired.",
+    ),
+    "sublinkHiddenConfig": MessageLookupByLibrary.simpleMessage(
+      "The subscription owner has hidden the configuration details.",
+    ),
+    "sublinkLinkUnavailable": MessageLookupByLibrary.simpleMessage(
+      "The link is no longer served by the subscription owner.",
+    ),
+    "sublinkQuotaExhausted": MessageLookupByLibrary.simpleMessage(
+      "The subscription traffic limit is exhausted.",
+    ),
+    "sublinkRemaining": MessageLookupByLibrary.simpleMessage("Left"),
+    "sublinkStatusUnavailable": MessageLookupByLibrary.simpleMessage(
+      "The subscription status is unavailable.",
+    ),
+    "sublinkTelemetryAccept": MessageLookupByLibrary.simpleMessage("Continue"),
+    "sublinkTelemetryMessage": MessageLookupByLibrary.simpleMessage(
+      "The owner of this subscription receives the volume of traffic you use. Site names and request contents are never sent.",
+    ),
+    "sublinkTelemetryTitle": MessageLookupByLibrary.simpleMessage(
+      "Telemetry is on",
+    ),
     "submit": MessageLookupByLibrary.simpleMessage("送信"),
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage("サブスクリプション情報"),
     "sudoPasswordTitle": MessageLookupByLibrary.simpleMessage("sudo のパスワードを入力"),

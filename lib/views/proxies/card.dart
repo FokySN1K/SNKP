@@ -383,6 +383,11 @@ class _DelayTextState extends ConsumerState<_DelayText> {
     DelayTestPhase? phase,
   ) {
     final size = globalState.measure.textHeight(AppTextStyle.caption2);
+    // A hidden share keeps the node names and drops the measurements that
+    // would let the receiver fingerprint the upstream servers.
+    if (SublinkManager.instance.activeHidden) {
+      return SizedBox(height: size, width: size);
+    }
     if (phase == DelayTestPhase.running) {
       return SizedBox(
         height: size,

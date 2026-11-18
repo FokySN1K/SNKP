@@ -1043,5 +1043,17 @@
   "historyEventSuspicious": "已排除",
   "historyEventRecovered": "已恢复",
   "historyEventDataSilent": "无响应",
-  "historyEventPool": "轮换"
+  "historyEventPool": "轮换",
+  "sublinkTelemetryTitle": "遥测已开启",
+  "sublinkTelemetryMessage": "订阅所有者会收到你使用的流量总量。不会发送网站名称和请求内容。",
+  "sublinkTelemetryAccept": "继续",
+  "sublinkExpired": "订阅已过期。",
+  "sublinkQuotaExhausted": "订阅流量额度已用尽。",
+  "sublinkDeviceBlocked": "订阅所有者未允许此设备。",
+  "sublinkDevicePending": "订阅所有者需要批准此设备。",
+  "sublinkLinkUnavailable": "订阅所有者已停止提供此链接。",
+  "sublinkStatusUnavailable": "订阅状态不可用。",
+  "sublinkRemaining": "剩余",
+  "sublinkDaysLeft": "天",
+  "sublinkHiddenConfig": "订阅所有者隐藏了配置详情。"
 }

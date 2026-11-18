@@ -146,6 +146,9 @@ class ProfilesAction extends _$ProfilesAction {
       ref.read(profilesProvider.notifier).put(profile);
       final updated = await profile.update(
         validate: (path, key) => _core.validateProfile(path, key),
+        headers: await SublinkManager.instance.headersFor(profile.url),
+        onHeaders: (headers) =>
+            SublinkManager.instance.captureDownload(profile.url, headers),
       );
       // The download can take minutes; edits and deletes made meanwhile win.
       final latest = ref.read(profilesProvider).getProfile(profile.id);
@@ -407,9 +410,12 @@ class ProfilesAction extends _$ProfilesAction {
     );
   }
 
-  Future<Profile> _download(Profile profile) {
+  Future<Profile> _download(Profile profile) async {
     return profile.update(
       validate: (path, key) => _core.validateProfile(path, key),
+      headers: await SublinkManager.instance.headersFor(profile.url),
+      onHeaders: (headers) =>
+          SublinkManager.instance.captureDownload(profile.url, headers),
     );
   }
 

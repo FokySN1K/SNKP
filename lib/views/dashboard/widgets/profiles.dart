@@ -16,7 +16,7 @@ import 'package:material_ui/material_ui.dart';
 import 'card.dart';
 import 'profile_detail.dart';
 
-typedef _Usage = ({int used, int total, double share});
+typedef _Usage = ({int used, int total, int left, double share});
 
 _Usage? _usageOf(Profile? profile) {
   final info = profile?.subscriptionInfo;
@@ -27,6 +27,7 @@ _Usage? _usageOf(Profile? profile) {
   return (
     used: used,
     total: info.total,
+    left: (info.total - used).clamp(0, info.total).toInt(),
     share: (used / info.total).clamp(0.0, 1.0).toDouble(),
   );
 }
@@ -326,7 +327,7 @@ class _UsageMeter extends StatelessWidget {
             final unit = DashboardText.unit(context, AppTextStyle.footnote);
             final used = ' ${context.appLocalizations.usedShort}';
             final traffic =
-                '${dashboardTraffic(usage.used)} / ${dashboardTraffic(usage.total)}';
+                '${context.appLocalizations.sublinkRemaining} ${dashboardTraffic(usage.left)}';
             final trafficStyle = AppTextStyle.footnote
                 .of(context)
                 .toTabular

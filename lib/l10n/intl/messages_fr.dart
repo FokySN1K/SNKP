@@ -1196,9 +1196,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Saisissez le contenu de la règle",
     ),
     "installNow": MessageLookupByLibrary.simpleMessage("Installer"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "L’autorisation de la liste des apps a été refusée ; les apps installées ne peuvent donc pas être listées. Veuillez l’accorder manuellement dans les réglages du système.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "L’autorisation de la liste des apps a été refusée ; les apps installées ne peuvent donc pas être listées. Veuillez l’accorder manuellement dans les réglages du système.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Ce système masque la liste des apps installées tant que l’autorisation n’est pas accordée. Accordez-la pour configurer le proxy par app.",
     ),
@@ -2111,6 +2112,36 @@ class MessageLookup extends MessageLookupByLibrary {
       "La route stricte empêche le trafic tel que le DNS de contourner TUN et, avec IPv6 désactivé, bloque les connexions IPv6 de cet appareil.",
     ),
     "style": MessageLookupByLibrary.simpleMessage("Style"),
+    "sublinkDaysLeft": MessageLookupByLibrary.simpleMessage("d left"),
+    "sublinkDeviceBlocked": MessageLookupByLibrary.simpleMessage(
+      "The subscription owner has not allowed this device.",
+    ),
+    "sublinkDevicePending": MessageLookupByLibrary.simpleMessage(
+      "The subscription owner has to approve this device.",
+    ),
+    "sublinkExpired": MessageLookupByLibrary.simpleMessage(
+      "The subscription has expired.",
+    ),
+    "sublinkHiddenConfig": MessageLookupByLibrary.simpleMessage(
+      "The subscription owner has hidden the configuration details.",
+    ),
+    "sublinkLinkUnavailable": MessageLookupByLibrary.simpleMessage(
+      "The link is no longer served by the subscription owner.",
+    ),
+    "sublinkQuotaExhausted": MessageLookupByLibrary.simpleMessage(
+      "The subscription traffic limit is exhausted.",
+    ),
+    "sublinkRemaining": MessageLookupByLibrary.simpleMessage("Left"),
+    "sublinkStatusUnavailable": MessageLookupByLibrary.simpleMessage(
+      "The subscription status is unavailable.",
+    ),
+    "sublinkTelemetryAccept": MessageLookupByLibrary.simpleMessage("Continue"),
+    "sublinkTelemetryMessage": MessageLookupByLibrary.simpleMessage(
+      "The owner of this subscription receives the volume of traffic you use. Site names and request contents are never sent.",
+    ),
+    "sublinkTelemetryTitle": MessageLookupByLibrary.simpleMessage(
+      "Telemetry is on",
+    ),
     "submit": MessageLookupByLibrary.simpleMessage("Valider"),
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Infos d’abonnement",
