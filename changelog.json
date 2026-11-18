@@ -2,6 +2,24 @@
   "schemaVersion": 2,
   "versions": [
     {
+      "version": "1.0.56",
+      "tag": "v1.0.56",
+      "date": "2026-11-18",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "feat",
+          "entries": [
+            {
+              "id": "ecdfa80",
+              "scope": "proxies",
+              "text": "Groups now show what the route means: a silent member is marked, a pin the group routes around is named with its reason, the info sheet shows the rotation and the group history, and the node list no longer jumps while delays are equal."
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.55",
       "tag": "v1.0.55",
       "date": "2026-11-18",

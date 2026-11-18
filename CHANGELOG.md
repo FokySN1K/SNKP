@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.56 (2026-11-18)
+
+**Features**
+
+- **proxies** Groups now show what the route means: a silent member is marked, a pin the group routes around is named with its reason, the info sheet shows the rotation and the group history, and the node list no longer jumps while delays are equal. (ecdfa80)
+
 ## v1.0.55 (2026-11-18)
 
 **Features**
