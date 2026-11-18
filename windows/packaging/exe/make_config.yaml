@@ -15,4 +15,6 @@ locales:
   - lang: zh
     file: ..\windows\packaging\exe\ChineseSimplified.isl
   - lang: en
+  # No file: the compiler ships its own Russian.isl.
+  - lang: ru
 privileges_required: admin

@@ -162,8 +162,12 @@ Name: "chineseSimplified"; MessagesFile: {% if locale.file %}{{ locale.file }}{%
 {% if locale.lang == 'uk' %}Name: "ukrainian"; MessagesFile: "compiler:Languages\\Ukrainian.isl"{% endif %}
 {% endfor %}
 
+; Every [Languages] entry needs its own line here, or the prompt that
+; offers to delete the user data falls back to English.
 [CustomMessages]
 english.RemoveUserData=Also delete your profiles and settings?
+chineseSimplified.RemoveUserData=是否也删除配置文件和设置？
+russian.RemoveUserData=Удалить также профили и настройки?
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: {% if CREATE_DESKTOP_ICON != true %}unchecked{% else %}checkedonce{% endif %}

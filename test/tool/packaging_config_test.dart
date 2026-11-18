@@ -59,4 +59,33 @@ void main() {
     expect(macros, contains('%global debug_package %{nil}'));
     expect(macros, contains('%global __os_install_post %{nil}'));
   });
+
+  test('every Windows installer language translates the data prompt', () {
+    final script = File(
+      'windows/packaging/exe/inno_setup.iss',
+    ).readAsStringSync();
+    final languageNames = {
+      for (final match in RegExp(
+        r'''locale\.lang == '(\w+)'.*?Name: "(\w+)"''',
+        dotAll: true,
+      ).allMatches(script))
+        match.group(1)!: match.group(2)!,
+    };
+    final config =
+        loadYaml(
+              File('windows/packaging/exe/make_config.yaml').readAsStringSync(),
+            )
+            as YamlMap;
+
+    for (final locale in (config['locales'] as YamlList).cast<YamlMap>()) {
+      final code = locale['lang'] as String;
+      final name = languageNames[code];
+      expect(name, isNotNull, reason: 'no [Languages] entry for $code');
+      expect(
+        script,
+        contains('$name.RemoveUserData='),
+        reason: 'no RemoveUserData for $code',
+      );
+    }
+  });
 }
