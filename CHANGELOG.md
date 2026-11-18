@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.57 (2026-11-18)
+
+**Features**
+
+- **core** The node pinned in a url-test-pool group now stays on the route even when a health check marks it unavailable or suspicious, so the pin no longer silently stops acting. (b6affa2)
+- **proxies** The group state shows how many members of the pool can carry traffic now, and a pin held on a node a check marked out of play is named in the header. (07e6315)
+
 ## v1.0.56 (2026-11-18)
 
 **Features**

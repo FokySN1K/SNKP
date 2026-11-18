@@ -2,6 +2,29 @@
   "schemaVersion": 2,
   "versions": [
     {
+      "version": "1.0.57",
+      "tag": "v1.0.57",
+      "date": "2026-11-18",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "feat",
+          "entries": [
+            {
+              "id": "b6affa2",
+              "scope": "core",
+              "text": "The node pinned in a url-test-pool group now stays on the route even when a health check marks it unavailable or suspicious, so the pin no longer silently stops acting."
+            },
+            {
+              "id": "07e6315",
+              "scope": "proxies",
+              "text": "The group state shows how many members of the pool can carry traffic now, and a pin held on a node a check marked out of play is named in the header."
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.56",
       "tag": "v1.0.56",
       "date": "2026-11-18",
