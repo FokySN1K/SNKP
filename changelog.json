@@ -2,6 +2,24 @@
   "schemaVersion": 2,
   "versions": [
     {
+      "version": "1.0.60",
+      "tag": "v1.0.60",
+      "date": "2026-11-18",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "fix",
+          "entries": [
+            {
+              "id": "fdbd024",
+              "scope": "windows",
+              "text": "The Windows uninstaller asks about deleting your data in the installer's language"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.59",
       "tag": "v1.0.59",
       "date": "2026-11-18",

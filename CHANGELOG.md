@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.60 (2026-11-18)
+
+**Bug Fixes**
+
+- **windows** The Windows uninstaller asks about deleting your data in the installer's language (fdbd024)
+
 ## v1.0.59 (2026-11-18)
 
 **Bug Fixes**
