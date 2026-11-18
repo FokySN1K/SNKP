@@ -185,22 +185,8 @@ class CoreController {
     return result;
   }
 
-  Future<List<Group>> getProxiesGroups({
-    required ProxiesSortType sortType,
-    required DelayMap delayMap,
-    required Map<String, String> selectedMap,
-    required String defaultTestUrl,
-  }) async {
-    final proxiesData = await _interface.getProxies();
-    return toGroupsTask(
-      ComputeGroupsState(
-        proxiesData: proxiesData,
-        sortType: sortType,
-        delayMap: delayMap,
-        selectedMap: selectedMap,
-        defaultTestUrl: defaultTestUrl,
-      ),
-    );
+  Future<ProxiesData> getProxiesData() {
+    return _interface.getProxies();
   }
 
   Future<ChangeProxyResult> changeProxy(ChangeProxyParams changeProxyParams) {

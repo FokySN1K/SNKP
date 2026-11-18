@@ -207,7 +207,6 @@ class ProxiesAction extends _$ProxiesAction {
           final sortType = ref.read(
             proxiesStyleSettingProvider.select((state) => state.sortType),
           );
-          final delayMap = ref.read(delayDataSourceProvider);
           final testUrl = ref.read(
             patchClashConfigProvider.select((state) => state.testUrl),
           );
@@ -215,11 +214,21 @@ class ProxiesAction extends _$ProxiesAction {
             currentProfileProvider.select((state) => state?.selectedMap ?? {}),
           );
           try {
-            return await _core.getProxiesGroups(
-              selectedMap: selectedMap,
-              sortType: sortType,
-              delayMap: delayMap,
-              defaultTestUrl: testUrl,
+            final proxiesData = await _core.getProxiesData();
+            // The Core keeps its own measurements, so the pull hands them to
+            // the page before the groups are built: both the first render and
+            // the sort read the values the cards then show.
+            ref
+                .read(delayDataSourceProvider.notifier)
+                .seedDelays(proxiesData.lastDelays);
+            return await toGroupsTask(
+              ComputeGroupsState(
+                proxiesData: proxiesData,
+                sortType: sortType,
+                delayMap: ref.read(delayDataSourceProvider),
+                selectedMap: selectedMap,
+                defaultTestUrl: testUrl,
+              ),
             );
           } catch (e) {
             commonPrint.log(

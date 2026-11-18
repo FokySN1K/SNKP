@@ -155,4 +155,68 @@ void main() {
     expect(find.text('G0', skipOffstage: false), findsNothing);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('the header tells the delay the Core kept for the route', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(500, 400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    const testUrl = 'https://delay.test';
+    final profile = Profile.normal().copyWith(
+      currentGroupName: 'Selector',
+      selectedMap: {'Selector': 'Proxy 1'},
+    );
+    const group = Group(
+      name: 'Selector',
+      type: GroupType.Selector,
+      hidden: false,
+      now: 'Proxy 1',
+      testUrl: testUrl,
+      all: [
+        Proxy(name: 'Proxy 1', type: 'ss'),
+        Proxy(name: 'Proxy 2', type: 'ss'),
+      ],
+    );
+    final container = ProviderContainer(
+      overrides: [
+        profilesProvider.overrideWith(() => TestProfiles([profile])),
+        currentProfileIdProvider.overrideWithBuild((_, _) => profile.id),
+        currentGroupsStateProvider.overrideWithValue(
+          const GroupsState(value: [group]),
+        ),
+        groupsProvider.overrideWithValue([group]),
+      ],
+    );
+    addTearDown(container.dispose);
+    globalState.container = container;
+    container
+        .read(viewSizeProvider.notifier)
+        .update((_) => const Size(500, 400));
+    container.read(delayDataSourceProvider.notifier).seedDelays({
+      testUrl: {'Proxy 1': 128},
+    });
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(child: ProxiesView()),
+      ),
+    );
+    container
+        .read(proxiesStyleSettingProvider.notifier)
+        .update((state) => state.copyWith(type: ProxiesType.list));
+    await tester.pump();
+
+    expect(
+      find.descendant(
+        of: find.byType(ListHeader),
+        matching: find.text('128 ms'),
+      ),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
 }

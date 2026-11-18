@@ -410,6 +410,47 @@ void main() {
         },
       ]);
     });
+
+    test('seeds the values the Core measured on its own', () {
+      container.read(delayDataSourceProvider.notifier).seedDelays({
+        'https://test.example': {'A': 120},
+        'https://other.example': {'B': 80},
+      });
+
+      expect(container.read(delayDataSourceProvider), {
+        'https://test.example': {'A': 120},
+        'https://other.example': {'B': 80},
+      });
+    });
+
+    test('a seeded value never replaces a live one', () {
+      const url = 'https://test.example';
+      final notifier = container.read(delayDataSourceProvider.notifier);
+      notifier.setDelay(const Delay(name: 'A', url: url, value: -1));
+
+      notifier.seedDelays({
+        url: {'A': 120, 'B': 80},
+      });
+
+      expect(container.read(delayDataSourceProvider), {
+        url: {'A': -1, 'B': 80},
+      });
+    });
+
+    test('seeding nothing new publishes no state change', () {
+      const url = 'https://test.example';
+      final notifier = container.read(delayDataSourceProvider.notifier);
+      notifier.seedDelays({
+        url: {'A': 120},
+      });
+      final state = container.read(delayDataSourceProvider);
+
+      notifier.seedDelays({
+        url: {'A': 100},
+      });
+
+      expect(identical(container.read(delayDataSourceProvider), state), isTrue);
+    });
   });
 
   group('Loading provider', () {

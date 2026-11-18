@@ -578,3 +578,31 @@ abstract class ProxiesData with _$ProxiesData {
   factory ProxiesData.fromJson(Map<String, Object?> json) =>
       _$ProxiesDataFromJson(json);
 }
+
+extension ProxiesDataExt on ProxiesData {
+  /// What the Core last measured, by test URL and then proxy name.
+  Map<String, Map<String, int>> get lastDelays {
+    final delays = <String, Map<String, int>>{};
+    for (final entry in proxies.entries) {
+      final raw = entry.value;
+      if (raw is! Map) continue;
+      final extra = raw['extra'];
+      if (extra is! Map) continue;
+      for (final urlEntry in extra.entries) {
+        final url = urlEntry.key;
+        final state = urlEntry.value;
+        if (url is! String || state is! Map) continue;
+        final history = state['history'];
+        if (history is! List || history.isEmpty) continue;
+        final last = history.last;
+        if (last is! Map) continue;
+        final delay = last['delay'];
+        if (delay is! num) continue;
+        final value = delay.toInt();
+        if (value <= 0) continue; // a failed check is recorded as zero
+        (delays[url] ??= {})[entry.key] = value;
+      }
+    }
+    return delays;
+  }
+}

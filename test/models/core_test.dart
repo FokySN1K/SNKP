@@ -213,6 +213,74 @@ void main() {
       expect(data.all, ['G1']);
       expect(data.proxies['G1'], isA<Map>());
     });
+
+    test('lastDelays reads the last measurement the Core kept per URL', () {
+      final data = ProxiesData.fromJson({
+        'proxies': {
+          'HK-01': {
+            'name': 'HK-01',
+            'type': 'ss',
+            'extra': {
+              'https://a.example': {
+                'alive': true,
+                'history': [
+                  {'time': '2026-01-01T00:00:00Z', 'delay': 120},
+                  {'time': '2026-01-01T00:01:00Z', 'delay': 90},
+                ],
+              },
+              'https://b.example': {
+                'alive': true,
+                'history': [
+                  {'time': '2026-01-01T00:00:00Z', 'delay': 55},
+                ],
+              },
+            },
+          },
+          'HK-02': {'name': 'HK-02', 'type': 'ss'},
+          'HK-03': {
+            'name': 'HK-03',
+            'type': 'ss',
+            'extra': {
+              'https://a.example': {
+                'alive': false,
+                'history': [
+                  {'time': '2026-01-01T00:00:00Z', 'delay': 0},
+                ],
+              },
+            },
+          },
+        },
+        'all': ['HK-01', 'HK-02', 'HK-03'],
+      });
+
+      expect(data.lastDelays, {
+        'https://a.example': {'HK-01': 90},
+        'https://b.example': {'HK-01': 55},
+      });
+    });
+
+    test('lastDelays skips a proxy whose latest check failed', () {
+      final data = ProxiesData.fromJson({
+        'proxies': {
+          'HK-01': {
+            'name': 'HK-01',
+            'type': 'ss',
+            'extra': {
+              'https://a.example': {
+                'alive': false,
+                'history': [
+                  {'time': '2026-01-01T00:00:00Z', 'delay': 90},
+                  {'time': '2026-01-01T00:01:00Z', 'delay': 0},
+                ],
+              },
+            },
+          },
+        },
+        'all': ['HK-01'],
+      });
+
+      expect(data.lastDelays, isEmpty);
+    });
   });
 
   group('ExternalProvider', () {

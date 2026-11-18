@@ -387,6 +387,25 @@ class DelayDataSource extends _$DelayDataSource with AutoDisposeNotifierMixin {
     }
   }
 
+  /// Seeds what the Core measured itself; a live value always wins.
+  void seedDelays(Map<String, Map<String, int>> seed) {
+    final delayMap = _ownedDelayMap();
+    var changed = false;
+    for (final entry in seed.entries) {
+      final urlDelays = delayMap[entry.key] ??= {};
+      for (final delay in entry.value.entries) {
+        if (urlDelays.containsKey(delay.key)) {
+          continue;
+        }
+        urlDelays[delay.key] = delay.value;
+        changed = true;
+      }
+    }
+    if (changed) {
+      value = _published = UnmodifiableMapView(delayMap);
+    }
+  }
+
   DelayMap _ownedDelayMap() {
     final owned = _owned;
     if (owned != null && identical(state, _published)) {

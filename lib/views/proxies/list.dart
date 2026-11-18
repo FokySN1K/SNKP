@@ -835,6 +835,22 @@ class _SelectedProxyName extends ConsumerWidget {
       overflow: TextOverflow.ellipsis,
       style: AppTextStyle.caption1.of(context, emphasized: true).toLight,
     );
+    // A shut group hides the card that carries the number, so the header tells
+    // the delay of the route the group actually uses.
+    final delay = ref.watch(
+      delayProvider(proxyName: proxyName, testUrl: group.testUrl),
+    );
+    final delayText = delay == null
+        ? null
+        : Text(
+            delay > 0
+                ? '$delay ms'
+                : delayFailureText(delay, context.appLocalizations),
+            maxLines: 1,
+            style: AppTextStyle.caption1
+                .of(context, emphasized: true)
+                .copyWith(color: context.colorScheme.delayColor(delay)),
+          );
     final iconSize = globalState.measure.textHeight(AppTextStyle.caption1);
     // A pin the group routes around must not read as the user's own pick: the
     // header says the route moved and why. A pin the group still follows, but
@@ -862,7 +878,7 @@ class _SelectedProxyName extends ConsumerWidget {
           child: GlyphIcon(AppGlyphs.refresh, size: iconSize),
         ),
     ];
-    if (marks.isEmpty) {
+    if (marks.isEmpty && delayText == null) {
       return name;
     }
     return Row(
@@ -871,6 +887,7 @@ class _SelectedProxyName extends ConsumerWidget {
       children: [
         ...marks,
         Flexible(child: name),
+        ?delayText,
       ],
     );
   }

@@ -29,6 +29,37 @@ const _testUrl = 'http://delay.test';
 Group _group(String name, List<Proxy> all) =>
     Group(type: GroupType.Selector, name: name, all: all);
 
+/// The Core's answer: a selector over two nodes, each with the last delay the
+/// Core measured for the page's own test URL.
+ProxiesData _proxiesDataKeeping(int first, int second) => ProxiesData(
+  all: const ['Proxy', 'Direct'],
+  proxies: Map<String, dynamic>.from({
+    'Proxy': Map<String, dynamic>.from({
+      'name': 'Proxy',
+      'type': 'Selector',
+      'now': 'HK-01',
+      'all': ['HK-01', 'HK-02'],
+    }),
+    'Direct': Map<String, dynamic>.from({'name': 'Direct', 'type': 'Direct'}),
+    'HK-01': _withKeptDelay('HK-01', first),
+    'HK-02': _withKeptDelay('HK-02', second),
+  }),
+);
+
+Map<String, dynamic> _withKeptDelay(String name, int delay) =>
+    Map<String, dynamic>.from({
+      'name': name,
+      'type': 'ss',
+      'extra': {
+        _testUrl: {
+          'alive': delay > 0,
+          'history': [
+            {'time': '2026-01-01T00:00:00Z', 'delay': delay},
+          ],
+        },
+      },
+    });
+
 const _proxy = Proxy(name: 'HK-01', type: 'ss');
 
 Profile _selectedProfile(String proxyName) => Profile(
@@ -119,6 +150,53 @@ void main() {
       final groups = container.read(groupsProvider);
       expect(groups.map((group) => group.name), ['Proxy']);
       expect(groups.single.all.map((proxy) => proxy.name), ['HK-01']);
+    });
+
+    test(
+      'seeds the delays the Core kept before the groups are built',
+      () async {
+        when(
+          core.getProxies,
+        ).thenAnswer((_) async => _proxiesDataKeeping(120, 0));
+        final container = _delayContainer(buildContainer);
+
+        await actionOf(container).updateGroups();
+
+        expect(container.read(delayDataSourceProvider), {
+          _testUrl: {'HK-01': 120},
+        });
+      },
+    );
+
+    test('a live delay is not replaced by the value the Core kept', () async {
+      when(
+        core.getProxies,
+      ).thenAnswer((_) async => _proxiesDataKeeping(120, 0));
+      final container = _delayContainer(buildContainer);
+      container
+          .read(delayDataSourceProvider.notifier)
+          .setDelay(const Delay(name: 'HK-01', url: _testUrl, value: -2));
+
+      await actionOf(container).updateGroups();
+
+      expect(container.read(delayDataSourceProvider)[_testUrl]?['HK-01'], -2);
+    });
+
+    test('sorts the members by the delay the Core kept', () async {
+      when(
+        core.getProxies,
+      ).thenAnswer((_) async => _proxiesDataKeeping(300, 40));
+      final container = _delayContainer(buildContainer);
+      container
+          .read(proxiesStyleSettingProvider.notifier)
+          .update((state) => state.copyWith(sortType: ProxiesSortType.delay));
+
+      await actionOf(container).updateGroups();
+
+      expect(container.read(groupsProvider).single.all.map((p) => p.name), [
+        'HK-02',
+        'HK-01',
+      ]);
     });
 
     test(
