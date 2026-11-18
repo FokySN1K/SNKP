@@ -239,6 +239,7 @@ class ProxiesAction extends _$ProxiesAction {
         next: groups,
         frozen: ref.read(delayTestingGroupsProvider),
       );
+      ref.read(groupHistoryProvider.notifier).record(groups);
       _syncRecoveryRefresh(groups);
     } catch (e) {
       // The Core failure path already runs inside the retry task above; a

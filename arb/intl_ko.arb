@@ -1026,5 +1026,22 @@
   "dnsFallbackFilterGeoipCodeHint": "The country the GeoIP check uses.\n\nExample: CN, the default; RU on a Russian network.",
   "dnsFallbackFilterGeositeHint": "Name sets whose answers always go to the fallback.\n\nExample: geosite:gfw.",
   "dnsFallbackFilterIpcidrHint": "Address ranges whose answers always go to the fallback.\n\nExample: 127.0.0.0/8 catches a hijacked local resolver.",
-  "dnsFallbackFilterDomainHint": "Extra names treated as censored, on top of the geosite sets.\n\nExample: +.twitter.com."
+  "dnsFallbackFilterDomainHint": "Extra names treated as censored, on top of the geosite sets.\n\nExample: +.twitter.com.",
+  "groupState": "그룹 상태",
+  "pinnedNode": "고정된 노드",
+  "pinSkipped": "고정이 적용되지 않음",
+  "pinSkippedUnavailable": "고정된 노드를 사용할 수 없어 그룹이 다른 노드를 사용합니다",
+  "pinSkippedSuspicious": "고정된 노드가 의심스러워 그룹이 다른 노드를 사용합니다",
+  "poolRotation": "로테이션 참여",
+  "nodesSilent": "응답 없는 노드",
+  "dataSilentNode": "노드가 데이터에 응답하지 않습니다",
+  "groupHistory": "그룹 기록",
+  "groupHistoryEmpty": "아직 없음",
+  "historyEventNow": "경로",
+  "historyEventPin": "고정됨",
+  "historyEventUnpin": "고정 해제됨",
+  "historyEventSuspicious": "제외됨",
+  "historyEventRecovered": "복귀됨",
+  "historyEventDataSilent": "무응답",
+  "historyEventPool": "로테이션"
 }

@@ -1026,5 +1026,22 @@
   "dnsFallbackFilterGeoipCodeHint": "Страна, по которой идёт проверка GeoIP.\n\nПример: CN по умолчанию; RU в российской сети.",
   "dnsFallbackFilterGeositeHint": "Наборы имён, ответы на которые всегда идут в fallback.\n\nПример: geosite:gfw.",
   "dnsFallbackFilterIpcidrHint": "Диапазоны адресов, ответы с которыми всегда идут в fallback.\n\nПример: 127.0.0.0/8 ловит подменённый локальный резолвер.",
-  "dnsFallbackFilterDomainHint": "Дополнительные имена, которые считаются подменёнными, сверх наборов geosite.\n\nПример: +.twitter.com."
+  "dnsFallbackFilterDomainHint": "Дополнительные имена, которые считаются подменёнными, сверх наборов geosite.\n\nПример: +.twitter.com.",
+  "groupState": "Состояние группы",
+  "pinnedNode": "Закреплённый узел",
+  "pinSkipped": "Закрепление не действует",
+  "pinSkippedUnavailable": "Закреплённый узел недоступен, группа использует другой",
+  "pinSkippedSuspicious": "Закреплённый узел под подозрением, группа использует другой",
+  "poolRotation": "В ротации",
+  "nodesSilent": "Молчащие узлы",
+  "dataSilentNode": "Узел перестал отвечать на данные",
+  "groupHistory": "История группы",
+  "groupHistoryEmpty": "Пока ничего",
+  "historyEventNow": "Маршрут",
+  "historyEventPin": "Закрепление",
+  "historyEventUnpin": "Закрепление снято",
+  "historyEventSuspicious": "Выведен из игры",
+  "historyEventRecovered": "Снова в игре",
+  "historyEventDataSilent": "Молчит",
+  "historyEventPool": "Ротация"
 }

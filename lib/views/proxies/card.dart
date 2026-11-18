@@ -53,6 +53,10 @@ class ProxyCard extends ConsumerWidget {
   /// around this node until a check measures it again.
   final bool suspicious;
 
+  /// A pool marks a member whose handshake went unanswered; the badge says the
+  /// pool stopped trusting its data plane.
+  final bool silent;
+
   const ProxyCard({
     super.key,
     required this.groupName,
@@ -61,6 +65,7 @@ class ProxyCard extends ConsumerWidget {
     required this.groupType,
     required this.type,
     this.suspicious = false,
+    this.silent = false,
   });
 
   Measure get measure => globalState.measure;
@@ -249,6 +254,7 @@ class ProxyCard extends ConsumerWidget {
                     children: [
                       Expanded(child: proxyNameText),
                       if (suspicious) const _SuspiciousBadge(),
+                      if (silent) const _SilentBadge(),
                       if (pinned)
                         SelectionBadge.preferred(inUse: inUse)
                       else if (inUse)
@@ -461,8 +467,8 @@ class _DelayTextState extends ConsumerState<_DelayText> {
   }
 }
 
-/// A node a pool dropped after its dial failed, marked until the pool's own
-/// check measures it again.
+/// A node a pool keeps out of play after its dial failed, marked until the
+/// pool's own check measures it again.
 class _SuspiciousBadge extends StatelessWidget {
   const _SuspiciousBadge();
 
@@ -486,6 +492,39 @@ class _SuspiciousBadge extends StatelessWidget {
               size: _size - 5,
               fill: 1,
               color: colorScheme.onWarningContainer,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A node whose handshake went unanswered: the pool routes around it until a
+/// check measures it again.
+class _SilentBadge extends StatelessWidget {
+  const _SilentBadge();
+
+  static const _size = 18.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    return Tooltip(
+      message: context.appLocalizations.dataSilentNode,
+      child: SizedBox.square(
+        dimension: _size,
+        child: DecoratedBox(
+          decoration: ShapeDecoration(
+            shape: AppShape.circle,
+            color: colorScheme.errorContainer,
+          ),
+          child: Center(
+            child: GlyphIcon(
+              AppGlyphs.wifiOff,
+              size: _size - 5,
+              fill: 1,
+              color: colorScheme.onErrorContainer,
             ),
           ),
         ),

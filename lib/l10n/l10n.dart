@@ -8667,6 +8667,156 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Group state`
+  String get groupState {
+    return Intl.message('Group state', name: 'groupState', desc: '', args: []);
+  }
+
+  /// `Pinned node`
+  String get pinnedNode {
+    return Intl.message('Pinned node', name: 'pinnedNode', desc: '', args: []);
+  }
+
+  /// `Pin not in use`
+  String get pinSkipped {
+    return Intl.message(
+      'Pin not in use',
+      name: 'pinSkipped',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The pinned node is unavailable, so the group uses another`
+  String get pinSkippedUnavailable {
+    return Intl.message(
+      'The pinned node is unavailable, so the group uses another',
+      name: 'pinSkippedUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The pinned node is under suspicion, so the group uses another`
+  String get pinSkippedSuspicious {
+    return Intl.message(
+      'The pinned node is under suspicion, so the group uses another',
+      name: 'pinSkippedSuspicious',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `In rotation`
+  String get poolRotation {
+    return Intl.message(
+      'In rotation',
+      name: 'poolRotation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Silent nodes`
+  String get nodesSilent {
+    return Intl.message(
+      'Silent nodes',
+      name: 'nodesSilent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The node stopped answering data`
+  String get dataSilentNode {
+    return Intl.message(
+      'The node stopped answering data',
+      name: 'dataSilentNode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Group history`
+  String get groupHistory {
+    return Intl.message(
+      'Group history',
+      name: 'groupHistory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Nothing yet`
+  String get groupHistoryEmpty {
+    return Intl.message(
+      'Nothing yet',
+      name: 'groupHistoryEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Route`
+  String get historyEventNow {
+    return Intl.message('Route', name: 'historyEventNow', desc: '', args: []);
+  }
+
+  /// `Pinned`
+  String get historyEventPin {
+    return Intl.message('Pinned', name: 'historyEventPin', desc: '', args: []);
+  }
+
+  /// `Pin cleared`
+  String get historyEventUnpin {
+    return Intl.message(
+      'Pin cleared',
+      name: 'historyEventUnpin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Out of play`
+  String get historyEventSuspicious {
+    return Intl.message(
+      'Out of play',
+      name: 'historyEventSuspicious',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Back in play`
+  String get historyEventRecovered {
+    return Intl.message(
+      'Back in play',
+      name: 'historyEventRecovered',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Silent`
+  String get historyEventDataSilent {
+    return Intl.message(
+      'Silent',
+      name: 'historyEventDataSilent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rotation`
+  String get historyEventPool {
+    return Intl.message(
+      'Rotation',
+      name: 'historyEventPool',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

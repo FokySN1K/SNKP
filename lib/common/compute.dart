@@ -26,12 +26,14 @@ List<Group> computeSort({
           delayMap: delayMap,
         ),
     };
-    return List.of(proxies)
-      ..sort((a, b) => delayStates[a.name]!.compareTo(delayStates[b.name]!));
+    return _stableSort(
+      proxies,
+      (a, b) => delayStates[a.name]!.compareTo(delayStates[b.name]!),
+    );
   }
 
   List<Proxy> sortOfName(List<Proxy> proxies) {
-    return List.of(proxies)..sort((a, b) => a.name.compareTo(b.name));
+    return _stableSort(proxies, (a, b) => a.name.compareTo(b.name));
   }
 
   // A group keeps the groups the profile put among its members where they
@@ -53,14 +55,18 @@ List<Group> computeSort({
         _pinnedProxyTypes.contains(proxy.type);
     final sorted = sortOfDelay(
       groups: groups,
-      proxies: [for (final proxy in proxies) if (!pinned(proxy)) proxy],
+      proxies: [
+        for (final proxy in proxies)
+          if (!pinned(proxy)) proxy,
+      ],
       delayMap: delayMap,
       selectedMap: selectedMap,
       testUrl: testUrl,
     );
     var next = 0;
     return [
-      for (final proxy in proxies) if (pinned(proxy)) proxy else sorted[next++],
+      for (final proxy in proxies)
+        if (pinned(proxy)) proxy else sorted[next++],
     ];
   }
 
@@ -82,6 +88,20 @@ List<Group> computeSort({
   }).toList();
 }
 
+/// Dart's `List.sort` is not stable: two members that compare equal swap
+/// places on their own, and the page polls every couple of seconds, so a card
+/// would jump with nothing having changed. Sorting the indexes with the
+/// original position as the tie-breaker keeps equal members where the list
+/// put them.
+List<T> _stableSort<T>(List<T> items, int Function(T a, T b) compare) {
+  final order = List<int>.generate(items.length, (index) => index);
+  order.sort((a, b) {
+    final byValue = compare(items[a], items[b]);
+    return byValue != 0 ? byValue : a.compareTo(b);
+  });
+  return [for (final index in order) items[index]];
+}
+
 /// Keeps the members of a group a check is running in the order the page
 /// already shows them. A sweep lands one result at a time, and a list that
 /// re-sorted on each of them would move a card out from under the cursor. A
@@ -94,9 +114,7 @@ List<Group> keepTestedGroupOrder({
   if (frozen.isEmpty || previous.isEmpty) {
     return next;
   }
-  final previousMembers = {
-    for (final group in previous) group.name: group.all,
-  };
+  final previousMembers = {for (final group in previous) group.name: group.all};
   return [
     for (final group in next)
       if (frozen.contains(group.name))

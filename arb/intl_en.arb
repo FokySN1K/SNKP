@@ -1026,5 +1026,22 @@
   "dnsFallbackFilterGeoipCodeHint": "The country the GeoIP check uses.\n\nExample: CN, the default; RU on a Russian network.",
   "dnsFallbackFilterGeositeHint": "Name sets whose answers always go to the fallback.\n\nExample: geosite:gfw.",
   "dnsFallbackFilterIpcidrHint": "Address ranges whose answers always go to the fallback.\n\nExample: 127.0.0.0/8 catches a hijacked local resolver.",
-  "dnsFallbackFilterDomainHint": "Extra names treated as censored, on top of the geosite sets.\n\nExample: +.twitter.com."
+  "dnsFallbackFilterDomainHint": "Extra names treated as censored, on top of the geosite sets.\n\nExample: +.twitter.com.",
+  "groupState": "Group state",
+  "pinnedNode": "Pinned node",
+  "pinSkipped": "Pin not in use",
+  "pinSkippedUnavailable": "The pinned node is unavailable, so the group uses another",
+  "pinSkippedSuspicious": "The pinned node is under suspicion, so the group uses another",
+  "poolRotation": "In rotation",
+  "nodesSilent": "Silent nodes",
+  "dataSilentNode": "The node stopped answering data",
+  "groupHistory": "Group history",
+  "groupHistoryEmpty": "Nothing yet",
+  "historyEventNow": "Route",
+  "historyEventPin": "Pinned",
+  "historyEventUnpin": "Pin cleared",
+  "historyEventSuspicious": "Out of play",
+  "historyEventRecovered": "Back in play",
+  "historyEventDataSilent": "Silent",
+  "historyEventPool": "Rotation"
 }

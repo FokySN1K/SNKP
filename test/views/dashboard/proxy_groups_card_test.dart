@@ -214,7 +214,10 @@ void main() {
     await pumpCard(tester);
 
     expect(name('HK-01'), findsOneWidget);
-    expect(find.byTooltip('The group is re-checking its nodes'), findsOneWidget);
+    expect(
+      find.byTooltip('The group is re-checking its nodes'),
+      findsOneWidget,
+    );
     expect(
       find.descendant(
         of: find.byTooltip('The group is re-checking its nodes'),

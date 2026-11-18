@@ -505,6 +505,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "dark": MessageLookupByLibrary.simpleMessage("ダーク"),
     "dashboard": MessageLookupByLibrary.simpleMessage("ダッシュボード"),
     "dashboardAddableSection": MessageLookupByLibrary.simpleMessage("追加できるカード"),
+    "dataSilentNode": MessageLookupByLibrary.simpleMessage(
+      "ノードがデータに応答しなくなりました",
+    ),
     "databaseWriteFailedTip": MessageLookupByLibrary.simpleMessage(
       "変更の保存に失敗したため、元に戻しました",
     ),
@@ -871,9 +874,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "grid": MessageLookupByLibrary.simpleMessage("グリッド"),
     "groupCount": m32,
     "groupCountUnit": MessageLookupByLibrary.simpleMessage("個"),
+    "groupHistory": MessageLookupByLibrary.simpleMessage("グループの履歴"),
+    "groupHistoryEmpty": MessageLookupByLibrary.simpleMessage("まだありません"),
     "groupRecovering": MessageLookupByLibrary.simpleMessage(
       "グループがノードを再確認しています",
     ),
+    "groupState": MessageLookupByLibrary.simpleMessage("グループの状態"),
     "groupTimeoutCount": m33,
     "hasCacheChange": MessageLookupByLibrary.simpleMessage("変更をキャッシュしますか？"),
     "hashByInUser": MessageLookupByLibrary.simpleMessage("インバウンドユーザーでハッシュ"),
@@ -888,6 +894,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "hideTimeoutProxies": MessageLookupByLibrary.simpleMessage(
       "タイムアウトしたプロキシを隠す",
     ),
+    "historyEventDataSilent": MessageLookupByLibrary.simpleMessage("無応答"),
+    "historyEventNow": MessageLookupByLibrary.simpleMessage("経路"),
+    "historyEventPin": MessageLookupByLibrary.simpleMessage("固定"),
+    "historyEventPool": MessageLookupByLibrary.simpleMessage("ローテーション"),
+    "historyEventRecovered": MessageLookupByLibrary.simpleMessage("復帰"),
+    "historyEventSuspicious": MessageLookupByLibrary.simpleMessage("除外中"),
+    "historyEventUnpin": MessageLookupByLibrary.simpleMessage("固定を解除"),
     "hopInterval": MessageLookupByLibrary.simpleMessage("ホップ間隔"),
     "host": MessageLookupByLibrary.simpleMessage("ホスト"),
     "hostname": MessageLookupByLibrary.simpleMessage("ホスト名"),
@@ -1194,6 +1207,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "noResolveHostname": MessageLookupByLibrary.simpleMessage("ホスト名を解決しない"),
     "noSearchResults": MessageLookupByLibrary.simpleMessage("一致する結果はありません"),
     "nodes": MessageLookupByLibrary.simpleMessage("ノード"),
+    "nodesSilent": MessageLookupByLibrary.simpleMessage("応答しないノード"),
     "nonTextProviderFile": MessageLookupByLibrary.simpleMessage(
       "この外部リソースはテキストファイルではありません",
     ),
@@ -1245,7 +1259,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "paste": MessageLookupByLibrary.simpleMessage("貼り付け"),
     "peers": MessageLookupByLibrary.simpleMessage("ピア"),
     "pickFromAlbum": MessageLookupByLibrary.simpleMessage("アルバムから選択"),
+    "pinSkipped": MessageLookupByLibrary.simpleMessage("固定は使われていません"),
+    "pinSkippedSuspicious": MessageLookupByLibrary.simpleMessage(
+      "固定したノードが疑わしいため、グループは別のノードを使います",
+    ),
+    "pinSkippedUnavailable": MessageLookupByLibrary.simpleMessage(
+      "固定したノードが利用できないため、グループは別のノードを使います",
+    ),
     "pinWindow": MessageLookupByLibrary.simpleMessage("最前面に固定"),
+    "pinnedNode": MessageLookupByLibrary.simpleMessage("固定したノード"),
     "pleaseBindWebDAV": MessageLookupByLibrary.simpleMessage("WebDAVを連携してください"),
     "pleaseEnterScriptName": MessageLookupByLibrary.simpleMessage(
       "スクリプト名を入力してください",
@@ -1260,6 +1282,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "pluginPassword": MessageLookupByLibrary.simpleMessage("プラグインパスワード"),
     "pluginPath": MessageLookupByLibrary.simpleMessage("プラグインパス"),
     "pluginUsername": MessageLookupByLibrary.simpleMessage("プラグインユーザー名"),
+    "poolRotation": MessageLookupByLibrary.simpleMessage("ローテーション内"),
     "port": MessageLookupByLibrary.simpleMessage("ポート"),
     "portConflictTip": MessageLookupByLibrary.simpleMessage("別のポートを入力してください"),
     "portHopping": MessageLookupByLibrary.simpleMessage("ポートホッピング"),

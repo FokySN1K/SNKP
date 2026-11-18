@@ -634,6 +634,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "dashboardAddableSection": MessageLookupByLibrary.simpleMessage(
       "Disponibles para añadir",
     ),
+    "dataSilentNode": MessageLookupByLibrary.simpleMessage(
+      "El nodo dejó de responder a los datos",
+    ),
     "databaseWriteFailedTip": MessageLookupByLibrary.simpleMessage(
       "No se pudo guardar el cambio; se ha revertido",
     ),
@@ -1070,9 +1073,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "grid": MessageLookupByLibrary.simpleMessage("Cuadrícula"),
     "groupCount": m32,
     "groupCountUnit": MessageLookupByLibrary.simpleMessage("grupos"),
+    "groupHistory": MessageLookupByLibrary.simpleMessage("Historial del grupo"),
+    "groupHistoryEmpty": MessageLookupByLibrary.simpleMessage("Nada todavía"),
     "groupRecovering": MessageLookupByLibrary.simpleMessage(
       "El grupo está revisando sus nodos",
     ),
+    "groupState": MessageLookupByLibrary.simpleMessage("Estado del grupo"),
     "groupTimeoutCount": m33,
     "hasCacheChange": MessageLookupByLibrary.simpleMessage(
       "¿Guardar los cambios en la caché?",
@@ -1092,6 +1098,21 @@ class MessageLookup extends MessageLookupByLibrary {
     "hidePassword": MessageLookupByLibrary.simpleMessage("Ocultar contraseña"),
     "hideTimeoutProxies": MessageLookupByLibrary.simpleMessage(
       "Ocultar proxies sin respuesta",
+    ),
+    "historyEventDataSilent": MessageLookupByLibrary.simpleMessage(
+      "Silencioso",
+    ),
+    "historyEventNow": MessageLookupByLibrary.simpleMessage("Ruta"),
+    "historyEventPin": MessageLookupByLibrary.simpleMessage("Fijado"),
+    "historyEventPool": MessageLookupByLibrary.simpleMessage("Rotación"),
+    "historyEventRecovered": MessageLookupByLibrary.simpleMessage(
+      "De nuevo en juego",
+    ),
+    "historyEventSuspicious": MessageLookupByLibrary.simpleMessage(
+      "Fuera de juego",
+    ),
+    "historyEventUnpin": MessageLookupByLibrary.simpleMessage(
+      "Fijación retirada",
     ),
     "hopInterval": MessageLookupByLibrary.simpleMessage("Intervalo de salto"),
     "host": MessageLookupByLibrary.simpleMessage("Host"),
@@ -1470,6 +1491,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "No hay resultados",
     ),
     "nodes": MessageLookupByLibrary.simpleMessage("Nodos"),
+    "nodesSilent": MessageLookupByLibrary.simpleMessage("Nodos silenciosos"),
     "nonTextProviderFile": MessageLookupByLibrary.simpleMessage(
       "Este recurso externo no es un archivo de texto",
     ),
@@ -1533,7 +1555,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "paste": MessageLookupByLibrary.simpleMessage("Pegar"),
     "peers": MessageLookupByLibrary.simpleMessage("Pares"),
     "pickFromAlbum": MessageLookupByLibrary.simpleMessage("Elegir del álbum"),
+    "pinSkipped": MessageLookupByLibrary.simpleMessage(
+      "La fijación no está en uso",
+    ),
+    "pinSkippedSuspicious": MessageLookupByLibrary.simpleMessage(
+      "El nodo fijado está bajo sospecha, así que el grupo usa otro",
+    ),
+    "pinSkippedUnavailable": MessageLookupByLibrary.simpleMessage(
+      "El nodo fijado no está disponible, así que el grupo usa otro",
+    ),
     "pinWindow": MessageLookupByLibrary.simpleMessage("Fijar ventana"),
+    "pinnedNode": MessageLookupByLibrary.simpleMessage("Nodo fijado"),
     "pleaseBindWebDAV": MessageLookupByLibrary.simpleMessage("Vincula WebDAV"),
     "pleaseEnterScriptName": MessageLookupByLibrary.simpleMessage(
       "Introduce un nombre para el script",
@@ -1554,6 +1586,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "pluginUsername": MessageLookupByLibrary.simpleMessage(
       "Usuario del complemento",
     ),
+    "poolRotation": MessageLookupByLibrary.simpleMessage("En rotación"),
     "port": MessageLookupByLibrary.simpleMessage("Puerto"),
     "portConflictTip": MessageLookupByLibrary.simpleMessage(
       "Introduce un puerto diferente",

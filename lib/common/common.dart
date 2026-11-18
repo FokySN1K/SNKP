@@ -15,6 +15,7 @@ export 'file.dart';
 export 'fixed.dart';
 export 'function.dart';
 export 'future.dart';
+export 'group_history.dart';
 export 'http.dart';
 export 'indexing.dart';
 export 'input_entries.dart';

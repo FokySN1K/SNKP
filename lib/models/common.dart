@@ -510,6 +510,27 @@ abstract class Group with _$Group {
     /// The members a failed dial took out of a pool's rotation, until its own
     /// check or the mark's lifetime clears them.
     @Default([]) List<String> suspicious,
+
+    /// The members a pool keeps in rotation, out of `all`.
+    @Default([]) List<String> pool,
+
+    /// How many members a pool keeps in rotation.
+    int? poolSize,
+
+    /// The member a user pinned: the group routes through it while a check
+    /// says it can carry traffic, and routes around it while one says it
+    /// cannot.
+    String? fixed,
+
+    /// Whether the pin is the member the group routes through now.
+    @Default(true) bool fixedActive,
+
+    /// Why the group routes where it does, as the Core names it. A host shows
+    /// a value it has no words for as it is.
+    String? nowReason,
+
+    /// The members whose handshake went unanswered, until a check answers.
+    @Default([]) List<String> dataSilent,
   }) = _Group;
 
   factory Group.fromJson(Map<String, Object?> json) => _$GroupFromJson(json);
@@ -539,6 +560,16 @@ extension GroupExt on Group {
       all.isEmpty || all.any((proxy) => proxy.name == proxyName);
 
   bool isSuspicious(String proxyName) => suspicious.contains(proxyName);
+
+  bool isDataSilent(String proxyName) => dataSilent.contains(proxyName);
+
+  /// The pin the Core holds: a pick that outlives the route, so a group that
+  /// must avoid it still reports it.
+  bool get isPinned => (fixed ?? '').isNotEmpty;
+
+  /// Whether a pin is held and the group routes around it, which the page has
+  /// to say out loud instead of showing the route as the user's own pick.
+  bool get pinSkipped => isPinned && !fixedActive;
 }
 
 @freezed

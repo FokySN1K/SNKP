@@ -368,6 +368,7 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
                 proxy: proxy,
                 groupName: groupName,
                 suspicious: group.isSuspicious(proxy.name),
+                silent: group.isDataSilent(proxy.name),
               ),
             ),
           ),
@@ -834,20 +835,29 @@ class _SelectedProxyName extends ConsumerWidget {
       overflow: TextOverflow.ellipsis,
       style: AppTextStyle.caption1.of(context, emphasized: true).toLight,
     );
-    if (!group.recovering) {
+    final iconSize = globalState.measure.textHeight(AppTextStyle.caption1);
+    // A pin the group routes around must not read as the user's own pick: the
+    // header says the route moved and why.
+    final marks = [
+      if (group.pinSkipped)
+        Tooltip(
+          message: pinSkipReason(context, group),
+          child: GlyphIcon(AppGlyphs.warning, size: iconSize),
+        ),
+      if (group.recovering)
+        Tooltip(
+          message: context.appLocalizations.groupRecovering,
+          child: GlyphIcon(AppGlyphs.refresh, size: iconSize),
+        ),
+    ];
+    if (marks.isEmpty) {
       return name;
     }
     return Row(
       mainAxisSize: MainAxisSize.min,
       spacing: 4,
       children: [
-        Tooltip(
-          message: context.appLocalizations.groupRecovering,
-          child: GlyphIcon(
-            AppGlyphs.refresh,
-            size: globalState.measure.textHeight(AppTextStyle.caption1),
-          ),
-        ),
+        ...marks,
         Flexible(child: name),
       ],
     );

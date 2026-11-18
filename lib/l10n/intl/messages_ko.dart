@@ -490,6 +490,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "dark": MessageLookupByLibrary.simpleMessage("다크"),
     "dashboard": MessageLookupByLibrary.simpleMessage("대시보드"),
     "dashboardAddableSection": MessageLookupByLibrary.simpleMessage("추가 가능"),
+    "dataSilentNode": MessageLookupByLibrary.simpleMessage(
+      "노드가 데이터에 응답하지 않습니다",
+    ),
     "databaseWriteFailedTip": MessageLookupByLibrary.simpleMessage(
       "변경 사항을 저장하지 못해 되돌렸습니다",
     ),
@@ -858,9 +861,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "grid": MessageLookupByLibrary.simpleMessage("격자"),
     "groupCount": m32,
     "groupCountUnit": MessageLookupByLibrary.simpleMessage("개"),
+    "groupHistory": MessageLookupByLibrary.simpleMessage("그룹 기록"),
+    "groupHistoryEmpty": MessageLookupByLibrary.simpleMessage("아직 없음"),
     "groupRecovering": MessageLookupByLibrary.simpleMessage(
       "그룹이 노드를 다시 확인하는 중입니다",
     ),
+    "groupState": MessageLookupByLibrary.simpleMessage("그룹 상태"),
     "groupTimeoutCount": m33,
     "hasCacheChange": MessageLookupByLibrary.simpleMessage("변경 사항을 캐시하시겠습니까?"),
     "hashByInUser": MessageLookupByLibrary.simpleMessage("인바운드 사용자별 해시"),
@@ -875,6 +881,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "hideTimeoutProxies": MessageLookupByLibrary.simpleMessage(
       "시간 초과된 프록시 숨기기",
     ),
+    "historyEventDataSilent": MessageLookupByLibrary.simpleMessage("무응답"),
+    "historyEventNow": MessageLookupByLibrary.simpleMessage("경로"),
+    "historyEventPin": MessageLookupByLibrary.simpleMessage("고정됨"),
+    "historyEventPool": MessageLookupByLibrary.simpleMessage("로테이션"),
+    "historyEventRecovered": MessageLookupByLibrary.simpleMessage("복귀됨"),
+    "historyEventSuspicious": MessageLookupByLibrary.simpleMessage("제외됨"),
+    "historyEventUnpin": MessageLookupByLibrary.simpleMessage("고정 해제됨"),
     "hopInterval": MessageLookupByLibrary.simpleMessage("호핑 간격"),
     "host": MessageLookupByLibrary.simpleMessage("호스트"),
     "hostname": MessageLookupByLibrary.simpleMessage("호스트 이름"),
@@ -1177,6 +1190,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "noResolveHostname": MessageLookupByLibrary.simpleMessage("호스트 이름 확인 안 함"),
     "noSearchResults": MessageLookupByLibrary.simpleMessage("일치하는 결과 없음"),
     "nodes": MessageLookupByLibrary.simpleMessage("노드"),
+    "nodesSilent": MessageLookupByLibrary.simpleMessage("응답 없는 노드"),
     "nonTextProviderFile": MessageLookupByLibrary.simpleMessage(
       "이 외부 리소스는 텍스트 파일이 아닙니다",
     ),
@@ -1224,7 +1238,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "paste": MessageLookupByLibrary.simpleMessage("붙여넣기"),
     "peers": MessageLookupByLibrary.simpleMessage("피어"),
     "pickFromAlbum": MessageLookupByLibrary.simpleMessage("앨범에서 선택"),
+    "pinSkipped": MessageLookupByLibrary.simpleMessage("고정이 적용되지 않음"),
+    "pinSkippedSuspicious": MessageLookupByLibrary.simpleMessage(
+      "고정된 노드가 의심스러워 그룹이 다른 노드를 사용합니다",
+    ),
+    "pinSkippedUnavailable": MessageLookupByLibrary.simpleMessage(
+      "고정된 노드를 사용할 수 없어 그룹이 다른 노드를 사용합니다",
+    ),
     "pinWindow": MessageLookupByLibrary.simpleMessage("창 고정"),
+    "pinnedNode": MessageLookupByLibrary.simpleMessage("고정된 노드"),
     "pleaseBindWebDAV": MessageLookupByLibrary.simpleMessage("WebDAV를 연결하세요"),
     "pleaseEnterScriptName": MessageLookupByLibrary.simpleMessage(
       "스크립트 이름을 입력하세요",
@@ -1239,6 +1261,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "pluginPassword": MessageLookupByLibrary.simpleMessage("플러그인 비밀번호"),
     "pluginPath": MessageLookupByLibrary.simpleMessage("플러그인 경로"),
     "pluginUsername": MessageLookupByLibrary.simpleMessage("플러그인 사용자 이름"),
+    "poolRotation": MessageLookupByLibrary.simpleMessage("로테이션 참여"),
     "port": MessageLookupByLibrary.simpleMessage("포트"),
     "portConflictTip": MessageLookupByLibrary.simpleMessage("다른 포트를 입력하세요"),
     "portHopping": MessageLookupByLibrary.simpleMessage("포트 호핑"),

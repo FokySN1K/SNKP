@@ -589,6 +589,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "dashboardAddableSection": MessageLookupByLibrary.simpleMessage(
       "Available to add",
     ),
+    "dataSilentNode": MessageLookupByLibrary.simpleMessage(
+      "The node stopped answering data",
+    ),
     "databaseWriteFailedTip": MessageLookupByLibrary.simpleMessage(
       "Failed to save the change; it has been rolled back",
     ),
@@ -1009,9 +1012,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "grid": MessageLookupByLibrary.simpleMessage("Grid"),
     "groupCount": m32,
     "groupCountUnit": MessageLookupByLibrary.simpleMessage("groups"),
+    "groupHistory": MessageLookupByLibrary.simpleMessage("Group history"),
+    "groupHistoryEmpty": MessageLookupByLibrary.simpleMessage("Nothing yet"),
     "groupRecovering": MessageLookupByLibrary.simpleMessage(
       "The group is re-checking its nodes",
     ),
+    "groupState": MessageLookupByLibrary.simpleMessage("Group state"),
     "groupTimeoutCount": m33,
     "hasCacheChange": MessageLookupByLibrary.simpleMessage(
       "Cache the changes?",
@@ -1030,6 +1036,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "hideTimeoutProxies": MessageLookupByLibrary.simpleMessage(
       "Hide timed-out proxies",
     ),
+    "historyEventDataSilent": MessageLookupByLibrary.simpleMessage("Silent"),
+    "historyEventNow": MessageLookupByLibrary.simpleMessage("Route"),
+    "historyEventPin": MessageLookupByLibrary.simpleMessage("Pinned"),
+    "historyEventPool": MessageLookupByLibrary.simpleMessage("Rotation"),
+    "historyEventRecovered": MessageLookupByLibrary.simpleMessage(
+      "Back in play",
+    ),
+    "historyEventSuspicious": MessageLookupByLibrary.simpleMessage(
+      "Out of play",
+    ),
+    "historyEventUnpin": MessageLookupByLibrary.simpleMessage("Pin cleared"),
     "hopInterval": MessageLookupByLibrary.simpleMessage("Hop interval"),
     "host": MessageLookupByLibrary.simpleMessage("Host"),
     "hostname": MessageLookupByLibrary.simpleMessage("Hostname"),
@@ -1373,6 +1390,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "No matching results",
     ),
     "nodes": MessageLookupByLibrary.simpleMessage("Nodes"),
+    "nodesSilent": MessageLookupByLibrary.simpleMessage("Silent nodes"),
     "nonTextProviderFile": MessageLookupByLibrary.simpleMessage(
       "This external resource is not a text file",
     ),
@@ -1432,7 +1450,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "paste": MessageLookupByLibrary.simpleMessage("Paste"),
     "peers": MessageLookupByLibrary.simpleMessage("Peers"),
     "pickFromAlbum": MessageLookupByLibrary.simpleMessage("Choose from album"),
+    "pinSkipped": MessageLookupByLibrary.simpleMessage("Pin not in use"),
+    "pinSkippedSuspicious": MessageLookupByLibrary.simpleMessage(
+      "The pinned node is under suspicion, so the group uses another",
+    ),
+    "pinSkippedUnavailable": MessageLookupByLibrary.simpleMessage(
+      "The pinned node is unavailable, so the group uses another",
+    ),
     "pinWindow": MessageLookupByLibrary.simpleMessage("Pin window"),
+    "pinnedNode": MessageLookupByLibrary.simpleMessage("Pinned node"),
     "pleaseBindWebDAV": MessageLookupByLibrary.simpleMessage(
       "Please bind WebDAV",
     ),
@@ -1449,6 +1475,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "pluginPassword": MessageLookupByLibrary.simpleMessage("Plugin password"),
     "pluginPath": MessageLookupByLibrary.simpleMessage("Plugin path"),
     "pluginUsername": MessageLookupByLibrary.simpleMessage("Plugin username"),
+    "poolRotation": MessageLookupByLibrary.simpleMessage("In rotation"),
     "port": MessageLookupByLibrary.simpleMessage("Port"),
     "portConflictTip": MessageLookupByLibrary.simpleMessage(
       "Please enter a different port",

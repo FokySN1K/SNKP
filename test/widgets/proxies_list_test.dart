@@ -387,6 +387,89 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('a pin the group routes around is marked in the header', (
+    tester,
+  ) async {
+    const reason = 'The pinned node is unavailable, so the group uses another';
+    await pumpList(
+      tester,
+      groups: [
+        _group('G0', 3).copyWith(
+          type: GroupType.URLTestPool,
+          now: 'G0-0',
+          fixed: 'G0-1',
+          fixedActive: false,
+          nowReason: 'fixed-unavailable',
+        ),
+        _group('G1', 3).copyWith(now: 'G1-0'),
+      ],
+    );
+
+    expect(
+      find.descendant(of: headerOf('G0'), matching: find.byTooltip(reason)),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: headerOf('G1'), matching: find.byTooltip(reason)),
+      findsNothing,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a pin the group routes through needs no mark', (tester) async {
+    await pumpList(
+      tester,
+      groups: [
+        _group('G0', 3).copyWith(
+          type: GroupType.URLTestPool,
+          now: 'G0-1',
+          fixed: 'G0-1',
+          fixedActive: true,
+          nowReason: 'fixed',
+        ),
+        _group('G1', 3).copyWith(now: 'G1-0'),
+      ],
+    );
+
+    expect(
+      find.descendant(
+        of: headerOf('G0'),
+        matching: find.byTooltip(
+          'The pinned node is unavailable, so the group uses another',
+        ),
+      ),
+      findsNothing,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a pool marks the node its data plane went silent on', (
+    tester,
+  ) async {
+    await pumpList(
+      tester,
+      groups: [
+        _group('G0', 3).copyWith(
+          type: GroupType.URLTestPool,
+          now: 'G0-0',
+          dataSilent: const ['G0-2'],
+        ),
+        _group('G1', 3).copyWith(now: 'G1-0'),
+      ],
+    );
+
+    final badge = find.byTooltip('The node stopped answering data');
+    expect(badge, findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('G0.G0-2')),
+        matching: badge,
+      ),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('the delay test button tests its own group only', (tester) async {
     await pumpList(tester);
 

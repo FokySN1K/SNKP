@@ -11,6 +11,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'card.dart';
+import 'common.dart';
+import 'history.dart';
 
 /// What the app knows about one node: the whole of its name, which a card only
 /// has room to cut short, and the picks that card's menu offers.
@@ -77,6 +79,9 @@ class _ProxyInfoSheet extends ConsumerWidget {
       ),
     );
     final provider = proxy.providerName;
+    final group = ref.watch(
+      groupsProvider.select((groups) => groups.getGroup(groupName)),
+    );
     return CommonScaffold(
       title: appLocalizations.basicInfo,
       body: ListView(
@@ -120,6 +125,38 @@ class _ProxyInfoSheet extends ConsumerWidget {
               ),
             ],
           ),
+          if (group != null)
+            generateSection(
+              title: appLocalizations.groupState,
+              items: [
+                if (group.isPinned)
+                  DetailRow(
+                    title: appLocalizations.pinnedNode,
+                    value: EmojiText(group.fixed ?? ''),
+                  ),
+                if (group.pinSkipped)
+                  DetailRow(
+                    title: appLocalizations.pinSkipped,
+                    value: Text(pinSkipReason(context, group)),
+                  ),
+                if (group.poolSize != null)
+                  DetailRow(
+                    title: appLocalizations.poolRotation,
+                    value: Text('${group.poolSize} / ${group.all.length}'),
+                  ),
+                if (group.dataSilent.isNotEmpty)
+                  DetailRow(
+                    title: appLocalizations.nodesSilent,
+                    value: Text('${group.dataSilent.length}'),
+                  ),
+                DecorationListItem(
+                  title: Text(appLocalizations.groupHistory),
+                  trailing: const GlyphIcon(AppGlyphs.clock, size: 18),
+                  onPressed: () =>
+                      showGroupHistory(context, groupName: groupName),
+                ),
+              ],
+            ),
           ProxyConnectionSection(name: proxy.name),
           ProxyHealthSection(
             proxy: proxy,

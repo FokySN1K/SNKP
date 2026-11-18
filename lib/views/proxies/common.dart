@@ -1,3 +1,4 @@
+import 'package:fl_clash/common/context.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
@@ -5,6 +6,18 @@ import 'package:fl_clash/ui/typography.dart';
 import 'package:flutter/widgets.dart';
 
 const proxyGridSpacing = 8.0;
+
+/// Why the group does not route through the pin, in words a user reads. A
+/// reason the Core reports but this build has no words for is shown as it is.
+String pinSkipReason(BuildContext context, Group group) {
+  final appLocalizations = context.appLocalizations;
+  return switch (group.nowReason) {
+    'fixed-unavailable' => appLocalizations.pinSkippedUnavailable,
+    'fixed-suspicious' => appLocalizations.pinSkippedSuspicious,
+    final reason? => reason,
+    null => appLocalizations.pinSkippedUnavailable,
+  };
+}
 
 double get listHeaderHeight {
   final measure = globalState.measure;

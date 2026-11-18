@@ -633,6 +633,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "dashboardAddableSection": MessageLookupByLibrary.simpleMessage(
       "Disponibles à l’ajout",
     ),
+    "dataSilentNode": MessageLookupByLibrary.simpleMessage(
+      "Le nœud ne répond plus aux données",
+    ),
     "databaseWriteFailedTip": MessageLookupByLibrary.simpleMessage(
       "Échec de l’enregistrement de la modification ; elle a été annulée",
     ),
@@ -1067,9 +1070,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "grid": MessageLookupByLibrary.simpleMessage("Grille"),
     "groupCount": m32,
     "groupCountUnit": MessageLookupByLibrary.simpleMessage("groupes"),
+    "groupHistory": MessageLookupByLibrary.simpleMessage(
+      "Historique du groupe",
+    ),
+    "groupHistoryEmpty": MessageLookupByLibrary.simpleMessage(
+      "Rien pour l\'instant",
+    ),
     "groupRecovering": MessageLookupByLibrary.simpleMessage(
       "Le groupe revérifie ses nœuds",
     ),
+    "groupState": MessageLookupByLibrary.simpleMessage("État du groupe"),
     "groupTimeoutCount": m33,
     "hasCacheChange": MessageLookupByLibrary.simpleMessage(
       "Mettre les modifications en cache ?",
@@ -1089,6 +1099,19 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "hideTimeoutProxies": MessageLookupByLibrary.simpleMessage(
       "Masquer les proxys expirés",
+    ),
+    "historyEventDataSilent": MessageLookupByLibrary.simpleMessage(
+      "Silencieux",
+    ),
+    "historyEventNow": MessageLookupByLibrary.simpleMessage("Itinéraire"),
+    "historyEventPin": MessageLookupByLibrary.simpleMessage("Épinglé"),
+    "historyEventPool": MessageLookupByLibrary.simpleMessage("Rotation"),
+    "historyEventRecovered": MessageLookupByLibrary.simpleMessage(
+      "De retour en jeu",
+    ),
+    "historyEventSuspicious": MessageLookupByLibrary.simpleMessage("Hors jeu"),
+    "historyEventUnpin": MessageLookupByLibrary.simpleMessage(
+      "Épinglage retiré",
     ),
     "hopInterval": MessageLookupByLibrary.simpleMessage("Intervalle de saut"),
     "host": MessageLookupByLibrary.simpleMessage("Hôte"),
@@ -1465,6 +1488,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "noSearchResults": MessageLookupByLibrary.simpleMessage("Aucun résultat"),
     "nodes": MessageLookupByLibrary.simpleMessage("Nœuds"),
+    "nodesSilent": MessageLookupByLibrary.simpleMessage("Nœuds silencieux"),
     "nonTextProviderFile": MessageLookupByLibrary.simpleMessage(
       "Cette ressource externe n’est pas un fichier texte",
     ),
@@ -1532,7 +1556,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "pickFromAlbum": MessageLookupByLibrary.simpleMessage(
       "Choisir dans l’album",
     ),
+    "pinSkipped": MessageLookupByLibrary.simpleMessage(
+      "L\'épinglage n\'est pas utilisé",
+    ),
+    "pinSkippedSuspicious": MessageLookupByLibrary.simpleMessage(
+      "Le nœud épinglé est suspect, le groupe en utilise un autre",
+    ),
+    "pinSkippedUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Le nœud épinglé est indisponible, le groupe en utilise un autre",
+    ),
     "pinWindow": MessageLookupByLibrary.simpleMessage("Épingler la fenêtre"),
+    "pinnedNode": MessageLookupByLibrary.simpleMessage("Nœud épinglé"),
     "pleaseBindWebDAV": MessageLookupByLibrary.simpleMessage(
       "Veuillez lier un WebDAV",
     ),
@@ -1555,6 +1589,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "pluginUsername": MessageLookupByLibrary.simpleMessage(
       "Nom d’utilisateur du plugin",
     ),
+    "poolRotation": MessageLookupByLibrary.simpleMessage("En rotation"),
     "port": MessageLookupByLibrary.simpleMessage("Port"),
     "portConflictTip": MessageLookupByLibrary.simpleMessage(
       "Veuillez saisir un autre port",

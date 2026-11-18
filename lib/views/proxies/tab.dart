@@ -281,6 +281,7 @@ class ProxyGroupView extends ConsumerWidget {
             proxy: proxy,
             groupName: group.name,
             suspicious: group.isSuspicious(proxy.name),
+            silent: group.isDataSilent(proxy.name),
           );
         },
       ),

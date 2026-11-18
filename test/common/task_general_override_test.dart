@@ -62,8 +62,11 @@ void main() {
       const PatchClashConfig(findProcessMode: FindProcessMode.always),
     );
 
-    expect(config['find-process-mode'], 'strict',
-        reason: 'the profile wins until the override key is picked');
+    expect(
+      config['find-process-mode'],
+      'strict',
+      reason: 'the profile wins until the override key is picked',
+    );
   });
 
   test('picked process mode replaces the profile value', () async {

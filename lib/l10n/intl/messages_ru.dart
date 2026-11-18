@@ -607,6 +607,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "dashboardAddableSection": MessageLookupByLibrary.simpleMessage(
       "Можно добавить",
     ),
+    "dataSilentNode": MessageLookupByLibrary.simpleMessage(
+      "Узел перестал отвечать на данные",
+    ),
     "databaseWriteFailedTip": MessageLookupByLibrary.simpleMessage(
       "Не удалось сохранить изменение; оно отменено",
     ),
@@ -1043,9 +1046,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "grid": MessageLookupByLibrary.simpleMessage("Сетка"),
     "groupCount": m32,
     "groupCountUnit": MessageLookupByLibrary.simpleMessage("групп"),
+    "groupHistory": MessageLookupByLibrary.simpleMessage("История группы"),
+    "groupHistoryEmpty": MessageLookupByLibrary.simpleMessage("Пока ничего"),
     "groupRecovering": MessageLookupByLibrary.simpleMessage(
       "Группа повторно проверяет узлы",
     ),
+    "groupState": MessageLookupByLibrary.simpleMessage("Состояние группы"),
     "groupTimeoutCount": m33,
     "hasCacheChange": MessageLookupByLibrary.simpleMessage(
       "Кэшировать изменения?",
@@ -1063,6 +1069,19 @@ class MessageLookup extends MessageLookupByLibrary {
     "hidePassword": MessageLookupByLibrary.simpleMessage("Скрыть пароль"),
     "hideTimeoutProxies": MessageLookupByLibrary.simpleMessage(
       "Скрывать прокси с таймаутом",
+    ),
+    "historyEventDataSilent": MessageLookupByLibrary.simpleMessage("Молчит"),
+    "historyEventNow": MessageLookupByLibrary.simpleMessage("Маршрут"),
+    "historyEventPin": MessageLookupByLibrary.simpleMessage("Закрепление"),
+    "historyEventPool": MessageLookupByLibrary.simpleMessage("Ротация"),
+    "historyEventRecovered": MessageLookupByLibrary.simpleMessage(
+      "Снова в игре",
+    ),
+    "historyEventSuspicious": MessageLookupByLibrary.simpleMessage(
+      "Выведен из игры",
+    ),
+    "historyEventUnpin": MessageLookupByLibrary.simpleMessage(
+      "Закрепление снято",
     ),
     "hopInterval": MessageLookupByLibrary.simpleMessage("Интервал перескока"),
     "host": MessageLookupByLibrary.simpleMessage("Хост"),
@@ -1427,6 +1446,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ничего не найдено",
     ),
     "nodes": MessageLookupByLibrary.simpleMessage("Узлы"),
+    "nodesSilent": MessageLookupByLibrary.simpleMessage("Молчащие узлы"),
     "nonTextProviderFile": MessageLookupByLibrary.simpleMessage(
       "Этот внешний ресурс не является текстовым файлом",
     ),
@@ -1488,9 +1508,19 @@ class MessageLookup extends MessageLookupByLibrary {
     "paste": MessageLookupByLibrary.simpleMessage("Вставить"),
     "peers": MessageLookupByLibrary.simpleMessage("Пиры"),
     "pickFromAlbum": MessageLookupByLibrary.simpleMessage("Выбрать из галереи"),
+    "pinSkipped": MessageLookupByLibrary.simpleMessage(
+      "Закрепление не действует",
+    ),
+    "pinSkippedSuspicious": MessageLookupByLibrary.simpleMessage(
+      "Закреплённый узел под подозрением, группа использует другой",
+    ),
+    "pinSkippedUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Закреплённый узел недоступен, группа использует другой",
+    ),
     "pinWindow": MessageLookupByLibrary.simpleMessage(
       "Закрепить поверх всех окон",
     ),
+    "pinnedNode": MessageLookupByLibrary.simpleMessage("Закреплённый узел"),
     "pleaseBindWebDAV": MessageLookupByLibrary.simpleMessage(
       "Привяжите WebDAV",
     ),
@@ -1509,6 +1539,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "pluginUsername": MessageLookupByLibrary.simpleMessage(
       "Имя пользователя плагина",
     ),
+    "poolRotation": MessageLookupByLibrary.simpleMessage("В ротации"),
     "port": MessageLookupByLibrary.simpleMessage("Порт"),
     "portConflictTip": MessageLookupByLibrary.simpleMessage(
       "Введите другой порт",

@@ -1026,5 +1026,22 @@
   "dnsFallbackFilterGeoipCodeHint": "The country the GeoIP check uses.\n\nExample: CN, the default; RU on a Russian network.",
   "dnsFallbackFilterGeositeHint": "Name sets whose answers always go to the fallback.\n\nExample: geosite:gfw.",
   "dnsFallbackFilterIpcidrHint": "Address ranges whose answers always go to the fallback.\n\nExample: 127.0.0.0/8 catches a hijacked local resolver.",
-  "dnsFallbackFilterDomainHint": "Extra names treated as censored, on top of the geosite sets.\n\nExample: +.twitter.com."
+  "dnsFallbackFilterDomainHint": "Extra names treated as censored, on top of the geosite sets.\n\nExample: +.twitter.com.",
+  "groupState": "グループの状態",
+  "pinnedNode": "固定したノード",
+  "pinSkipped": "固定は使われていません",
+  "pinSkippedUnavailable": "固定したノードが利用できないため、グループは別のノードを使います",
+  "pinSkippedSuspicious": "固定したノードが疑わしいため、グループは別のノードを使います",
+  "poolRotation": "ローテーション内",
+  "nodesSilent": "応答しないノード",
+  "dataSilentNode": "ノードがデータに応答しなくなりました",
+  "groupHistory": "グループの履歴",
+  "groupHistoryEmpty": "まだありません",
+  "historyEventNow": "経路",
+  "historyEventPin": "固定",
+  "historyEventUnpin": "固定を解除",
+  "historyEventSuspicious": "除外中",
+  "historyEventRecovered": "復帰",
+  "historyEventDataSilent": "無応答",
+  "historyEventPool": "ローテーション"
 }

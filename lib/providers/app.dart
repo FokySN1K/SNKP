@@ -334,6 +334,29 @@ class Groups extends _$Groups with AutoDisposeNotifierMixin {
   }
 }
 
+/// The window the proxies page records the groups in. The log is kept out of
+/// the notifier's state on purpose: the page polls every couple of seconds,
+/// and a state that carried the window would rebuild it on every switch.
+@Riverpod(keepAlive: true)
+class GroupHistory extends _$GroupHistory {
+  final GroupHistoryLog _log = GroupHistoryLog();
+
+  @override
+  int build() {
+    return _log.revision;
+  }
+
+  GroupHistoryLog get log => _log;
+
+  void record(List<Group> groups) {
+    final revision = _log.revision;
+    _log.record(groups);
+    if (_log.revision != revision) {
+      state = _log.revision;
+    }
+  }
+}
+
 @Riverpod(keepAlive: true)
 class DelayDataSource extends _$DelayDataSource with AutoDisposeNotifierMixin {
   DelayMap? _owned;

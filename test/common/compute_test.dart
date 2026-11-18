@@ -275,6 +275,27 @@ void main() {
       expect(names.indexOf('proxy-b'), lessThan(names.indexOf('proxy-a')));
     });
 
+    test('ProxiesSortType.delay keeps equal members where they were', () {
+      // Dart sorts a list this long with a quicksort that is not stable: two
+      // members whose delays are equal would swap places between refreshes.
+      final names = [for (var index = 0; index < 40; index++) 'n-$index'];
+      final pool = [
+        Group(
+          name: 'pool',
+          type: GroupType.URLTestPool,
+          all: [for (final name in names) Proxy(name: name, type: 'ss')],
+        ),
+      ];
+      final result = computeSort(
+        groups: pool,
+        sortType: ProxiesSortType.delay,
+        delayMap: const {},
+        selectedMap: const {},
+        defaultTestUrl: 'http://test.com',
+      );
+      expect(result[0].all.map((proxy) => proxy.name).toList(), names);
+    });
+
     test('ProxiesSortType.delay pins nested groups inside a selector', () {
       final nestedGroups = [
         const Group(name: 'nested', type: GroupType.URLTest),

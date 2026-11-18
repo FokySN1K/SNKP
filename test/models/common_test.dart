@@ -192,6 +192,43 @@ void main() {
       expect(group.suspicious, isEmpty);
       expect(group.isSuspicious('Proxy A'), isFalse);
     });
+
+    test('reads the pin, the rotation and the members that went silent', () {
+      final group = Group.fromJson({
+        'type': 'url-test-pool',
+        'name': 'Pool',
+        'now': 'Proxy A',
+        'fixed': 'Proxy B',
+        'fixedActive': false,
+        'nowReason': 'fixed-unavailable',
+        'pool': ['Proxy A', 'Proxy C'],
+        'poolSize': 2,
+        'dataSilent': ['Proxy C'],
+      });
+
+      expect(group.fixed, 'Proxy B');
+      expect(group.isPinned, isTrue);
+      expect(group.fixedActive, isFalse);
+      expect(group.pinSkipped, isTrue);
+      expect(group.nowReason, 'fixed-unavailable');
+      expect(group.pool, ['Proxy A', 'Proxy C']);
+      expect(group.poolSize, 2);
+      expect(group.isDataSilent('Proxy C'), isTrue);
+      expect(group.isDataSilent('Proxy A'), isFalse);
+    });
+
+    test('a group with no pin reads as neither pinned nor skipped', () {
+      final group = Group.fromJson({'type': 'url-test', 'name': 'Auto'});
+
+      expect(group.isPinned, isFalse);
+      expect(group.pinSkipped, isFalse);
+      // A Core that predates the field reports no pin, and a pin it does not
+      // report must not read as one it routed around.
+      expect(group.fixedActive, isTrue);
+      expect(group.pool, isEmpty);
+      expect(group.poolSize, isNull);
+      expect(group.dataSilent, isEmpty);
+    });
   });
 
   group('ScriptsExt naming', () {

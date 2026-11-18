@@ -208,6 +208,18 @@ _Group _$GroupFromJson(Map<String, dynamic> json) => _Group(
           ?.map((e) => e as String)
           .toList() ??
       const [],
+  pool:
+      (json['pool'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      const [],
+  poolSize: (json['poolSize'] as num?)?.toInt(),
+  fixed: json['fixed'] as String?,
+  fixedActive: json['fixedActive'] as bool? ?? true,
+  nowReason: json['nowReason'] as String?,
+  dataSilent:
+      (json['dataSilent'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
 );
 
 Map<String, dynamic> _$GroupToJson(_Group instance) => <String, dynamic>{
@@ -221,6 +233,12 @@ Map<String, dynamic> _$GroupToJson(_Group instance) => <String, dynamic>{
   'lastGood': instance.lastGood,
   'recovering': instance.recovering,
   'suspicious': instance.suspicious,
+  'pool': instance.pool,
+  'poolSize': instance.poolSize,
+  'fixed': instance.fixed,
+  'fixedActive': instance.fixedActive,
+  'nowReason': instance.nowReason,
+  'dataSilent': instance.dataSilent,
 };
 
 const _$GroupTypeEnumMap = {

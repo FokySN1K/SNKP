@@ -1026,5 +1026,22 @@
   "dnsFallbackFilterGeoipCodeHint": "The country the GeoIP check uses.\n\nExample: CN, the default; RU on a Russian network.",
   "dnsFallbackFilterGeositeHint": "Name sets whose answers always go to the fallback.\n\nExample: geosite:gfw.",
   "dnsFallbackFilterIpcidrHint": "Address ranges whose answers always go to the fallback.\n\nExample: 127.0.0.0/8 catches a hijacked local resolver.",
-  "dnsFallbackFilterDomainHint": "Extra names treated as censored, on top of the geosite sets.\n\nExample: +.twitter.com."
+  "dnsFallbackFilterDomainHint": "Extra names treated as censored, on top of the geosite sets.\n\nExample: +.twitter.com.",
+  "groupState": "分组状态",
+  "pinnedNode": "已固定的节点",
+  "pinSkipped": "固定未生效",
+  "pinSkippedUnavailable": "固定的节点不可用，分组改用其他节点",
+  "pinSkippedSuspicious": "固定的节点可疑，分组改用其他节点",
+  "poolRotation": "轮换中",
+  "nodesSilent": "无响应的节点",
+  "dataSilentNode": "节点不再响应数据",
+  "groupHistory": "分组历史",
+  "groupHistoryEmpty": "暂无记录",
+  "historyEventNow": "线路",
+  "historyEventPin": "已固定",
+  "historyEventUnpin": "已取消固定",
+  "historyEventSuspicious": "已排除",
+  "historyEventRecovered": "已恢复",
+  "historyEventDataSilent": "无响应",
+  "historyEventPool": "轮换"
 }

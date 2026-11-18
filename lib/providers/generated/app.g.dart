@@ -1440,6 +1440,71 @@ abstract class _$Groups extends $Notifier<List<Group>> {
   }
 }
 
+/// The window the proxies page records the groups in. The log is kept out of
+/// the notifier's state on purpose: the page polls every couple of seconds,
+/// and a state that carried the window would rebuild it on every switch.
+
+@ProviderFor(GroupHistory)
+final groupHistoryProvider = GroupHistoryProvider._();
+
+/// The window the proxies page records the groups in. The log is kept out of
+/// the notifier's state on purpose: the page polls every couple of seconds,
+/// and a state that carried the window would rebuild it on every switch.
+final class GroupHistoryProvider extends $NotifierProvider<GroupHistory, int> {
+  /// The window the proxies page records the groups in. The log is kept out of
+  /// the notifier's state on purpose: the page polls every couple of seconds,
+  /// and a state that carried the window would rebuild it on every switch.
+  GroupHistoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'groupHistoryProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$groupHistoryHash();
+
+  @$internal
+  @override
+  GroupHistory create() => GroupHistory();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(int value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<int>(value),
+    );
+  }
+}
+
+String _$groupHistoryHash() => r'dac8d4db18d38786ffad8f9abdeba9ab6c9fdecb';
+
+/// The window the proxies page records the groups in. The log is kept out of
+/// the notifier's state on purpose: the page polls every couple of seconds,
+/// and a state that carried the window would rebuild it on every switch.
+
+abstract class _$GroupHistory extends $Notifier<int> {
+  int build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<int, int>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<int, int>,
+              int,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(DelayDataSource)
 final delayDataSourceProvider = DelayDataSourceProvider._();
 
