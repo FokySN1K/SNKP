@@ -217,6 +217,27 @@ void main() {
       expect(group.isDataSilent('Proxy A'), isFalse);
     });
 
+    test('counts the pool members no mark covers', () {
+      final group = Group.fromJson({
+        'type': 'url-test-pool',
+        'name': 'Pool',
+        'pool': ['Proxy A', 'Proxy B', 'Proxy C'],
+        'poolSize': 4,
+        'suspicious': ['Proxy B'],
+        'dataSilent': ['Proxy C'],
+      });
+
+      expect(
+        group.aliveInPool,
+        1,
+        reason: 'a suspicious member and a silent one are not alive',
+      );
+      expect(
+        Group.fromJson({'type': 'selector', 'name': 'Manual'}).aliveInPool,
+        0,
+      );
+    });
+
     test('a group with no pin reads as neither pinned nor skipped', () {
       final group = Group.fromJson({'type': 'url-test', 'name': 'Auto'});
 

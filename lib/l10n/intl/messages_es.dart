@@ -1586,7 +1586,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "pluginUsername": MessageLookupByLibrary.simpleMessage(
       "Usuario del complemento",
     ),
-    "poolRotation": MessageLookupByLibrary.simpleMessage("En rotación"),
+    "poolRotation": MessageLookupByLibrary.simpleMessage("En el pool"),
     "port": MessageLookupByLibrary.simpleMessage("Puerto"),
     "portConflictTip": MessageLookupByLibrary.simpleMessage(
       "Introduce un puerto diferente",

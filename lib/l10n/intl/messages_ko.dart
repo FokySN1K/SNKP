@@ -1261,7 +1261,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "pluginPassword": MessageLookupByLibrary.simpleMessage("플러그인 비밀번호"),
     "pluginPath": MessageLookupByLibrary.simpleMessage("플러그인 경로"),
     "pluginUsername": MessageLookupByLibrary.simpleMessage("플러그인 사용자 이름"),
-    "poolRotation": MessageLookupByLibrary.simpleMessage("로테이션 참여"),
+    "poolRotation": MessageLookupByLibrary.simpleMessage("풀 내"),
     "port": MessageLookupByLibrary.simpleMessage("포트"),
     "portConflictTip": MessageLookupByLibrary.simpleMessage("다른 포트를 입력하세요"),
     "portHopping": MessageLookupByLibrary.simpleMessage("포트 호핑"),

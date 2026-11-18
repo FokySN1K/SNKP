@@ -837,11 +837,23 @@ class _SelectedProxyName extends ConsumerWidget {
     );
     final iconSize = globalState.measure.textHeight(AppTextStyle.caption1);
     // A pin the group routes around must not read as the user's own pick: the
-    // header says the route moved and why.
+    // header says the route moved and why. A pin the group still follows, but
+    // on a member a mark took out of play, gets the same warning: the route is
+    // the user's pick, and the card names the risk.
+    final pinnedName = group.fixed ?? '';
     final marks = [
       if (group.pinSkipped)
         Tooltip(
           message: pinSkipReason(context, group),
+          child: GlyphIcon(AppGlyphs.warning, size: iconSize),
+        ),
+      if (group.isPinned &&
+          !group.pinSkipped &&
+          (group.isSuspicious(pinnedName) || group.isDataSilent(pinnedName)))
+        Tooltip(
+          message: group.isDataSilent(pinnedName)
+              ? context.appLocalizations.dataSilentNode
+              : context.appLocalizations.suspiciousNode,
           child: GlyphIcon(AppGlyphs.warning, size: iconSize),
         ),
       if (group.recovering)

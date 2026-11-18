@@ -1282,7 +1282,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "pluginPassword": MessageLookupByLibrary.simpleMessage("プラグインパスワード"),
     "pluginPath": MessageLookupByLibrary.simpleMessage("プラグインパス"),
     "pluginUsername": MessageLookupByLibrary.simpleMessage("プラグインユーザー名"),
-    "poolRotation": MessageLookupByLibrary.simpleMessage("ローテーション内"),
+    "poolRotation": MessageLookupByLibrary.simpleMessage("プール内"),
     "port": MessageLookupByLibrary.simpleMessage("ポート"),
     "portConflictTip": MessageLookupByLibrary.simpleMessage("別のポートを入力してください"),
     "portHopping": MessageLookupByLibrary.simpleMessage("ポートホッピング"),

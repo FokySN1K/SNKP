@@ -1032,7 +1032,7 @@
   "pinSkipped": "L'épinglage n'est pas utilisé",
   "pinSkippedUnavailable": "Le nœud épinglé est indisponible, le groupe en utilise un autre",
   "pinSkippedSuspicious": "Le nœud épinglé est suspect, le groupe en utilise un autre",
-  "poolRotation": "En rotation",
+  "poolRotation": "Dans le pool",
   "nodesSilent": "Nœuds silencieux",
   "dataSilentNode": "Le nœud ne répond plus aux données",
   "groupHistory": "Historique du groupe",

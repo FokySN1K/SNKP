@@ -1032,7 +1032,7 @@
   "pinSkipped": "Закрепление не действует",
   "pinSkippedUnavailable": "Закреплённый узел недоступен, группа использует другой",
   "pinSkippedSuspicious": "Закреплённый узел под подозрением, группа использует другой",
-  "poolRotation": "В ротации",
+  "poolRotation": "В пуле",
   "nodesSilent": "Молчащие узлы",
   "dataSilentNode": "Узел перестал отвечать на данные",
   "groupHistory": "История группы",

@@ -1032,7 +1032,7 @@
   "pinSkipped": "La fijación no está en uso",
   "pinSkippedUnavailable": "El nodo fijado no está disponible, así que el grupo usa otro",
   "pinSkippedSuspicious": "El nodo fijado está bajo sospecha, así que el grupo usa otro",
-  "poolRotation": "En rotación",
+  "poolRotation": "En el pool",
   "nodesSilent": "Nodos silenciosos",
   "dataSilentNode": "El nodo dejó de responder a los datos",
   "groupHistory": "Historial del grupo",

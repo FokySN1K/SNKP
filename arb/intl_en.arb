@@ -1032,7 +1032,7 @@
   "pinSkipped": "Pin not in use",
   "pinSkippedUnavailable": "The pinned node is unavailable, so the group uses another",
   "pinSkippedSuspicious": "The pinned node is under suspicion, so the group uses another",
-  "poolRotation": "In rotation",
+  "poolRotation": "In pool",
   "nodesSilent": "Silent nodes",
   "dataSilentNode": "The node stopped answering data",
   "groupHistory": "Group history",

@@ -1539,7 +1539,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "pluginUsername": MessageLookupByLibrary.simpleMessage(
       "Имя пользователя плагина",
     ),
-    "poolRotation": MessageLookupByLibrary.simpleMessage("В ротации"),
+    "poolRotation": MessageLookupByLibrary.simpleMessage("В пуле"),
     "port": MessageLookupByLibrary.simpleMessage("Порт"),
     "portConflictTip": MessageLookupByLibrary.simpleMessage(
       "Введите другой порт",

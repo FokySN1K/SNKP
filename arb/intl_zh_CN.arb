@@ -1032,7 +1032,7 @@
   "pinSkipped": "固定未生效",
   "pinSkippedUnavailable": "固定的节点不可用，分组改用其他节点",
   "pinSkippedSuspicious": "固定的节点可疑，分组改用其他节点",
-  "poolRotation": "轮换中",
+  "poolRotation": "池内",
   "nodesSilent": "无响应的节点",
   "dataSilentNode": "节点不再响应数据",
   "groupHistory": "分组历史",

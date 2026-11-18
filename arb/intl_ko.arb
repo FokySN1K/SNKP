@@ -1032,7 +1032,7 @@
   "pinSkipped": "고정이 적용되지 않음",
   "pinSkippedUnavailable": "고정된 노드를 사용할 수 없어 그룹이 다른 노드를 사용합니다",
   "pinSkippedSuspicious": "고정된 노드가 의심스러워 그룹이 다른 노드를 사용합니다",
-  "poolRotation": "로테이션 참여",
+  "poolRotation": "풀 내",
   "nodesSilent": "응답 없는 노드",
   "dataSilentNode": "노드가 데이터에 응답하지 않습니다",
   "groupHistory": "그룹 기록",

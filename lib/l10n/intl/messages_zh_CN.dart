@@ -1173,7 +1173,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "pluginPassword": MessageLookupByLibrary.simpleMessage("插件密码"),
     "pluginPath": MessageLookupByLibrary.simpleMessage("插件路径"),
     "pluginUsername": MessageLookupByLibrary.simpleMessage("插件用户名"),
-    "poolRotation": MessageLookupByLibrary.simpleMessage("轮换中"),
+    "poolRotation": MessageLookupByLibrary.simpleMessage("池内"),
     "port": MessageLookupByLibrary.simpleMessage("端口"),
     "portConflictTip": MessageLookupByLibrary.simpleMessage("请输入不同的端口"),
     "portHopping": MessageLookupByLibrary.simpleMessage("端口跳跃"),

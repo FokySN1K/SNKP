@@ -142,7 +142,7 @@ class _ProxyInfoSheet extends ConsumerWidget {
                 if (group.poolSize != null)
                   DetailRow(
                     title: appLocalizations.poolRotation,
-                    value: Text('${group.poolSize} / ${group.all.length}'),
+                    value: Text('${group.aliveInPool} / ${group.poolSize}'),
                   ),
                 if (group.dataSilent.isNotEmpty)
                   DetailRow(

@@ -517,9 +517,9 @@ abstract class Group with _$Group {
     /// How many members a pool keeps in rotation.
     int? poolSize,
 
-    /// The member a user pinned: the group routes through it while a check
-    /// says it can carry traffic, and routes around it while one says it
-    /// cannot.
+    /// The member a user pinned: while one is set the group routes through
+    /// it, even when a check marks it out of play, so the route follows the
+    /// user's pick until it is cleared or the member leaves the list.
     String? fixed,
 
     /// Whether the pin is the member the group routes through now.
@@ -562,6 +562,10 @@ extension GroupExt on Group {
   bool isSuspicious(String proxyName) => suspicious.contains(proxyName);
 
   bool isDataSilent(String proxyName) => dataSilent.contains(proxyName);
+
+  /// The pool members that can carry traffic now: the ones no mark covers.
+  int get aliveInPool =>
+      pool.where((name) => !isSuspicious(name) && !isDataSilent(name)).length;
 
   /// The pin the Core holds: a pick that outlives the route, so a group that
   /// must avoid it still reports it.
