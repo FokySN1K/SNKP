@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.58 (2026-11-18)
+
+**Bug Fixes**
+
+- **proxies** Proxy cards and collapsed groups show the delay the Core already measured (1fdf66d)
+
 ## v1.0.57 (2026-11-18)
 
 **Features**

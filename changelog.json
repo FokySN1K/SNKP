@@ -2,6 +2,24 @@
   "schemaVersion": 2,
   "versions": [
     {
+      "version": "1.0.58",
+      "tag": "v1.0.58",
+      "date": "2026-11-18",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "fix",
+          "entries": [
+            {
+              "id": "1fdf66d",
+              "scope": "proxies",
+              "text": "Proxy cards and collapsed groups show the delay the Core already measured"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.57",
       "tag": "v1.0.57",
       "date": "2026-11-18",
