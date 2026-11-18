@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.61 (2026-11-18)
+
+**Bug Fixes**
+
+- **proxies** Proxy cards keep their red timeouts after a restart. (2f947f2)
+
 ## v1.0.60 (2026-11-18)
 
 **Bug Fixes**

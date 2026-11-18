@@ -2,6 +2,24 @@
   "schemaVersion": 2,
   "versions": [
     {
+      "version": "1.0.61",
+      "tag": "v1.0.61",
+      "date": "2026-11-18",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "fix",
+          "entries": [
+            {
+              "id": "2f947f2",
+              "scope": "proxies",
+              "text": "Proxy cards keep their red timeouts after a restart."
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.60",
       "tag": "v1.0.60",
       "date": "2026-11-18",
