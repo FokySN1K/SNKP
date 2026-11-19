@@ -100,6 +100,12 @@ mixin CoreInterface {
 
   FutureOr<Traffic> getTotalTraffic(bool onlyStatisticsProxy);
 
+  /// The bytes every outbound node carried since the Core started.
+  FutureOr<List<NodeTraffic>> getNodeTraffic();
+
+  /// The Core's reliability score of every node it has judged.
+  FutureOr<List<NodeReputation>> getReputation();
+
   FutureOr<CoreMemoryStats?> getMemoryStats();
 
   FutureOr<void> resetTraffic();
@@ -574,6 +580,36 @@ abstract class CoreHandlerInterface with CoreInterface {
       arguments: onlyStatisticsProxy,
     );
     return data == null ? const Traffic() : Traffic.fromJson(data);
+  }
+
+  @override
+  Future<List<NodeTraffic>> getNodeTraffic() async {
+    final data = await _invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.getNodeTraffic,
+    );
+    final nodes = data?['nodes'];
+    if (nodes is! List) return const [];
+    final result = <NodeTraffic>[];
+    for (final node in nodes) {
+      final parsed = NodeTraffic.tryFromJson(node);
+      if (parsed != null) result.add(parsed);
+    }
+    return result;
+  }
+
+  @override
+  Future<List<NodeReputation>> getReputation() async {
+    final data = await _invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.getReputation,
+    );
+    final nodes = data?['nodes'];
+    if (nodes is! List) return const [];
+    final result = <NodeReputation>[];
+    for (final node in nodes) {
+      final parsed = NodeReputation.tryFromJson(node);
+      if (parsed != null) result.add(parsed);
+    }
+    return result;
   }
 
   @override

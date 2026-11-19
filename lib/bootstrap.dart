@@ -171,6 +171,14 @@ class Bootstrap {
       },
       onlyStatisticsProxy: () =>
           _container.read(appSettingProvider).onlyStatisticsProxy,
+      // The keys the served config carries, which is how a node the Core
+      // names in its counters becomes a node SublinkPro knows.
+      nodeKeys: () async {
+        final profile = _container
+            .read(profilesProvider)
+            .getProfile(_container.read(currentProfileIdProvider));
+        return profile?.nodeKeys() ?? const {};
+      },
       // A link that runs out turns itself off: the tunnel stops and the file
       // it ran is removed once the server says the quota is gone.
       onBlocked: (url) => _container

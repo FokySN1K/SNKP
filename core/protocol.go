@@ -32,6 +32,8 @@ const (
 	changeProxyMethod              CoreMethod = "changeProxy"
 	getTrafficMethod               CoreMethod = "getTraffic"
 	getTotalTrafficMethod          CoreMethod = "getTotalTraffic"
+	getNodeTrafficMethod           CoreMethod = "getNodeTraffic"
+	getReputationMethod            CoreMethod = "getReputation"
 	resetTrafficMethod             CoreMethod = "resetTraffic"
 	asyncTestDelayMethod           CoreMethod = "asyncTestDelay"
 	testGroupDelayMethod           CoreMethod = "testGroupDelay"

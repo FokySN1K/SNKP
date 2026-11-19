@@ -5,6 +5,7 @@ export 'common.dart';
 export 'config.dart';
 export 'core.dart';
 export 'ip_quality.dart';
+export 'node_telemetry.dart';
 export 'profile.dart';
 export 'references.dart';
 export 'release_download.dart';

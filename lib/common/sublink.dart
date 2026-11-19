@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -10,6 +11,7 @@ import 'package:fl_clash/common/dialog.dart';
 import 'package:fl_clash/common/print.dart';
 import 'package:fl_clash/common/system.dart';
 import 'package:fl_clash/core/controller.dart';
+import 'package:fl_clash/models/node_telemetry.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart' show TextSpan;
@@ -24,6 +26,24 @@ const _sessionFlushTimeout = Duration(seconds: 5);
 const _minReportInterval = Duration(seconds: 30);
 const _maxReportInterval = Duration(seconds: 600);
 const _defaultReportInterval = Duration(seconds: 60);
+const _minChannelInterval = Duration(seconds: 30);
+const _maxChannelInterval = Duration(seconds: 3600);
+
+/// A stopped session whose event never reached the server is retried for
+/// this long before it is dropped from the queue.
+const _eventRetention = Duration(days: 3);
+const _maxPendingEvents = 64;
+
+/// The keys of the active config are re-read after this long; a profile
+/// update invalidates them sooner.
+const _keyCacheTtl = Duration(minutes: 15);
+
+const _maxNodeRows = 200;
+const _maxReliabilityRows = 100;
+
+/// A node scoring below this is not trusted, which is what the reliability
+/// channel reports; the value matches the Core's `reputation.Trusted`.
+const _trustedScore = 30;
 
 /// The share server answered with a stub instead of a config: the link is
 /// spent, expired, hidden from this client or its device is not allowed to run
@@ -57,6 +77,12 @@ class SublinkLink {
   Uri get statusUri => origin.replace(path: '$endpointPath/status');
 
   Uri get telemetryUri => origin.replace(path: '$endpointPath/telemetry');
+
+  Uri get sessionsUri => origin.replace(path: '$endpointPath/sessions');
+
+  Uri get nodesUri => origin.replace(path: '$endpointPath/nodes');
+
+  Uri get reliabilityUri => origin.replace(path: '$endpointPath/reliability');
 
   String get label => origin.host;
 
@@ -113,6 +139,18 @@ class SublinkStatus {
   final String? noticeTitle;
   final String? noticeContent;
   final int reportIntervalSeconds;
+
+  /// Seconds between session events; zero when the server does not take
+  /// them from this link.
+  final int sessionsIntervalSeconds;
+
+  /// Seconds between per-node traffic reports; zero when the server does
+  /// not take them from this link.
+  final int nodesIntervalSeconds;
+
+  /// Seconds between reliability snapshots; zero when the server does not
+  /// take them from this link.
+  final int reliabilityIntervalSeconds;
   final bool expired;
   final DateTime fetchedAt;
 
@@ -134,6 +172,9 @@ class SublinkStatus {
     this.noticeTitle,
     this.noticeContent,
     this.reportIntervalSeconds = 60,
+    this.sessionsIntervalSeconds = 0,
+    this.nodesIntervalSeconds = 0,
+    this.reliabilityIntervalSeconds = 0,
     this.expired = false,
     required this.fetchedAt,
   });
@@ -155,6 +196,12 @@ class SublinkStatus {
       _maxReportInterval.inSeconds,
     ),
   );
+
+  bool get sessionsEnabled => sessionsIntervalSeconds > 0;
+
+  bool get nodesEnabled => nodesIntervalSeconds > 0;
+
+  bool get reliabilityEnabled => reliabilityIntervalSeconds > 0;
 
   SublinkStatus copyWith({
     int? limitBytes,
@@ -186,6 +233,9 @@ class SublinkStatus {
       noticeTitle: noticeTitle,
       noticeContent: noticeContent,
       reportIntervalSeconds: reportIntervalSeconds,
+      sessionsIntervalSeconds: sessionsIntervalSeconds,
+      nodesIntervalSeconds: nodesIntervalSeconds,
+      reliabilityIntervalSeconds: reliabilityIntervalSeconds,
       expired: expired ?? this.expired,
       fetchedAt: DateTime.now(),
     );
@@ -193,6 +243,24 @@ class SublinkStatus {
 
   static int _remainingOf(int limit, int reported) =>
       limit <= 0 ? 0 : max(0, limit - reported);
+
+  /// A channel the status says is on: the server may name the interval
+  /// itself, send a flag with the shared interval behind it, or send zero
+  /// for a channel it does not take from this link.
+  static int _channelSeconds(
+    Object? value,
+    bool telemetryEnabled,
+    int fallback,
+  ) {
+    if (!telemetryEnabled) return 0;
+    if (value is bool) return value ? fallback : 0;
+    final seconds = SublinkManager._int(value);
+    if (seconds <= 0) return 0;
+    return seconds.clamp(
+      _minChannelInterval.inSeconds,
+      _maxChannelInterval.inSeconds,
+    );
+  }
 
   static SublinkStatus fromJson(String url, Map<String, Object?> json) {
     final share = SublinkManager._map(json['share']);
@@ -213,6 +281,12 @@ class SublinkStatus {
     );
     final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     final explicitRemaining = share['remaining_bytes'];
+    final telemetryEnabled = telemetry['enabled'] == true;
+    final baseInterval = SublinkManager._int(
+      telemetry['report_interval_seconds'] ??
+          telemetry['report_interval_sessions'] ??
+          _defaultReportInterval.inSeconds,
+    );
     return SublinkStatus(
       url: url,
       valid: json['valid'] != false,
@@ -236,10 +310,21 @@ class SublinkStatus {
       noticeContent: SublinkManager._stringOrNull(
         notice['content'] ?? notice['body'],
       ),
-      reportIntervalSeconds: SublinkManager._int(
-        telemetry['report_interval_seconds'] ??
-            telemetry['report_interval_sessions'] ??
-            _defaultReportInterval.inSeconds,
+      reportIntervalSeconds: baseInterval,
+      sessionsIntervalSeconds: _channelSeconds(
+        telemetry['sessions'],
+        telemetryEnabled,
+        baseInterval,
+      ),
+      nodesIntervalSeconds: _channelSeconds(
+        telemetry['nodes'],
+        telemetryEnabled,
+        baseInterval,
+      ),
+      reliabilityIntervalSeconds: _channelSeconds(
+        telemetry['reliability'],
+        telemetryEnabled,
+        baseInterval,
       ),
       expired: expireAt > 0 && expireAt <= now,
       fetchedAt: DateTime.now(),
@@ -273,6 +358,15 @@ class _SublinkSession {
   final int baseTotal;
 
   Timer? timer;
+  Timer? nodesTimer;
+  Timer? reliabilityTimer;
+  int sessionsInterval = 0;
+  int nodesInterval = 0;
+  int nodeSeq = 0;
+  int reliabilitySeq = 0;
+  bool sendingNodes = false;
+  final Map<String, ({int up, int down})> nodeTotals = {};
+  final Map<String, ({int up, int down})> nodePending = {};
   int lastUp;
   int lastDown;
   int total;
@@ -290,6 +384,55 @@ class _SublinkSession {
        lastDown = 0,
        total = baseTotal;
 }
+
+/// A session event that has to outlive the session it belongs to: a stop the
+/// network refused is retried until the server takes it, and the queue is
+/// persisted so an app restart does not lose it.
+class _SublinkEvent {
+  const _SublinkEvent({
+    required this.url,
+    required this.event,
+    required this.sessionId,
+    required this.total,
+    required this.createdAt,
+  });
+
+  final String url;
+  final String event;
+  final String sessionId;
+  final int total;
+  final DateTime createdAt;
+
+  Map<String, Object?> toJson() => {
+    'url': url,
+    'event': event,
+    'session_id': sessionId,
+    'reported_total_bytes': total,
+    'created_at': createdAt.toUtc().toIso8601String(),
+  };
+
+  static _SublinkEvent? fromJson(Object? value) {
+    if (value is! Map) return null;
+    final url = value['url'];
+    final event = value['event'];
+    final sessionId = value['session_id'];
+    if (url is! String || url.isEmpty) return null;
+    if (event is! String || event.isEmpty) return null;
+    if (sessionId is! String || sessionId.isEmpty) return null;
+    return _SublinkEvent(
+      url: url,
+      event: event,
+      sessionId: sessionId,
+      total: SublinkManager._int(value['reported_total_bytes']),
+      createdAt:
+          DateTime.tryParse('${value['created_at'] ?? ''}') ??
+          DateTime.now(),
+    );
+  }
+}
+
+const _sessionStartEvent = 'session_start';
+const _sessionStopEvent = 'session_stop';
 
 /// Talks to SublinkPro on behalf of the active profile.
 ///
@@ -325,16 +468,32 @@ class SublinkManager {
   /// during a download is visible to the very next request.
   final Map<String, String> _secrets = {};
 
+  /// The per-channel intervals the config download announced, which the
+  /// status endpoint may not repeat.
+  final Map<String, ({int sessions, int nodes, int reliability})> _intervals =
+      {};
+
+  /// `node name -> sublinkpro_unique_key` of the active config.
+  Future<Map<String, String>> Function()? _nodeKeys;
+  Map<String, String>? _keysByNameCache;
+  DateTime? _keysByNameAt;
+
+  final List<_SublinkEvent> _events = [];
+  bool _eventsLoaded = false;
+  Future<void>? _flushingFuture;
+
   void attach({
     required CoreController core,
     required String? Function() activeUrl,
     required bool Function() onlyStatisticsProxy,
     Future<void> Function(String url)? onBlocked,
+    Future<Map<String, String>> Function()? nodeKeys,
   }) {
     _core = core;
     _activeUrl = activeUrl;
     _onlyStatisticsProxy = onlyStatisticsProxy;
     _onBlocked = onBlocked;
+    _nodeKeys = nodeKeys;
   }
 
   Future<SharedPreferences> get _store async =>
@@ -514,11 +673,25 @@ class SublinkManager {
     if (session == null) return;
     _session = null;
     session.timer?.cancel();
+    session.nodesTimer?.cancel();
+    session.reliabilityTimer?.cancel();
     try {
       await _sample(session).timeout(_sessionFlushTimeout);
       await _send(session).timeout(_sessionFlushTimeout);
+      await _tickNodes(session).timeout(_sessionFlushTimeout);
     } catch (error) {
       commonPrint.log('sublink flush error: $error', logLevel: LogLevel.warning);
+    }
+    if (session.sessionsInterval > 0) {
+      _enqueueEvent(session, _sessionStopEvent);
+      try {
+        await _flushEvents().timeout(_sessionFlushTimeout);
+      } catch (error) {
+        commonPrint.log(
+          'sublink session flush error: $error',
+          logLevel: LogLevel.warning,
+        );
+      }
     }
     await _persist(session);
     runtime.value = SublinkRuntime.idle;
@@ -543,9 +716,46 @@ class SublinkManager {
       session.lastUp = traffic.up;
       session.lastDown = traffic.down;
     }
+    final intervals = _intervals[link.token];
+    session.sessionsInterval = _preferredInterval(
+      status?.sessionsIntervalSeconds ?? 0,
+      intervals?.sessions,
+    );
+    session.nodesInterval = _preferredInterval(
+      status?.nodesIntervalSeconds ?? 0,
+      intervals?.nodes,
+    );
+    final reliabilityInterval = _preferredInterval(
+      status?.reliabilityIntervalSeconds ?? 0,
+      intervals?.reliability,
+    );
     _session = session;
+    await _loadEvents();
     final interval = status?.reportInterval ?? _defaultReportInterval;
     session.timer = Timer.periodic(interval, (_) => unawaited(_tick(session)));
+    if (session.nodesInterval > 0) {
+      session.nodesTimer = Timer.periodic(
+        Duration(seconds: session.nodesInterval),
+        (_) {
+          if (identical(_session, session)) unawaited(_tickNodes(session));
+        },
+      );
+      await _sampleNodes(session);
+    }
+    if (reliabilityInterval > 0) {
+      session.reliabilityTimer = Timer.periodic(
+        Duration(seconds: reliabilityInterval),
+        (_) {
+          if (identical(_session, session)) {
+            unawaited(_tickReliability(session));
+          }
+        },
+      );
+    }
+    if (session.sessionsInterval > 0) {
+      _enqueueEvent(session, _sessionStartEvent);
+      unawaited(_flushEvents());
+    }
     runtime.value = SublinkRuntime(
       url: link.url,
       active: true,
@@ -555,6 +765,9 @@ class SublinkManager {
 
   Future<void> _tick(_SublinkSession session) async {
     if (!identical(_session, session)) return;
+    // A start the network refused goes before the report that names its
+    // session, so the server sees the session before its bytes.
+    await _flushEvents();
     await _sample(session);
     await _send(session);
     await _persist(session);
@@ -623,6 +836,7 @@ class SublinkManager {
           'down': session.pendingDown,
           'report_id': '$id:${session.id}:${session.seq}',
           'reported_total_bytes': session.total,
+          'session_id': session.id,
           'install_id': id,
         },
         options: Options(
@@ -693,6 +907,10 @@ class SublinkManager {
       noticeTitle: current?.noticeTitle,
       noticeContent: current?.noticeContent,
       reportIntervalSeconds: current?.reportIntervalSeconds ?? 60,
+      sessionsIntervalSeconds: current?.sessionsIntervalSeconds ?? 0,
+      nodesIntervalSeconds: current?.nodesIntervalSeconds ?? 0,
+      reliabilityIntervalSeconds:
+          current?.reliabilityIntervalSeconds ?? 0,
       expired: current?.expired ?? false,
       fetchedAt: DateTime.now(),
     );
@@ -757,6 +975,26 @@ class SublinkManager {
   void captureDownload(String url, Headers headers) {
     final link = parseSublinkLink(url);
     if (link == null) return;
+    final announced = (
+      sessions: _headerSeconds(headers, 'x-sublink-report-interval-sessions'),
+      nodes: _headerSeconds(headers, 'x-sublink-report-interval-nodes'),
+      reliability: _headerSeconds(
+        headers,
+        'x-sublink-report-interval-reliability',
+      ),
+    );
+    if (announced.sessions != null ||
+        announced.nodes != null ||
+        announced.reliability != null) {
+      _intervals[link.token] = (
+        sessions: announced.sessions ?? 0,
+        nodes: announced.nodes ?? 0,
+        reliability: announced.reliability ?? 0,
+      );
+    }
+    // The config that carries the keys is being replaced.
+    _keysByNameCache = null;
+    _keysByNameAt = null;
     final secret = headers.value('x-sublink-device-secret')?.trim();
     if (secret != null && secret.isNotEmpty) {
       _secrets[link.token] = secret;
@@ -779,6 +1017,29 @@ class SublinkManager {
     unawaited(refreshStatus(link.url));
   }
 
+  static int? _headerSeconds(Headers headers, String name) {
+    final value = headers.value(name)?.trim();
+    if (value == null || value.isEmpty) return null;
+    final seconds = int.tryParse(value);
+    if (seconds == null || seconds <= 0) return null;
+    return seconds.clamp(
+      _minChannelInterval.inSeconds,
+      _maxChannelInterval.inSeconds,
+    );
+  }
+
+  /// The interval a channel runs at: the status wins, the config download
+  /// fills in what the status did not say, zero switches the channel off.
+  static int _preferredInterval(int fromStatus, int? fromHeader) {
+    if (fromStatus > 0) return fromStatus;
+    final header = fromHeader ?? 0;
+    if (header <= 0) return 0;
+    return header.clamp(
+      _minChannelInterval.inSeconds,
+      _maxChannelInterval.inSeconds,
+    );
+  }
+
   Future<void> _saveSecret(SublinkLink link, String secret) async {
     final store = await _store;
     await store.setString(_key(link.token, 'secret'), secret);
@@ -789,9 +1050,20 @@ class SublinkManager {
     if (link == null) return;
     _secrets.remove(link.token);
     final store = await _store;
-    for (final name in ['secret', 'consent', 'total', 'last_up', 'last_down']) {
+    for (final name in [
+      'secret',
+      'consent',
+      'total',
+      'last_up',
+      'last_down',
+      'problems',
+    ]) {
       await store.remove(_key(link.token, name));
     }
+    _events.removeWhere((event) => event.url == link.url);
+    _intervals.remove(link.token);
+    _keysByNameCache = null;
+    _keysByNameAt = null;
     final next = {...statuses.value}..remove(link.token);
     statuses.value = next;
   }
@@ -802,11 +1074,420 @@ class SublinkManager {
     unawaited(onBlocked(link.url));
   }
 
+
+  // --- sessions, nodes and reliability ------------------------------------
+
+  void _enqueueEvent(_SublinkSession session, String event) {
+    _events.add(
+      _SublinkEvent(
+        url: session.link.url,
+        event: event,
+        sessionId: session.id,
+        total: session.total,
+        createdAt: DateTime.now(),
+      ),
+    );
+    if (_events.length > _maxPendingEvents) {
+      _events.removeRange(0, _events.length - _maxPendingEvents);
+    }
+    unawaited(_persistEvents());
+  }
+
+  Future<void> _loadEvents() async {
+    if (_eventsLoaded) return;
+    _eventsLoaded = true;
+    final store = await _store;
+    final raw = store.getString('sublink.events');
+    if (raw == null || raw.isEmpty) return;
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! List) return;
+      final now = DateTime.now();
+      for (final item in decoded) {
+        final event = _SublinkEvent.fromJson(item);
+        if (event == null) continue;
+        if (now.difference(event.createdAt) > _eventRetention) continue;
+        _events.add(event);
+      }
+    } catch (error) {
+      commonPrint.log('sublink event load error: $error', logLevel: LogLevel.warning);
+    }
+  }
+
+  Future<void> _persistEvents() async {
+    final store = await _store;
+    await store.setString(
+      'sublink.events',
+      jsonEncode([for (final event in _events) event.toJson()]),
+    );
+  }
+
+  /// Delivers the queued session events in order; a refused event keeps the
+  /// queue, and the next tick or the next start retries it with the same
+  /// session id.
+  Future<void> _flushEvents() {
+    final running = _flushingFuture;
+    if (running != null) return running;
+    if (_events.isEmpty) return Future.value();
+    final future = _flushEventsNow().whenComplete(() {
+      _flushingFuture = null;
+    });
+    _flushingFuture = future;
+    return future;
+  }
+
+  Future<void> _flushEventsNow() async {
+    try {
+      final id = await installId;
+      while (_events.isNotEmpty) {
+        final event = _events.first;
+        final link = parseSublinkLink(event.url);
+        if (link == null) {
+          _events.removeAt(0);
+          continue;
+        }
+        final payload = event.toJson()..remove('url');
+        final response = await _dio.postUri<Object?>(
+          link.sessionsUri.replace(queryParameters: {'token': link.token}),
+          data: {...payload, 'install_id': id},
+          options: Options(
+            headers: await _identityHeaders(link),
+            receiveTimeout: _telemetryTimeout,
+            sendTimeout: _telemetryTimeout,
+            validateStatus: (_) => true,
+          ),
+        );
+        final code = response.statusCode ?? 0;
+        if (code < 200 || code >= 300) break;
+        _events.removeAt(0);
+      }
+    } catch (error) {
+      commonPrint.log('sublink session error: $error', logLevel: LogLevel.warning);
+    } finally {
+      unawaited(_persistEvents());
+    }
+  }
+
+  Future<List<NodeTraffic>?> _readNodeTraffic() async {
+    final debug = debugNodeTraffic;
+    if (debug != null) return debug();
+    final core = _core;
+    if (core == null) return null;
+    try {
+      return await core.getNodeTraffic();
+    } catch (error) {
+      commonPrint.log('sublink node sample error: $error', logLevel: LogLevel.warning);
+      return null;
+    }
+  }
+
+  Future<List<NodeReputation>?> _readReputation() async {
+    final debug = debugReputation;
+    if (debug != null) return debug();
+    final core = _core;
+    if (core == null) return null;
+    try {
+      return await core.getReputation();
+    } catch (error) {
+      commonPrint.log('sublink reputation error: $error', logLevel: LogLevel.warning);
+      return null;
+    }
+  }
+
+  /// The nodes any group holds silent right now, which is the data-plane
+  /// observer's mark on top of the reputation score.
+  Future<Set<String>> _readSilent() async {
+    final debug = debugSilentNodes;
+    if (debug != null) return debug();
+    final core = _core;
+    if (core == null) return const {};
+    try {
+      final data = await core.getProxiesData();
+      final silent = <String>{};
+      for (final value in data.proxies.values) {
+        if (value is! Map) continue;
+        final names = value['dataSilent'];
+        if (names is! List) continue;
+        for (final name in names) {
+          if (name is String && name.isNotEmpty) silent.add(name);
+        }
+      }
+      return silent;
+    } catch (error) {
+      commonPrint.log('sublink silent read error: $error', logLevel: LogLevel.warning);
+      return const {};
+    }
+  }
+
+  /// `node name -> key` of the config that is running, cached so a report does
+  /// not parse the profile every time.
+  Future<Map<String, String>> _keysByName() async {
+    final cached = _keysByNameCache;
+    final at = _keysByNameAt;
+    if (cached != null &&
+        at != null &&
+        DateTime.now().difference(at) < _keyCacheTtl) {
+      return cached;
+    }
+    final read = debugNodeKeys ?? _nodeKeys;
+    if (read == null) return cached ?? const {};
+    try {
+      final byKey = await read();
+      final byName = <String, String>{};
+      for (final entry in byKey.entries) {
+        if (entry.key.isEmpty || entry.value.isEmpty) continue;
+        byName[entry.value] = entry.key;
+      }
+      _keysByNameCache = byName;
+      _keysByNameAt = DateTime.now();
+      return byName;
+    } catch (error) {
+      commonPrint.log('sublink key read error: $error', logLevel: LogLevel.warning);
+      return cached ?? const {};
+    }
+  }
+
+  /// Turns two Core readings into the bytes each node moved between them. A
+  /// node seen for the first time only sets the baseline: the Core counts from
+  /// its own start, not from this session.
+  Future<void> _sampleNodes(_SublinkSession session) async {
+    final nodes = await _readNodeTraffic();
+    if (nodes == null) return;
+    final keys = await _keysByName();
+    for (final node in nodes) {
+      final last = session.nodeTotals[node.name];
+      session.nodeTotals[node.name] = (up: node.up, down: node.down);
+      if (last == null) continue;
+      var deltaUp = node.up - last.up;
+      var deltaDown = node.down - last.down;
+      if (deltaUp < 0 || deltaDown < 0) {
+        // The Core restarted and its counters with it.
+        deltaUp = max(0, node.up);
+        deltaDown = max(0, node.down);
+      }
+      if (deltaUp + deltaDown <= 0) continue;
+      final key = keys[node.name];
+      if (key == null || key.isEmpty) continue;
+      final pending = session.nodePending[key] ?? (up: 0, down: 0);
+      session.nodePending[key] = (
+        up: pending.up + deltaUp,
+        down: pending.down + deltaDown,
+      );
+    }
+  }
+
+  Future<void> _tickNodes(_SublinkSession session) async {
+    if (session.nodesInterval <= 0) return;
+    await _sampleNodes(session);
+    await _sendNodes(session);
+  }
+
+  Future<void> _sendNodes(_SublinkSession session) async {
+    if (session.nodePending.isEmpty || session.sendingNodes) return;
+    session.sendingNodes = true;
+    try {
+      final id = await installId;
+      final rows = session.nodePending.entries.toList()
+        ..sort((a, b) {
+          final totalA = a.value.up + a.value.down;
+          final totalB = b.value.up + b.value.down;
+          if (totalA != totalB) return totalB.compareTo(totalA);
+          return a.key.compareTo(b.key);
+        });
+      final sent = rows.take(_maxNodeRows).toList();
+      final response = await _dio.postUri<Object?>(
+        session.link.nodesUri.replace(
+          queryParameters: {'token': session.link.token},
+        ),
+        data: {
+          'report_id': '$id:${session.id}:n${session.nodeSeq}',
+          'session_id': session.id,
+          'install_id': id,
+          'window_seconds': session.nodesInterval,
+          'nodes': [
+            for (final row in sent)
+              {'key': row.key, 'up': row.value.up, 'down': row.value.down},
+          ],
+        },
+        options: Options(
+          headers: await _identityHeaders(session.link),
+          receiveTimeout: _telemetryTimeout,
+          sendTimeout: _telemetryTimeout,
+          validateStatus: (_) => true,
+        ),
+      );
+      final code = response.statusCode ?? 0;
+      if (code < 200 || code >= 300) {
+        commonPrint.log(
+          'sublink nodes rejected: $code',
+          logLevel: LogLevel.warning,
+        );
+        return;
+      }
+      for (final row in sent) {
+        session.nodePending.remove(row.key);
+      }
+      session.nodeSeq += 1;
+    } catch (error) {
+      commonPrint.log('sublink nodes error: $error', logLevel: LogLevel.warning);
+    } finally {
+      session.sendingNodes = false;
+    }
+  }
+
+  Future<Map<String, String>> _loadProblems(String token) async {
+    final store = await _store;
+    final raw = store.getString(_key(token, 'problems'));
+    if (raw == null || raw.isEmpty) return <String, String>{};
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! Map) return <String, String>{};
+      return {
+        for (final entry in decoded.entries)
+          if (entry.key is String && entry.value is String)
+            entry.key as String: entry.value as String,
+      };
+    } catch (_) {
+      return <String, String>{};
+    }
+  }
+
+  Future<void> _saveProblems(String token, Map<String, String> problems) async {
+    final store = await _store;
+    await store.setString(_key(token, 'problems'), jsonEncode(problems));
+  }
+
+  /// Reports the nodes this device does not trust and, once, every node that
+  /// was on the previous report and has recovered since.
+  Future<void> _tickReliability(_SublinkSession session) async {
+    final snapshot = await _readReputation();
+    if (snapshot == null) return;
+    final silent = await _readSilent();
+    final keys = await _keysByName();
+    final byName = {for (final entry in snapshot) entry.name: entry};
+    final problems = <String, Map<String, Object?>>{};
+    final names = <String, String>{};
+    for (final entry in snapshot) {
+      final key = keys[entry.name];
+      if (key == null || key.isEmpty) continue;
+      final isSilent = silent.contains(entry.name);
+      final isProblem =
+          entry.score < _trustedScore || entry.fails > 0 || isSilent;
+      if (!isProblem) continue;
+      problems[key] = {
+        'key': key,
+        'score': entry.score,
+        'fails': entry.fails,
+        'streak': entry.streak,
+        'silent': isSilent,
+        'last_seen': entry.lastSeen?.toUtc().toIso8601String(),
+      };
+      names[key] = entry.name;
+    }
+    for (final name in silent) {
+      final key = keys[name];
+      if (key == null || key.isEmpty || problems.containsKey(key)) continue;
+      problems[key] = {
+        'key': key,
+        'score': 0,
+        'fails': 0,
+        'streak': 0,
+        'silent': true,
+        'last_seen': null,
+      };
+      names[key] = name;
+    }
+    final previous = await _loadProblems(session.link.token);
+    final recovered = <Map<String, Object?>>[];
+    for (final entry in previous.entries) {
+      if (problems.containsKey(entry.key)) continue;
+      final current = byName[entry.value];
+      recovered.add({
+        'key': entry.key,
+        'score': current?.score ?? _trustedScore,
+        'fails': current?.fails ?? 0,
+        'streak': current?.streak ?? 0,
+        'silent': false,
+        'last_seen': current?.lastSeen?.toUtc().toIso8601String(),
+        'recovered': true,
+      });
+    }
+    if (problems.isEmpty && recovered.isEmpty) {
+      if (previous.isNotEmpty) {
+        await _saveProblems(session.link.token, const {});
+      }
+      return;
+    }
+    final ranked = problems.values.toList()
+      ..sort((a, b) {
+        final scoreA = a['score'] as int? ?? 0;
+        final scoreB = b['score'] as int? ?? 0;
+        if (scoreA != scoreB) return scoreA.compareTo(scoreB);
+        return ('${a['key']}').compareTo('${b['key']}');
+      });
+    final rows = [
+      ...ranked.take(_maxReliabilityRows),
+      ...recovered,
+    ];
+    try {
+      final id = await installId;
+      final response = await _dio.postUri<Object?>(
+        session.link.reliabilityUri.replace(
+          queryParameters: {'token': session.link.token},
+        ),
+        data: {
+          'report_id': '$id:${session.id}:r${session.reliabilitySeq}',
+          'install_id': id,
+          'reported_at': DateTime.now().toUtc().toIso8601String(),
+          'nodes': rows,
+        },
+        options: Options(
+          headers: await _identityHeaders(session.link),
+          receiveTimeout: _telemetryTimeout,
+          sendTimeout: _telemetryTimeout,
+          validateStatus: (_) => true,
+        ),
+      );
+      final code = response.statusCode ?? 0;
+      if (code < 200 || code >= 300) {
+        commonPrint.log(
+          'sublink reliability rejected: $code',
+          logLevel: LogLevel.warning,
+        );
+        return;
+      }
+      session.reliabilitySeq += 1;
+      await _saveProblems(session.link.token, names);
+    } catch (error) {
+      commonPrint.log(
+        'sublink reliability error: $error',
+        logLevel: LogLevel.warning,
+      );
+    }
+  }
+
   // --- test seams ---------------------------------------------------------
 
   /// The traffic a test feeds the sampler instead of the Core's counters.
   @visibleForTesting
   ({int up, int down}) Function()? debugTraffic;
+
+  @visibleForTesting
+  List<NodeTraffic> Function()? debugNodeTraffic;
+
+  @visibleForTesting
+  List<NodeReputation> Function()? debugReputation;
+
+  @visibleForTesting
+  Set<String> Function()? debugSilentNodes;
+
+  @visibleForTesting
+  Future<Map<String, String>> Function()? debugNodeKeys;
+
+  @visibleForTesting
+  List<Map<String, Object?>> get debugEvents => [
+    for (final event in _events) event.toJson(),
+  ];
 
   @visibleForTesting
   Dio get debugDio => _dio;
@@ -838,10 +1519,34 @@ class SublinkManager {
   }
 
   @visibleForTesting
+  Future<void> debugStartWithStatus(String url, SublinkStatus status) async {
+    final link = parseSublinkLink(url);
+    if (link == null) return;
+    await _startSession(link, status);
+  }
+
+  @visibleForTesting
   Future<void> debugTick() async {
     final session = _session;
     if (session == null) return;
     await _tick(session);
+  }
+
+  @visibleForTesting
+  Future<void> debugFlushEvents() => _flushEvents();
+
+  @visibleForTesting
+  Future<void> debugTickNodes() async {
+    final session = _session;
+    if (session == null) return;
+    await _tickNodes(session);
+  }
+
+  @visibleForTesting
+  Future<void> debugTickReliability() async {
+    final session = _session;
+    if (session == null) return;
+    await _tickReliability(session);
   }
 
   @visibleForTesting
@@ -854,6 +1559,17 @@ class SublinkManager {
     _onBlocked = null;
     _activeUrl = null;
     debugTraffic = null;
+    debugNodeTraffic = null;
+    debugReputation = null;
+    debugSilentNodes = null;
+    debugNodeKeys = null;
+    _nodeKeys = null;
+    _keysByNameCache = null;
+    _keysByNameAt = null;
+    _intervals.clear();
+    _events.clear();
+    _eventsLoaded = false;
+    _flushingFuture = null;
     statuses.value = {};
     runtime.value = SublinkRuntime.idle;
   }
