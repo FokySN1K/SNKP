@@ -23,6 +23,11 @@ const _allowed = {
   // `App` is the process-wide Android plugin; the notifier relays keyboard
   // state from the platform channel for the whole run.
   'lib/plugins/app.dart#floatingKeyboard',
+  // `SublinkManager` is the app-lifetime singleton behind share links; the
+  // dashboard reads the link statuses and the telemetry state for the whole
+  // run, so neither notifier has an owner that could dispose it.
+  'lib/common/sublink.dart#statuses',
+  'lib/common/sublink.dart#runtime',
 };
 
 final _declaration = RegExp(

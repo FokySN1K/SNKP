@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
@@ -155,6 +157,85 @@ void main() {
       );
 
       expect(profiles.optimizeLabel(newProfile).label, 'Work(2)');
+    });
+  });
+
+  group('Sublink node keys', () {
+    Map<String, String> keysOf(String yaml) => nodeKeysOf(utf8.encode(yaml));
+
+    const before = '''
+proxies:
+  - {name: Tokyo, type: ss, sublinkpro_unique_key: key-a}
+  - {name: Osaka, type: trojan, sublink_unique_key_node: key-b}
+  - {name: Dropped, type: ss, sublinkpro_unique_key: key-c}
+  - {name: Plain, type: direct}
+  - {name: '', type: ss, sublinkpro_unique_key: key-d}
+  - {name: EmptyKey, type: ss, sublinkpro_unique_key: ''}
+''';
+    const after = '''
+proxies:
+  - {name: Tokyo-01, type: ss, sublinkpro_unique_key: key-a}
+  - {name: Osaka, type: trojan, sublink_unique_key_node: key-b}
+  - {name: Added, type: ss, sublinkpro_unique_key: key-e}
+''';
+
+    test('reads both key spellings and skips nameless or keyless nodes', () {
+      expect(keysOf(before), {
+        'key-a': 'Tokyo',
+        'key-b': 'Osaka',
+        'key-c': 'Dropped',
+      });
+    });
+
+    test('reads no keys from a config that carries none', () {
+      expect(keysOf('rules:\n  - MATCH,DIRECT\n'), isEmpty);
+      expect(keysOf('proxies:\n  - {name: Plain, type: ss}\n'), isEmpty);
+      expect(keysOf('proxies: not-a-list\n'), isEmpty);
+    });
+
+    test('renames only the nodes whose name changed under the same key', () {
+      expect(nodeRenames(keysOf(before), keysOf(after)), {
+        'Tokyo': 'Tokyo-01',
+      });
+    });
+
+    test('points the selection at the renamed nodes and keeps the rest', () {
+      expect(
+        renameSelection({
+          'Proxy': 'Tokyo',
+          'Auto': 'Osaka',
+          'Direct': 'DIRECT',
+        }, {
+          'Tokyo': 'Tokyo-01',
+        }),
+        {'Proxy': 'Tokyo-01', 'Auto': 'Osaka', 'Direct': 'DIRECT'},
+      );
+      expect(renameSelection({}, {'Tokyo': 'Tokyo-01'}), isEmpty);
+      expect(renameSelection({'Proxy': 'Tokyo'}, {}), {'Proxy': 'Tokyo'});
+    });
+
+    test('moves measured delays to the names the nodes carry now', () {
+      final delays = {
+        'https://www.gstatic.com/generate_204': {'Tokyo': 120, 'Osaka': 50},
+        'https://cp.cloudflare.com': {'Tokyo': 80},
+      };
+      expect(renameDelayMap(delays, {'Tokyo': 'Tokyo-01'}), {
+        'https://www.gstatic.com/generate_204': {'Tokyo-01': 120, 'Osaka': 50},
+        'https://cp.cloudflare.com': {'Tokyo-01': 80},
+      });
+      expect(
+        renameDelayMap({
+          'u': {'Tokyo': 120, 'Tokyo-01': 200},
+        }, {'Tokyo': 'Tokyo-01'}),
+        {
+          'u': {'Tokyo-01': 200},
+        },
+      );
+      expect(
+        renameDelayMap({'u': {'Osaka': 50}}, {'Tokyo': 'Tokyo-01'}),
+        isNull,
+      );
+      expect(renameDelayMap({}, {'Tokyo': 'Tokyo-01'}), isNull);
     });
   });
 }

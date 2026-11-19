@@ -7,7 +7,6 @@ import 'package:dio/dio.dart';
 import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/common/dialog.dart';
-import 'package:fl_clash/common/exception.dart';
 import 'package:fl_clash/common/print.dart';
 import 'package:fl_clash/common/system.dart';
 import 'package:fl_clash/core/controller.dart';
@@ -25,6 +24,20 @@ const _sessionFlushTimeout = Duration(seconds: 5);
 const _minReportInterval = Duration(seconds: 30);
 const _maxReportInterval = Duration(seconds: 600);
 const _defaultReportInterval = Duration(seconds: 60);
+
+/// The share server answered with a stub instead of a config: the link is
+/// spent, expired, hidden from this client or its device is not allowed to run
+/// it. It is an error, not a config, so nothing installs it as a profile, and
+/// the file the link used to serve no longer has a reason to stay.
+final class SublinkStubException implements Exception {
+  final String reason;
+  final String message;
+
+  const SublinkStubException(this.reason, this.message);
+
+  @override
+  String toString() => message;
+}
 
 /// A `…/c/?token=…` link and the sibling endpoints derived from it.
 @immutable
@@ -297,6 +310,7 @@ class SublinkManager {
   CoreController? _core;
   String? Function()? _activeUrl;
   bool Function()? _onlyStatisticsProxy;
+  Future<void> Function(String url)? _onBlocked;
 
   final Dio _dio = Dio(
     BaseOptions(connectTimeout: const Duration(seconds: 10)),
@@ -315,10 +329,12 @@ class SublinkManager {
     required CoreController core,
     required String? Function() activeUrl,
     required bool Function() onlyStatisticsProxy,
+    Future<void> Function(String url)? onBlocked,
   }) {
     _core = core;
     _activeUrl = activeUrl;
     _onlyStatisticsProxy = onlyStatisticsProxy;
+    _onBlocked = onBlocked;
   }
 
   Future<SharedPreferences> get _store async =>
@@ -443,6 +459,14 @@ class SublinkManager {
 
   // --- telemetry ----------------------------------------------------------
 
+  /// Whether a start has to wait for the link before the tunnel is built:
+  /// `prepareStart` weighs what the link's status, consent and session say.
+  bool get startNeedsLink =>
+      _session != null || parseSublinkLink(_activeUrl?.call()) != null;
+
+  /// Whether a stop has a session whose traffic still needs a flush.
+  bool get hasSession => _session != null;
+
   Future<bool> prepareStart() async {
     final url = _activeUrl?.call();
     final link = parseSublinkLink(url);
@@ -453,14 +477,17 @@ class SublinkManager {
     final status = await refreshStatus(link.url);
     if (status != null) {
       if (!status.valid) {
+        _notifyBlocked(link);
         await _alert(_reasonMessage(status.reason));
         return false;
       }
       if (status.expired) {
+        _notifyBlocked(link);
         await _alert(currentAppLocalizations.sublinkExpired);
         return false;
       }
       if (status.quotaExhausted) {
+        _notifyBlocked(link);
         await _alert(currentAppLocalizations.sublinkQuotaExhausted);
         return false;
       }
@@ -500,8 +527,7 @@ class SublinkManager {
   Future<void> _startSession(SublinkLink link, SublinkStatus? status) async {
     if (_session?.link.token == link.token) return;
     await stopSession();
-    final core = _core;
-    if (core == null) return;
+    if (_core == null && debugTraffic == null) return;
     final store = await _store;
     // The local counter is this installation's own, never the link total the
     // server reports: that one aggregates every device of the share.
@@ -512,12 +538,10 @@ class SublinkManager {
       id: _randomHex(4),
       baseTotal: saved,
     );
-    try {
-      final traffic = await core.getTotalTraffic(_onlyStatisticsProxy?.call() ?? true);
-      session.lastUp = traffic.up.toInt();
-      session.lastDown = traffic.down.toInt();
-    } catch (error) {
-      commonPrint.log('sublink sample error: $error', logLevel: LogLevel.warning);
+    final traffic = await _readTraffic();
+    if (traffic != null) {
+      session.lastUp = traffic.up;
+      session.lastDown = traffic.down;
     }
     _session = session;
     final interval = status?.reportInterval ?? _defaultReportInterval;
@@ -536,15 +560,29 @@ class SublinkManager {
     await _persist(session);
   }
 
-  Future<void> _sample(_SublinkSession session) async {
+  /// The counters this run has moved: the Core's, or a test's stand-in.
+  Future<({int up, int down})?> _readTraffic() async {
+    final debug = debugTraffic;
+    if (debug != null) return debug();
     final core = _core;
-    if (core == null) return;
+    if (core == null) return null;
     try {
       final traffic = await core.getTotalTraffic(
         _onlyStatisticsProxy?.call() ?? true,
       );
-      final up = traffic.up.toInt();
-      final down = traffic.down.toInt();
+      return (up: traffic.up.toInt(), down: traffic.down.toInt());
+    } catch (error) {
+      commonPrint.log('sublink sample error: $error', logLevel: LogLevel.warning);
+      return null;
+    }
+  }
+
+  Future<void> _sample(_SublinkSession session) async {
+    final traffic = await _readTraffic();
+    if (traffic == null) return;
+    try {
+      final up = traffic.up;
+      final down = traffic.down;
       var deltaUp = up - session.lastUp;
       var deltaDown = down - session.lastDown;
       if (deltaUp < 0 || deltaDown < 0) {
@@ -602,14 +640,17 @@ class SublinkManager {
         );
         return;
       }
-      final payload = _payload(response.data);
-      if (payload == null) return;
       // Either applied now or already applied by an earlier delivery of the
-      // same report; both mean the batch is no longer pending.
+      // same report; both mean the batch is no longer pending. The body only
+      // carries the live quota: one that does not parse must not keep a
+      // delivered batch pending forever.
       session.pendingUp = 0;
       session.pendingDown = 0;
       session.seq += 1;
-      _applyTelemetry(session, payload);
+      final payload = _payload(response.data);
+      if (payload != null) {
+        _applyTelemetry(session, payload);
+      }
       runtime.value = SublinkRuntime(
         url: session.link.url,
         active: true,
@@ -658,6 +699,9 @@ class SublinkManager {
     statuses.value = {...statuses.value, session.link.token: next};
     if (exhausted && !(current?.quotaExhausted ?? false) && !session.quotaNotified) {
       session.quotaNotified = true;
+      // A spent link can no longer serve its config: the tunnel and the file
+      // it runs go away with the alert.
+      _notifyBlocked(session.link);
       unawaited(_alert(currentAppLocalizations.sublinkQuotaExhausted));
     }
   }
@@ -725,7 +769,8 @@ class SublinkManager {
             reason != 'ok' &&
             reason != 'served');
     if (stub) {
-      throw MessageException(
+      throw SublinkStubException(
+        reason ?? '',
         reason == null || reason.isEmpty
             ? currentAppLocalizations.sublinkStatusUnavailable
             : _reasonMessage(reason),
@@ -749,6 +794,68 @@ class SublinkManager {
     }
     final next = {...statuses.value}..remove(link.token);
     statuses.value = next;
+  }
+
+  void _notifyBlocked(SublinkLink link) {
+    final onBlocked = _onBlocked;
+    if (onBlocked == null) return;
+    unawaited(onBlocked(link.url));
+  }
+
+  // --- test seams ---------------------------------------------------------
+
+  /// The traffic a test feeds the sampler instead of the Core's counters.
+  @visibleForTesting
+  ({int up, int down}) Function()? debugTraffic;
+
+  @visibleForTesting
+  Dio get debugDio => _dio;
+
+  @visibleForTesting
+  int get debugPendingBytes =>
+      (_session?.pendingUp ?? 0) + (_session?.pendingDown ?? 0);
+
+  @visibleForTesting
+  int get debugTotal => _session?.total ?? 0;
+
+  @visibleForTesting
+  bool get debugActive => _session != null;
+
+  /// The callback `attach` would have wired, for a test without a Core.
+  @visibleForTesting
+  set debugOnBlocked(Future<void> Function(String url)? callback) =>
+      _onBlocked = callback;
+
+  /// The profile URL `attach` would have wired, for a test without a Core.
+  @visibleForTesting
+  set debugActiveUrl(String? Function()? read) => _activeUrl = read;
+
+  @visibleForTesting
+  Future<void> debugStart(String url) async {
+    final link = parseSublinkLink(url);
+    if (link == null) return;
+    await _startSession(link, null);
+  }
+
+  @visibleForTesting
+  Future<void> debugTick() async {
+    final session = _session;
+    if (session == null) return;
+    await _tick(session);
+  }
+
+  @visibleForTesting
+  Future<void> debugReset() async {
+    await stopSession();
+    _prefs = null;
+    _installId = null;
+    _deviceName = null;
+    _secrets.clear();
+    _onBlocked = null;
+    _activeUrl = null;
+    debugTraffic = null;
+    statuses.value = {};
+    runtime.value = SublinkRuntime.idle;
   }
 
   // --- parsing helpers ----------------------------------------------------

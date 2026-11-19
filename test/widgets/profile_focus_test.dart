@@ -151,7 +151,7 @@ void main() {
     final container = await pumpProfiles(tester, profiles: [url, file]);
 
     expect(find.byTooltip(currentAppLocalizations.edit), findsNothing);
-    expect(find.text('3KB / 4KB'), findsOneWidget);
+    expect(find.text('Left 1KB / 4KB'), findsOneWidget);
     expect(find.text('5m ago'), findsOneWidget);
 
     container.read(updatingKeysProvider.notifier).start(url.updatingKey);
@@ -246,6 +246,49 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(l.runtimeConfig), findsOneWidget);
     expect(find.text(l.subscriptionInfo), findsNothing);
+  });
+
+  testWidgets('a share whose owner hid the config keeps its link masked', (
+    tester,
+  ) async {
+    const link = 'https://sub.example.com/c/?token=hidden';
+    SublinkManager.instance.statuses.value = {
+      'hidden': SublinkStatus(
+        url: link,
+        hideConfig: true,
+        fetchedAt: DateTime.now(),
+      ),
+    };
+    addTearDown(() => SublinkManager.instance.statuses.value = {});
+
+    await pumpProfiles(
+      tester,
+      profiles: [
+        Profile.normal(label: 'hidden', url: link).copyWith(
+          subscriptionInfo: const SubscriptionInfo(
+            upload: 1024,
+            download: 2048,
+            total: 4096,
+            expire: 1234567890,
+          ),
+        ),
+      ],
+    );
+
+    expect(SublinkManager.instance.hiddenFor(link), isTrue);
+    final l = currentAppLocalizations;
+    await openProfileMenu(tester, 'hidden');
+    await tester.tap(find.text(l.more).last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l.copyLink));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining(l.sublinkHiddenConfig, findRichText: true),
+      findsOneWidget,
+    );
+    await tester.tap(find.text(l.confirm));
+    await tester.pumpAndSettle();
   });
 
   testWidgets('a custom profile lists its final config and no extend', (

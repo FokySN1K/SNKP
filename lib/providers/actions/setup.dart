@@ -164,20 +164,35 @@ class SetupAction extends _$SetupAction {
     }
   }
 
-  Future<bool> setRunning(bool running, {bool initialize = false}) async {
+  Future<bool> setRunning(bool running, {bool initialize = false}) {
     if (running && !initialize && !ref.read(initProvider)) {
-      return true;
+      return Future.value(true);
     }
+    final manager = SublinkManager.instance;
+    if (running) {
+      // The UI marks a start running before the first await, so only a share
+      // link — its status, consent and telemetry session — defers the start;
+      // a plain profile keeps starting synchronously.
+      if (manager.startNeedsLink) {
+        return _prepareAndRun(initialize: initialize);
+      }
+      return _run(true, initialize: initialize);
+    }
+    // The stop marks the tunnel stopped the same way; the traffic a session
+    // leaves behind reads the Core's counters, which outlive its listeners.
+    if (manager.hasSession) {
+      unawaited(manager.stopSession());
+    }
+    return _run(false, initialize: false);
+  }
+
+  Future<bool> _prepareAndRun({required bool initialize}) async {
     // A share link can carry telemetry, a spent quota or a revoked device; the
     // tunnel is not built until the user has seen what the link means.
-    if (running) {
-      if (!await SublinkManager.instance.prepareStart()) {
-        return false;
-      }
-    } else {
-      await SublinkManager.instance.stopSession();
+    if (!await SublinkManager.instance.prepareStart()) {
+      return false;
     }
-    return _run(running, initialize: running && initialize);
+    return _run(true, initialize: initialize);
   }
 
   Future<bool> _run(
@@ -767,11 +782,25 @@ class SetupAction extends _$SetupAction {
   }) async {
     var profile = ref.read(currentProfileProvider) ?? recoverMissingProfile();
     // A refresh failure is surfaced by safeRun; setup keeps the old profile.
-    final nextProfile = await globalState.safeRun(
-      () => profile?.checkAndUpdateAndCopy(
-        validate: (path, key) => _core.validateProfile(path, key),
-      ),
-    );
+    final current = profile;
+    var sublinkBlocked = false;
+    final nextProfile = await globalState.safeRun(() async {
+      try {
+        return await current?.checkAndUpdateAndCopy(
+          validate: (path, key) => _core.validateProfile(path, key),
+        );
+      } on SublinkStubException {
+        sublinkBlocked = true;
+        rethrow;
+      }
+    });
+    if (sublinkBlocked) {
+      final url = current?.url;
+      if (url != null) {
+        await ref.read(profilesActionProvider.notifier).blockSublinkProfile(url);
+      }
+      return _SetupTaskResult.failed;
+    }
     if (nextProfile != null) {
       profile = nextProfile;
       ref.read(profilesProvider.notifier).put(nextProfile);

@@ -406,6 +406,15 @@ class DelayDataSource extends _$DelayDataSource with AutoDisposeNotifierMixin {
     }
   }
 
+  /// A profile's nodes were renamed but kept their identity; what was
+  /// measured for the old names belongs to the new ones.
+  void renameDelays(Map<String, String> renames) {
+    final next = renameDelayMap(state, renames);
+    if (next == null) return;
+    _owned = next;
+    value = _published = UnmodifiableMapView(next);
+  }
+
   DelayMap _ownedDelayMap() {
     final owned = _owned;
     if (owned != null && identical(state, _published)) {

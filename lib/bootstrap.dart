@@ -171,6 +171,11 @@ class Bootstrap {
       },
       onlyStatisticsProxy: () =>
           _container.read(appSettingProvider).onlyStatisticsProxy,
+      // A link that runs out turns itself off: the tunnel stops and the file
+      // it ran is removed once the server says the quota is gone.
+      onBlocked: (url) => _container
+          .read(profilesActionProvider.notifier)
+          .blockSublinkProfile(url),
     );
     unawaited(SublinkManager.instance.refreshActive());
     unawaited(_container.read(systemActionProvider.notifier).updateTray());

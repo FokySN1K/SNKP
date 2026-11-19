@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart' show Headers;
-import 'package:fl_clash/common/exception.dart';
 import 'package:fl_clash/common/sublink.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/state.dart';
@@ -176,7 +175,13 @@ void main() {
           _link,
           _FakeHeaders.of(headers),
         ),
-        throwsA(isA<MessageException>()),
+        throwsA(
+          isA<SublinkStubException>().having(
+            (error) => error.reason,
+            'reason',
+            'quota_exhausted',
+          ),
+        ),
       );
     });
 

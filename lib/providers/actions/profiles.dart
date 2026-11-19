@@ -142,19 +142,43 @@ class ProfilesAction extends _$ProfilesAction {
     final operation = showLoading
         ? ref.read(updatingKeysProvider.notifier).start(profile.updatingKey)
         : null;
+    final shareLink = parseSublinkLink(profile.url);
+    // Read before the download replaces the file: the keys tell which nodes
+    // the panel renamed between the two copies.
+    final previousKeys = shareLink == null
+        ? const <String, String>{}
+        : await profile.nodeKeys();
     try {
       ref.read(profilesProvider.notifier).put(profile);
-      final updated = await profile.update(
-        validate: (path, key) => _core.validateProfile(path, key),
-        headers: await SublinkManager.instance.headersFor(profile.url),
-        onHeaders: (headers) =>
-            SublinkManager.instance.captureDownload(profile.url, headers),
-      );
+      final Profile updated;
+      try {
+        updated = await profile.update(
+          validate: (path, key) => _core.validateProfile(path, key),
+          headers: await SublinkManager.instance.headersFor(profile.url),
+          onHeaders: (headers) =>
+              SublinkManager.instance.captureDownload(profile.url, headers),
+        );
+      } on SublinkStubException {
+        // The link no longer serves a config: the tunnel stops and the file it
+        // ran is dropped instead of being kept as a working profile.
+        await blockSublinkProfile(profile.url);
+        rethrow;
+      }
       // The download can take minutes; edits and deletes made meanwhile win.
       final latest = ref.read(profilesProvider).getProfile(profile.id);
       if (latest == null) {
         await clearEffect(profile.id);
         return;
+      }
+      final renames = shareLink == null
+          ? const <String, String>{}
+          : nodeRenames(previousKeys, await updated.nodeKeys());
+      if (renames.isNotEmpty) {
+        // The names the user picked and the values the cards measured belong
+        // to the nodes, not to the names the panel gave them this time.
+        ref.read(delayDataSourceProvider.notifier).renameDelays(renames);
+        ref.read(proxiesActionProvider.notifier).invalidateSavedDelays();
+        unawaited(_persistRenamedDelays(renames));
       }
       // The file may carry its own refresh interval; a profile the user edited
       // while the download ran keeps the value that edit set.
@@ -167,6 +191,7 @@ class ProfilesAction extends _$ProfilesAction {
         subscriptionInfo: updated.subscriptionInfo,
         lastUpdateDate: updated.lastUpdateDate,
         autoUpdateDuration: autoUpdateDuration,
+        selectedMap: renameSelection(latest.selectedMap, renames),
       );
       ref.read(profilesProvider.notifier).put(newProfile);
       if (profile.id == ref.read(currentProfileIdProvider)) {
@@ -193,6 +218,32 @@ class ProfilesAction extends _$ProfilesAction {
             .stop(profile.updatingKey, operation);
       }
     }
+  }
+
+  /// A share link refused to serve its config: stop running it and drop the
+  /// file it used to serve, so nothing keeps working past the refusal.
+  Future<void> blockSublinkProfile(String url) async {
+    final profile = ref
+        .read(profilesProvider)
+        .where((profile) => profile.url == url)
+        .firstOrNull;
+    if (profile == null) return;
+    if (ref.read(isStartProvider) &&
+        ref.read(currentProfileIdProvider) == profile.id) {
+      await globalState.safeRun(
+        () => ref.read(setupActionProvider.notifier).setRunning(false),
+      );
+    }
+    await clearEffect(profile.id);
+  }
+
+  /// Delays on disk carry the old names too; the next launch would seed them
+  /// back otherwise.
+  Future<void> _persistRenamedDelays(Map<String, String> renames) async {
+    final saved = await preferences.getDelays();
+    final next = renameDelayMap(saved, renames);
+    if (next == null) return;
+    await preferences.saveDelays(next);
   }
 
   Future<void> addProfileFormFile() async {

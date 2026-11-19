@@ -9,7 +9,12 @@ import '../helpers/test_app.dart';
 
 void main() {
   testWidgets('hides expiry when both values do not fit', (tester) async {
-    const trafficLabel = '1KB / 1GB';
+    const info = SubscriptionInfo(
+      upload: 1024,
+      total: 1073741824,
+      expire: 4102444800,
+    );
+    final trafficLabel = (info.total - info.upload).traffic.show;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -25,13 +30,7 @@ void main() {
         home: const Scaffold(
           body: SizedBox(
             width: 120,
-            child: SubscriptionInfoView(
-              subscriptionInfo: SubscriptionInfo(
-                upload: 1024,
-                total: 1073741824,
-                expire: 4102444800,
-              ),
-            ),
+            child: SubscriptionInfoView(subscriptionInfo: info),
           ),
         ),
       ),
@@ -118,7 +117,9 @@ void main() {
     expect(find.text(appLocalizations.totalTraffic), findsOneWidget);
     expect(find.text(appLocalizations.expireTime), findsOneWidget);
     expect(find.text('3KB'), findsOneWidget);
+    expect(find.text((1073741824 - 3072).traffic.show), findsOneWidget);
     expect(find.text('1GB'), findsOneWidget);
-    expect(find.byType(DecorationListItem), findsNWidgets(3));
+    expect(find.text(appLocalizations.sublinkRemaining), findsOneWidget);
+    expect(find.byType(DecorationListItem), findsNWidgets(4));
   });
 }

@@ -158,6 +158,9 @@ extension ProfileExtension on Profile {
 
   String get updatingKey => 'profile_$id';
 
+  /// Re-downloads the config a profile has lost. The download goes through
+  /// the same share identity a manual refresh uses, so the server binds this
+  /// device and answers a spent link with a stub instead of a bare config.
   Future<Profile?> checkAndUpdateAndCopy({
     required ValidateConfig validate,
   }) async {
@@ -168,7 +171,12 @@ extension ProfileExtension on Profile {
     if (await mFile.exists()) {
       return null;
     }
-    return update(validate: validate);
+    final manager = SublinkManager.instance;
+    return update(
+      validate: validate,
+      headers: await manager.headersFor(url),
+      onHeaders: (headers) => manager.captureDownload(url, headers),
+    );
   }
 
   Future<File> _getFile([bool autoCreate = true]) async {
@@ -185,6 +193,27 @@ extension ProfileExtension on Profile {
     return _getFile();
   }
 
+  /// Drops the config this profile holds. A link the server refuses to serve
+  /// must not keep running the file it used to serve.
+  Future<void> clearFile() async {
+    final mFile = await _getFile(false);
+    if (await mFile.exists()) {
+      await mFile.safeDelete();
+    }
+  }
+
+  /// `unique key -> node name` of the config on disk, empty when the file has
+  /// no keys or is gone.
+  Future<Map<String, String>> nodeKeys() async {
+    final mFile = await _getFile(false);
+    if (!await mFile.exists()) return const {};
+    try {
+      return nodeKeysOf(await mFile.readAsBytes());
+    } catch (_) {
+      return const {};
+    }
+  }
+
   Future<Profile> update({
     required ValidateConfig validate,
     Map<String, String>? headers,
@@ -194,7 +223,15 @@ extension ProfileExtension on Profile {
       url,
       headers: headers,
     );
-    onHeaders?.call(response.headers);
+    try {
+      onHeaders?.call(response.headers);
+    } catch (_) {
+      // The server answered with a stub instead of a config. The file this
+      // profile has been running is what the link no longer allows, so it is
+      // dropped before the error reaches the caller.
+      await clearFile();
+      rethrow;
+    }
     final disposition = response.headers.value('content-disposition');
     final userinfo = response.headers.value('subscription-userinfo');
     return copyWith(
@@ -276,4 +313,73 @@ Duration? _updateIntervalOf(Uint8List bytes) {
     _ => null,
   };
   return seconds != null && seconds > 0 ? Duration(seconds: seconds) : null;
+}
+
+/// The stable per-node key SublinkPro puts into every proxy it serves. The
+/// legacy spelling is still read for links served before the rename.
+const sublinkUniqueKeyField = 'sublinkpro_unique_key';
+const sublinkUniqueKeyLegacyField = 'sublink_unique_key_node';
+
+/// `unique key -> node name` of a served config; empty when it carries none.
+///
+/// The key is a hash of the node content, not of its name, so a panel that
+/// renames its nodes keeps their identity here.
+Map<String, String> nodeKeysOf(Uint8List bytes) {
+  if (bytes.length > _maxIntervalConfigBytes) {
+    return const {};
+  }
+  final text = utf8.decode(bytes, allowMalformed: true);
+  if (!text.contains(sublinkUniqueKeyField) &&
+      !text.contains(sublinkUniqueKeyLegacyField)) {
+    return const {};
+  }
+  final document = loadYaml(text);
+  if (document is! YamlMap) {
+    return const {};
+  }
+  final proxies = document['proxies'];
+  if (proxies is! YamlList) {
+    return const {};
+  }
+  final keys = <String, String>{};
+  for (final proxy in proxies) {
+    if (proxy is! YamlMap) continue;
+    final name = proxy['name'];
+    final key =
+        proxy[sublinkUniqueKeyField] ?? proxy[sublinkUniqueKeyLegacyField];
+    if (name is String && name.isNotEmpty && key is String && key.isNotEmpty) {
+      keys[key] = name;
+    }
+  }
+  return keys;
+}
+
+/// Old name -> new name for the nodes whose key stayed the same, which is how
+/// a panel's renaming of its nodes is recognised.
+Map<String, String> nodeRenames(
+  Map<String, String> before,
+  Map<String, String> after,
+) {
+  final renames = <String, String>{};
+  for (final entry in before.entries) {
+    final next = after[entry.key];
+    if (next != null && next != entry.value) {
+      renames[entry.value] = next;
+    }
+  }
+  return renames;
+}
+
+/// The selection with every renamed node pointed at the name it carries now.
+Map<String, String> renameSelection(
+  Map<String, String> selected,
+  Map<String, String> renames,
+) {
+  if (renames.isEmpty || selected.isEmpty) {
+    return selected;
+  }
+  return {
+    for (final entry in selected.entries)
+      entry.key: renames[entry.value] ?? entry.value,
+  };
 }

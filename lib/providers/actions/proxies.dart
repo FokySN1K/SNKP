@@ -182,6 +182,12 @@ class ProxiesAction extends _$ProxiesAction {
     return _savedDelays ??= await preferences.getDelays();
   }
 
+  /// The persisted delays were rewritten elsewhere; the cached copy must not
+  /// seed the old names back on the next pull.
+  void invalidateSavedDelays() {
+    _savedDelays = null;
+  }
+
   void _scheduleDelaysSave() {
     debouncer.call(
       FunctionTag.saveDelays,
