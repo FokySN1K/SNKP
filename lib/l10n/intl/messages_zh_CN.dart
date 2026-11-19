@@ -1570,9 +1570,20 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "sublinkTelemetryAccept": MessageLookupByLibrary.simpleMessage("继续"),
     "sublinkTelemetryMessage": MessageLookupByLibrary.simpleMessage(
-      "订阅所有者会收到你使用的流量总量。不会发送网站名称和请求内容。",
+      "此订阅的所有者会收到：",
+    ),
+    "sublinkTelemetryNodes": MessageLookupByLibrary.simpleMessage("每个节点承载的流量"),
+    "sublinkTelemetryPrivacy": MessageLookupByLibrary.simpleMessage(
+      "不会发送网站名称和请求内容。",
+    ),
+    "sublinkTelemetryReliability": MessageLookupByLibrary.simpleMessage(
+      "哪些节点无法连接",
+    ),
+    "sublinkTelemetrySessions": MessageLookupByLibrary.simpleMessage(
+      "VPN 连接开始和结束的时间",
     ),
     "sublinkTelemetryTitle": MessageLookupByLibrary.simpleMessage("遥测已开启"),
+    "sublinkTelemetryTraffic": MessageLookupByLibrary.simpleMessage("你使用的流量总量"),
     "submit": MessageLookupByLibrary.simpleMessage("提交"),
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage("订阅信息"),
     "sudoPasswordTitle": MessageLookupByLibrary.simpleMessage("输入 sudo 密码"),

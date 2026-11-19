@@ -163,7 +163,12 @@ void main() {
       (_) => _json({
         'data': {
           'valid': true,
-          'telemetry': {'enabled': true},
+          'telemetry': {
+            'enabled': true,
+            'sessions': true,
+            'nodes': true,
+            'reliability': true,
+          },
         },
       }),
     );
@@ -178,6 +183,18 @@ void main() {
       find.text(currentAppLocalizations.sublinkTelemetryTitle),
       findsOneWidget,
     );
+    for (final channel in [
+      currentAppLocalizations.sublinkTelemetryTraffic,
+      currentAppLocalizations.sublinkTelemetrySessions,
+      currentAppLocalizations.sublinkTelemetryNodes,
+      currentAppLocalizations.sublinkTelemetryReliability,
+      currentAppLocalizations.sublinkTelemetryPrivacy,
+    ]) {
+      expect(
+        find.textContaining(channel, findRichText: true),
+        findsOneWidget,
+      );
+    }
     await tester.tap(find.text(currentAppLocalizations.sublinkTelemetryAccept));
     await tester.pumpAndSettle();
 

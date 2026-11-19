@@ -2137,10 +2137,25 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "sublinkTelemetryAccept": MessageLookupByLibrary.simpleMessage("Continue"),
     "sublinkTelemetryMessage": MessageLookupByLibrary.simpleMessage(
-      "The owner of this subscription receives the volume of traffic you use. Site names and request contents are never sent.",
+      "The owner of this subscription receives:",
+    ),
+    "sublinkTelemetryNodes": MessageLookupByLibrary.simpleMessage(
+      "how much traffic each node carries",
+    ),
+    "sublinkTelemetryPrivacy": MessageLookupByLibrary.simpleMessage(
+      "Site names and request contents are never sent.",
+    ),
+    "sublinkTelemetryReliability": MessageLookupByLibrary.simpleMessage(
+      "which nodes fail to connect",
+    ),
+    "sublinkTelemetrySessions": MessageLookupByLibrary.simpleMessage(
+      "when your VPN connection starts and stops",
     ),
     "sublinkTelemetryTitle": MessageLookupByLibrary.simpleMessage(
       "Telemetry is on",
+    ),
+    "sublinkTelemetryTraffic": MessageLookupByLibrary.simpleMessage(
+      "the volume of traffic you use",
     ),
     "submit": MessageLookupByLibrary.simpleMessage("Valider"),
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(

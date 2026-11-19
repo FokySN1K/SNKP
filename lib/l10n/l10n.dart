@@ -8822,11 +8822,61 @@ class AppLocalizations {
     );
   }
 
-  /// `The owner of this subscription receives the volume of traffic you use. Site names and request contents are never sent.`
+  /// `The owner of this subscription receives:`
   String get sublinkTelemetryMessage {
     return Intl.message(
-      'The owner of this subscription receives the volume of traffic you use. Site names and request contents are never sent.',
+      'The owner of this subscription receives:',
       name: 'sublinkTelemetryMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `the volume of traffic you use`
+  String get sublinkTelemetryTraffic {
+    return Intl.message(
+      'the volume of traffic you use',
+      name: 'sublinkTelemetryTraffic',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `when your VPN connection starts and stops`
+  String get sublinkTelemetrySessions {
+    return Intl.message(
+      'when your VPN connection starts and stops',
+      name: 'sublinkTelemetrySessions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `how much traffic each node carries`
+  String get sublinkTelemetryNodes {
+    return Intl.message(
+      'how much traffic each node carries',
+      name: 'sublinkTelemetryNodes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `which nodes fail to connect`
+  String get sublinkTelemetryReliability {
+    return Intl.message(
+      'which nodes fail to connect',
+      name: 'sublinkTelemetryReliability',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Site names and request contents are never sent.`
+  String get sublinkTelemetryPrivacy {
+    return Intl.message(
+      'Site names and request contents are never sent.',
+      name: 'sublinkTelemetryPrivacy',
       desc: '',
       args: [],
     );

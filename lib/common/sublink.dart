@@ -670,7 +670,7 @@ class SublinkManager {
         await stopSession();
         return true;
       }
-      if (!await _ensureConsent(link)) {
+      if (!await _ensureConsent(link, status)) {
         return false;
       }
       await _startSession(link, status);
@@ -1044,17 +1044,32 @@ class SublinkManager {
     return store.getBool(_key(link.token, 'consent')) == true;
   }
 
-  Future<bool> _ensureConsent(SublinkLink link) async {
+  Future<bool> _ensureConsent(SublinkLink link, SublinkStatus status) async {
     if (await _hasConsent(link)) return true;
     final accepted = await dialogs.showMessage(
       title: currentAppLocalizations.sublinkTelemetryTitle,
-      message: TextSpan(text: currentAppLocalizations.sublinkTelemetryMessage),
+      message: TextSpan(text: _consentMessage(status)),
       confirmText: currentAppLocalizations.sublinkTelemetryAccept,
     );
     if (accepted != true) return false;
     final store = await _store;
     await store.setBool(_key(link.token, 'consent'), true);
     return true;
+  }
+
+  /// Names every channel the status takes from this link, so the consent is
+  /// given to what is actually sent and not to a generic "telemetry".
+  String _consentMessage(SublinkStatus status) {
+    final appLocalizations = currentAppLocalizations;
+    final channels = <String>[
+      appLocalizations.sublinkTelemetryTraffic,
+      if (status.sessionsEnabled) appLocalizations.sublinkTelemetrySessions,
+      if (status.nodesEnabled) appLocalizations.sublinkTelemetryNodes,
+      if (status.reliabilityEnabled) appLocalizations.sublinkTelemetryReliability,
+    ];
+    final lines = channels.map((channel) => '\u2022 $channel').join('\n');
+    return '${appLocalizations.sublinkTelemetryMessage}\n$lines\n\n'
+        '${appLocalizations.sublinkTelemetryPrivacy}';
   }
 
   Future<void> _alert(String message) async {

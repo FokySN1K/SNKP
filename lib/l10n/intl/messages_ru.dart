@@ -2075,10 +2075,25 @@ class MessageLookup extends MessageLookupByLibrary {
       "Продолжить",
     ),
     "sublinkTelemetryMessage": MessageLookupByLibrary.simpleMessage(
-      "Владелец подписки получает объём использованного трафика. Имена сайтов и содержимое запросов не отправляются.",
+      "Владелец этой подписки получает:",
+    ),
+    "sublinkTelemetryNodes": MessageLookupByLibrary.simpleMessage(
+      "сколько трафика проходит через каждый узел",
+    ),
+    "sublinkTelemetryPrivacy": MessageLookupByLibrary.simpleMessage(
+      "Имена сайтов и содержимое запросов не отправляются.",
+    ),
+    "sublinkTelemetryReliability": MessageLookupByLibrary.simpleMessage(
+      "какие узлы не подключаются",
+    ),
+    "sublinkTelemetrySessions": MessageLookupByLibrary.simpleMessage(
+      "когда VPN-подключение включается и выключается",
     ),
     "sublinkTelemetryTitle": MessageLookupByLibrary.simpleMessage(
       "Телеметрия включена",
+    ),
+    "sublinkTelemetryTraffic": MessageLookupByLibrary.simpleMessage(
+      "объём использованного трафика",
     ),
     "submit": MessageLookupByLibrary.simpleMessage("Отправить"),
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
