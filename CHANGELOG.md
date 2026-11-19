@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.62 (2026-11-19)
+
+**Bug Fixes**
+
+- **core** A broken pinned node no longer keeps the route: the pool dials a live node and the card says the pin is skipped. (0eb649d)
+
 ## v1.0.61 (2026-11-18)
 
 **Bug Fixes**

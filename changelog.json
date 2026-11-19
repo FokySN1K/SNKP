@@ -2,6 +2,24 @@
   "schemaVersion": 2,
   "versions": [
     {
+      "version": "1.0.62",
+      "tag": "v1.0.62",
+      "date": "2026-11-19",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "fix",
+          "entries": [
+            {
+              "id": "0eb649d",
+              "scope": "core",
+              "text": "A broken pinned node no longer keeps the route: the pool dials a live node and the card says the pin is skipped."
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.61",
       "tag": "v1.0.61",
       "date": "2026-11-18",
