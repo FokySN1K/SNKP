@@ -114,7 +114,11 @@ SublinkLink? parseSublinkLink(String? url) {
   return SublinkLink(
     url: text,
     token: token,
-    origin: Uri(scheme: uri.scheme, host: uri.host, port: uri.hasPort ? uri.port : null),
+    origin: Uri(
+      scheme: uri.scheme,
+      host: uri.host,
+      port: uri.hasPort ? uri.port : null,
+    ),
     endpointPath: endpointPath,
   );
 }
@@ -224,7 +228,10 @@ class SublinkStatus {
       reportedBytes: reportedBytes ?? this.reportedBytes,
       remainingBytes:
           remainingBytes ??
-          _remainingOf(limitBytes ?? this.limitBytes, reportedBytes ?? this.reportedBytes),
+          _remainingOf(
+            limitBytes ?? this.limitBytes,
+            reportedBytes ?? this.reportedBytes,
+          ),
       expireAt: expireAt ?? this.expireAt,
       quotaExhausted: quotaExhausted ?? this.quotaExhausted,
       maxDevices: maxDevices,
@@ -300,7 +307,8 @@ class SublinkStatus {
           ? max(0, explicitRemaining.toInt())
           : _remainingOf(limit, reported),
       expireAt: expireAt,
-      quotaExhausted: share['quota_exhausted'] == true || json['quota_exhausted'] == true,
+      quotaExhausted:
+          share['quota_exhausted'] == true || json['quota_exhausted'] == true,
       maxDevices: SublinkManager._int(group['max_devices']),
       activeDevices: SublinkManager._int(
         devices['active'] ?? group['active_devices'],
@@ -375,6 +383,11 @@ class _SublinkSession {
   int seq = 0;
   bool sending = false;
   bool quotaNotified = false;
+  // The quota the server last confirmed and the absolute total it arrived
+  // at: every confirmed byte lowers the remaining by the same amount the
+  // total grew, so the pair tells when the link is spent even offline.
+  int? quotaRemaining;
+  int quotaRemainingTotal = 0;
 
   _SublinkSession({
     required this.link,
@@ -425,8 +438,7 @@ class _SublinkEvent {
       sessionId: sessionId,
       total: SublinkManager._int(value['reported_total_bytes']),
       createdAt:
-          DateTime.tryParse('${value['created_at'] ?? ''}') ??
-          DateTime.now(),
+          DateTime.tryParse('${value['created_at'] ?? ''}') ?? DateTime.now(),
     );
   }
 }
@@ -601,7 +613,10 @@ class SublinkManager {
       _putStatus(link, status);
       return status;
     } catch (error) {
-      commonPrint.log('sublink status error: $error', logLevel: LogLevel.warning);
+      commonPrint.log(
+        'sublink status error: $error',
+        logLevel: LogLevel.warning,
+      );
       return null;
     }
   }
@@ -650,6 +665,7 @@ class SublinkManager {
         await _alert(currentAppLocalizations.sublinkQuotaExhausted);
         return false;
       }
+      await _rememberQuotaTrip(link, false);
       if (!status.telemetryEnabled) {
         await stopSession();
         return true;
@@ -661,8 +677,15 @@ class SublinkManager {
       return true;
     }
     // A server that cannot answer must not block the tunnel; the session runs
-    // without reporting until the next status refresh succeeds.
+    // without reporting until the next status refresh succeeds. A link the
+    // guard already found spent is the exception: without a server to say
+    // otherwise, the tunnel stays down instead of running past its quota.
     if (await _hasConsent(link)) {
+      if (await _quotaTripRemembered(link)) {
+        _notifyBlocked(link);
+        await _alert(currentAppLocalizations.sublinkQuotaExhausted);
+        return false;
+      }
       await _startSession(link, null);
     }
     return true;
@@ -680,7 +703,10 @@ class SublinkManager {
       await _send(session).timeout(_sessionFlushTimeout);
       await _tickNodes(session).timeout(_sessionFlushTimeout);
     } catch (error) {
-      commonPrint.log('sublink flush error: $error', logLevel: LogLevel.warning);
+      commonPrint.log(
+        'sublink flush error: $error',
+        logLevel: LogLevel.warning,
+      );
     }
     if (session.sessionsInterval > 0) {
       _enqueueEvent(session, _sessionStopEvent);
@@ -729,6 +755,10 @@ class SublinkManager {
       status?.reliabilityIntervalSeconds ?? 0,
       intervals?.reliability,
     );
+    if (status != null && status.hasQuota) {
+      session.quotaRemaining = status.remainingBytes;
+      session.quotaRemainingTotal = session.total;
+    }
     _session = session;
     await _loadEvents();
     final interval = status?.reportInterval ?? _defaultReportInterval;
@@ -769,6 +799,7 @@ class SublinkManager {
     // session, so the server sees the session before its bytes.
     await _flushEvents();
     await _sample(session);
+    if (await _stopOnSpentQuota(session)) return;
     await _send(session);
     await _persist(session);
   }
@@ -785,7 +816,10 @@ class SublinkManager {
       );
       return (up: traffic.up.toInt(), down: traffic.down.toInt());
     } catch (error) {
-      commonPrint.log('sublink sample error: $error', logLevel: LogLevel.warning);
+      commonPrint.log(
+        'sublink sample error: $error',
+        logLevel: LogLevel.warning,
+      );
       return null;
     }
   }
@@ -817,7 +851,10 @@ class SublinkManager {
         lastReportAt: runtime.value.lastReportAt,
       );
     } catch (error) {
-      commonPrint.log('sublink sample error: $error', logLevel: LogLevel.warning);
+      commonPrint.log(
+        'sublink sample error: $error',
+        logLevel: LogLevel.warning,
+      );
     }
   }
 
@@ -872,7 +909,10 @@ class SublinkManager {
         lastReportAt: DateTime.now(),
       );
     } catch (error) {
-      commonPrint.log('sublink telemetry error: $error', logLevel: LogLevel.warning);
+      commonPrint.log(
+        'sublink telemetry error: $error',
+        logLevel: LogLevel.warning,
+      );
     } finally {
       session.sending = false;
     }
@@ -909,13 +949,23 @@ class SublinkManager {
       reportIntervalSeconds: current?.reportIntervalSeconds ?? 60,
       sessionsIntervalSeconds: current?.sessionsIntervalSeconds ?? 0,
       nodesIntervalSeconds: current?.nodesIntervalSeconds ?? 0,
-      reliabilityIntervalSeconds:
-          current?.reliabilityIntervalSeconds ?? 0,
+      reliabilityIntervalSeconds: current?.reliabilityIntervalSeconds ?? 0,
       expired: current?.expired ?? false,
       fetchedAt: DateTime.now(),
     );
     statuses.value = {...statuses.value, session.link.token: next};
-    if (exhausted && !(current?.quotaExhausted ?? false) && !session.quotaNotified) {
+    if (next.hasQuota) {
+      session.quotaRemaining = next.remainingBytes;
+      session.quotaRemainingTotal = session.total;
+      if (!exhausted) {
+        unawaited(_rememberQuotaTrip(session.link, false));
+      }
+    } else {
+      session.quotaRemaining = null;
+    }
+    if (exhausted &&
+        !(current?.quotaExhausted ?? false) &&
+        !session.quotaNotified) {
       session.quotaNotified = true;
       // A spent link can no longer serve its config: the tunnel and the file
       // it runs go away with the alert.
@@ -924,10 +974,65 @@ class SublinkManager {
     }
   }
 
+  /// Stops the tunnel when the confirmed quota is used up: the local total
+  /// outgrew what the last server answer left. Returns true when it stopped
+  /// the session.
+  ///
+  /// The math is exact while no other device spends from the same link: a
+  /// confirmed report lowers the remaining by the delta it added to the total,
+  /// so both sides meet where the server would call the link spent. A final
+  /// report settles it when the link is reachable, so a limit raised in the
+  /// panel never stops a tunnel that still has traffic; a link that cannot be
+  /// reached is stopped on the last confirmed numbers.
+  Future<bool> _stopOnSpentQuota(_SublinkSession session) async {
+    final remaining = session.quotaRemaining;
+    if (remaining == null || remaining < 0) return false;
+    if (session.total - session.quotaRemainingTotal < remaining) return false;
+    await _send(session);
+    final settled = session.quotaRemaining;
+    if (settled != null &&
+        session.total - session.quotaRemainingTotal < settled) {
+      return false;
+    }
+    if (!session.quotaNotified) {
+      session.quotaNotified = true;
+      _notifyBlocked(session.link);
+      unawaited(_alert(currentAppLocalizations.sublinkQuotaExhausted));
+    }
+    await _rememberQuotaTrip(session.link, true);
+    await stopSession();
+    return true;
+  }
+
+  Future<bool> _quotaTripRemembered(SublinkLink link) async {
+    final store = await _store;
+    return store.getBool(_key(link.token, 'quota_tripped')) == true;
+  }
+
+  Future<void> _rememberQuotaTrip(SublinkLink link, bool tripped) async {
+    final store = await _store;
+    final key = _key(link.token, 'quota_tripped');
+    if (tripped) {
+      if (store.getBool(key) != true) {
+        await store.setBool(key, true);
+      }
+      return;
+    }
+    if (store.getBool(key) == true) {
+      await store.remove(key);
+    }
+  }
+
   Future<void> _persist(_SublinkSession session) async {
     final store = await _store;
-    await store.setString(_key(session.link.token, 'total'), '${session.total}');
-    await store.setString(_key(session.link.token, 'last_up'), '${session.lastUp}');
+    await store.setString(
+      _key(session.link.token, 'total'),
+      '${session.total}',
+    );
+    await store.setString(
+      _key(session.link.token, 'last_up'),
+      '${session.lastUp}',
+    );
     await store.setString(
       _key(session.link.token, 'last_down'),
       '${session.lastDown}',
@@ -961,10 +1066,12 @@ class SublinkManager {
     return switch (reason) {
       'quota_exhausted' => appLocalizations.sublinkQuotaExhausted,
       'expired' => appLocalizations.sublinkExpired,
-      'device_limit' || 'device_blocked' => appLocalizations.sublinkDeviceBlocked,
+      'device_limit' ||
+      'device_blocked' => appLocalizations.sublinkDeviceBlocked,
       'device_pending' => appLocalizations.sublinkDevicePending,
-      'invalid_token' || 'group_disabled' || 'template_disabled' =>
-        appLocalizations.sublinkLinkUnavailable,
+      'invalid_token' ||
+      'group_disabled' ||
+      'template_disabled' => appLocalizations.sublinkLinkUnavailable,
       _ => appLocalizations.sublinkStatusUnavailable,
     };
   }
@@ -1001,7 +1108,8 @@ class SublinkManager {
       unawaited(_saveSecret(link, secret));
     }
     final reason = headers.value('x-sublink-reason')?.trim();
-    final stub = headers.value('x-sublink-stub') != null ||
+    final stub =
+        headers.value('x-sublink-stub') != null ||
         (reason != null &&
             reason.isNotEmpty &&
             reason != 'ok' &&
@@ -1057,6 +1165,7 @@ class SublinkManager {
       'last_up',
       'last_down',
       'problems',
+      'quota_tripped',
     ]) {
       await store.remove(_key(link.token, name));
     }
@@ -1073,7 +1182,6 @@ class SublinkManager {
     if (onBlocked == null) return;
     unawaited(onBlocked(link.url));
   }
-
 
   // --- sessions, nodes and reliability ------------------------------------
 
@@ -1110,7 +1218,10 @@ class SublinkManager {
         _events.add(event);
       }
     } catch (error) {
-      commonPrint.log('sublink event load error: $error', logLevel: LogLevel.warning);
+      commonPrint.log(
+        'sublink event load error: $error',
+        logLevel: LogLevel.warning,
+      );
     }
   }
 
@@ -1162,7 +1273,10 @@ class SublinkManager {
         _events.removeAt(0);
       }
     } catch (error) {
-      commonPrint.log('sublink session error: $error', logLevel: LogLevel.warning);
+      commonPrint.log(
+        'sublink session error: $error',
+        logLevel: LogLevel.warning,
+      );
     } finally {
       unawaited(_persistEvents());
     }
@@ -1176,7 +1290,10 @@ class SublinkManager {
     try {
       return await core.getNodeTraffic();
     } catch (error) {
-      commonPrint.log('sublink node sample error: $error', logLevel: LogLevel.warning);
+      commonPrint.log(
+        'sublink node sample error: $error',
+        logLevel: LogLevel.warning,
+      );
       return null;
     }
   }
@@ -1189,7 +1306,10 @@ class SublinkManager {
     try {
       return await core.getReputation();
     } catch (error) {
-      commonPrint.log('sublink reputation error: $error', logLevel: LogLevel.warning);
+      commonPrint.log(
+        'sublink reputation error: $error',
+        logLevel: LogLevel.warning,
+      );
       return null;
     }
   }
@@ -1214,7 +1334,10 @@ class SublinkManager {
       }
       return silent;
     } catch (error) {
-      commonPrint.log('sublink silent read error: $error', logLevel: LogLevel.warning);
+      commonPrint.log(
+        'sublink silent read error: $error',
+        logLevel: LogLevel.warning,
+      );
       return const {};
     }
   }
@@ -1242,7 +1365,10 @@ class SublinkManager {
       _keysByNameAt = DateTime.now();
       return byName;
     } catch (error) {
-      commonPrint.log('sublink key read error: $error', logLevel: LogLevel.warning);
+      commonPrint.log(
+        'sublink key read error: $error',
+        logLevel: LogLevel.warning,
+      );
       return cached ?? const {};
     }
   }
@@ -1329,7 +1455,10 @@ class SublinkManager {
       }
       session.nodeSeq += 1;
     } catch (error) {
-      commonPrint.log('sublink nodes error: $error', logLevel: LogLevel.warning);
+      commonPrint.log(
+        'sublink nodes error: $error',
+        logLevel: LogLevel.warning,
+      );
     } finally {
       session.sendingNodes = false;
     }
@@ -1425,10 +1554,7 @@ class SublinkManager {
         if (scoreA != scoreB) return scoreA.compareTo(scoreB);
         return ('${a['key']}').compareTo('${b['key']}');
       });
-    final rows = [
-      ...ranked.take(_maxReliabilityRows),
-      ...recovered,
-    ];
+    final rows = [...ranked.take(_maxReliabilityRows), ...recovered];
     try {
       final id = await installId;
       final response = await _dio.postUri<Object?>(
@@ -1579,9 +1705,7 @@ class SublinkManager {
   static Map<String, Object?> _map(Object? value) {
     if (value is Map<String, Object?>) return value;
     if (value is Map) {
-      return {
-        for (final entry in value.entries) '${entry.key}': entry.value,
-      };
+      return {for (final entry in value.entries) '${entry.key}': entry.value};
     }
     return const {};
   }
