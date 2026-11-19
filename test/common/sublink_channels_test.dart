@@ -164,46 +164,63 @@ void main() {
     ]);
   });
 
-  test('unreliable nodes are reported and a recovery goes once', () async {
-    adapter.answers.add((_) => _json({'code': 0, 'data': {}}));
+  test(
+    'the whole reputation table is reported and a recovery goes once',
+    () async {
+      adapter.answers.add((_) => _json({'code': 0, 'data': {}}));
 
-    manager.debugTraffic = () => (up: 0, down: 0);
-    manager.debugNodeTraffic = () => const [];
-    manager.debugNodeKeys = () async => {'key-a': 'node-a'};
-    manager.debugSilentNodes = () => const {};
-    manager.debugReputation = () => const [
-      NodeReputation(name: 'node-a', score: -55, fails: 3, streak: 0),
-    ];
-    await manager.debugStartWithStatus(_link, _statusWithChannels());
-    await manager.debugFlushEvents();
+      manager.debugTraffic = () => (up: 0, down: 0);
+      manager.debugNodeTraffic = () => const [];
+      manager.debugNodeKeys = () async => {
+        'key-a': 'node-a',
+        'key-b': 'node-b',
+      };
+      manager.debugSilentNodes = () => const {};
+      manager.debugReputation = () => const [
+        NodeReputation(name: 'node-a', score: -55, fails: 3, streak: 0),
+        NodeReputation(name: 'node-b', score: 80, fails: 0, streak: 5),
+      ];
+      await manager.debugStartWithStatus(_link, _statusWithChannels());
+      await manager.debugFlushEvents();
 
-    adapter.answers.add((_) => _json({'code': 0, 'data': {}}));
-    await manager.debugTickReliability();
+      adapter.answers.add((_) => _json({'code': 0, 'data': {}}));
+      await manager.debugTickReliability();
 
-    expect(adapter.requests.last.uri.path, '/c/reliability');
-    final problem = _bodyOf(adapter.requests.last);
-    final flagged = problem['nodes'] as List;
-    expect(flagged, hasLength(1));
-    expect(flagged.single['key'], 'key-a');
-    expect(flagged.single['score'], -55);
-    expect(flagged.single['fails'], 3);
+      expect(adapter.requests.last.uri.path, '/c/reliability');
+      final first = _bodyOf(adapter.requests.last);
+      final reported = (first['nodes'] as List).cast<Map<String, Object?>>();
+      // Healthy nodes belong to the snapshot too, not only the problems.
+      expect(reported, hasLength(2));
+      final flagged = reported.firstWhere((row) => row['key'] == 'key-a');
+      expect(flagged['score'], -55);
+      expect(flagged['fails'], 3);
+      final healthy = reported.firstWhere((row) => row['key'] == 'key-b');
+      expect(healthy['score'], 80);
+      expect(healthy.containsKey('recovered'), isFalse);
 
-    manager.debugReputation = () => const [
-      NodeReputation(name: 'node-a', score: 40, fails: 0, streak: 3),
-    ];
-    adapter.answers.add((_) => _json({'code': 0, 'data': {}}));
-    await manager.debugTickReliability();
+      manager.debugReputation = () => const [
+        NodeReputation(name: 'node-a', score: 40, fails: 0, streak: 3),
+        NodeReputation(name: 'node-b', score: 80, fails: 0, streak: 6),
+      ];
+      adapter.answers.add((_) => _json({'code': 0, 'data': {}}));
+      await manager.debugTickReliability();
 
-    final recovery = _bodyOf(adapter.requests.last);
-    final recovered = recovery['nodes'] as List;
-    expect(recovered, hasLength(1));
-    expect(recovered.single['key'], 'key-a');
-    expect(recovered.single['recovered'], isTrue);
+      final second = _bodyOf(adapter.requests.last);
+      final recovery = (second['nodes'] as List)
+          .cast<Map<String, Object?>>()
+          .firstWhere((row) => row['key'] == 'key-a');
+      expect(recovery['recovered'], isTrue);
 
-    // The recovery is announced once; a healthy node stays quiet after it.
-    await manager.debugTickReliability();
-    expect(adapter.requests, hasLength(3));
-  });
+      // The recovery is announced once; the healthy snapshot keeps flowing.
+      adapter.answers.add((_) => _json({'code': 0, 'data': {}}));
+      await manager.debugTickReliability();
+      final third = _bodyOf(adapter.requests.last);
+      final steady = (third['nodes'] as List).cast<Map<String, Object?>>();
+      expect(steady, hasLength(2));
+      expect(steady.every((row) => row['recovered'] != true), isTrue);
+      expect(adapter.requests, hasLength(4));
+    },
+  );
 }
 
 class _FakeAdapter implements HttpClientAdapter {

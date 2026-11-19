@@ -39,6 +39,9 @@ const _maxPendingEvents = 64;
 const _keyCacheTtl = Duration(minutes: 15);
 
 const _maxNodeRows = 200;
+
+/// The reliability channel carries the whole reputation table, so the cap
+/// also bounds how many nodes one snapshot may describe.
 const _maxReliabilityRows = 100;
 
 /// A node scoring below this is not trusted, which is what the reliability
@@ -1065,7 +1068,8 @@ class SublinkManager {
       appLocalizations.sublinkTelemetryTraffic,
       if (status.sessionsEnabled) appLocalizations.sublinkTelemetrySessions,
       if (status.nodesEnabled) appLocalizations.sublinkTelemetryNodes,
-      if (status.reliabilityEnabled) appLocalizations.sublinkTelemetryReliability,
+      if (status.reliabilityEnabled)
+        appLocalizations.sublinkTelemetryReliability,
     ];
     final lines = channels.map((channel) => '\u2022 $channel').join('\n');
     return '${appLocalizations.sublinkTelemetryMessage}\n$lines\n\n'
@@ -1501,24 +1505,23 @@ class SublinkManager {
     await store.setString(_key(token, 'problems'), jsonEncode(problems));
   }
 
-  /// Reports the nodes this device does not trust and, once, every node that
-  /// was on the previous report and has recovered since.
+  /// Reports the device's whole reputation table: every node the Core keeps a
+  /// score for, problems first. A node that was a problem on the previous
+  /// report and recovered carries a one-shot `recovered` mark so the server
+  /// can close its incident instead of waiting for the score to climb back.
   Future<void> _tickReliability(_SublinkSession session) async {
     final snapshot = await _readReputation();
     if (snapshot == null) return;
     final silent = await _readSilent();
     final keys = await _keysByName();
     final byName = {for (final entry in snapshot) entry.name: entry};
-    final problems = <String, Map<String, Object?>>{};
-    final names = <String, String>{};
+    final rows = <String, Map<String, Object?>>{};
+    final problems = <String, String>{};
     for (final entry in snapshot) {
       final key = keys[entry.name];
       if (key == null || key.isEmpty) continue;
       final isSilent = silent.contains(entry.name);
-      final isProblem =
-          entry.score < _trustedScore || entry.fails > 0 || isSilent;
-      if (!isProblem) continue;
-      problems[key] = {
+      rows[key] = {
         'key': key,
         'score': entry.score,
         'fails': entry.fails,
@@ -1526,27 +1529,36 @@ class SublinkManager {
         'silent': isSilent,
         'last_seen': entry.lastSeen?.toUtc().toIso8601String(),
       };
-      names[key] = entry.name;
+      if (entry.score < _trustedScore || entry.fails > 0 || isSilent) {
+        problems[key] = entry.name;
+      }
     }
     for (final name in silent) {
       final key = keys[name];
-      if (key == null || key.isEmpty || problems.containsKey(key)) continue;
-      problems[key] = {
-        'key': key,
-        'score': 0,
-        'fails': 0,
-        'streak': 0,
-        'silent': true,
-        'last_seen': null,
-      };
-      names[key] = name;
+      if (key == null || key.isEmpty) continue;
+      problems[key] = name;
+      rows.putIfAbsent(
+        key,
+        () => {
+          'key': key,
+          'score': 0,
+          'fails': 0,
+          'streak': 0,
+          'silent': true,
+          'last_seen': null,
+        },
+      );
     }
     final previous = await _loadProblems(session.link.token);
-    final recovered = <Map<String, Object?>>[];
     for (final entry in previous.entries) {
       if (problems.containsKey(entry.key)) continue;
+      final row = rows[entry.key];
+      if (row != null) {
+        row['recovered'] = true;
+        continue;
+      }
       final current = byName[entry.value];
-      recovered.add({
+      rows[entry.key] = {
         'key': entry.key,
         'score': current?.score ?? _trustedScore,
         'fails': current?.fails ?? 0,
@@ -1554,22 +1566,26 @@ class SublinkManager {
         'silent': false,
         'last_seen': current?.lastSeen?.toUtc().toIso8601String(),
         'recovered': true,
-      });
+      };
     }
-    if (problems.isEmpty && recovered.isEmpty) {
+    if (rows.isEmpty) {
       if (previous.isNotEmpty) {
         await _saveProblems(session.link.token, const {});
       }
       return;
     }
-    final ranked = problems.values.toList()
+    final ranked = rows.values.toList()
       ..sort((a, b) {
+        // One-shot recoveries go first: the row cap must never drop them.
+        final recoveredA = a['recovered'] == true;
+        final recoveredB = b['recovered'] == true;
+        if (recoveredA != recoveredB) return recoveredA ? -1 : 1;
         final scoreA = a['score'] as int? ?? 0;
         final scoreB = b['score'] as int? ?? 0;
         if (scoreA != scoreB) return scoreA.compareTo(scoreB);
         return ('${a['key']}').compareTo('${b['key']}');
       });
-    final rows = [...ranked.take(_maxReliabilityRows), ...recovered];
+    final payload = ranked.take(_maxReliabilityRows).toList();
     try {
       final id = await installId;
       final response = await _dio.postUri<Object?>(
@@ -1580,7 +1596,7 @@ class SublinkManager {
           'report_id': '$id:${session.id}:r${session.reliabilitySeq}',
           'install_id': id,
           'reported_at': DateTime.now().toUtc().toIso8601String(),
-          'nodes': rows,
+          'nodes': payload,
         },
         options: Options(
           headers: await _identityHeaders(session.link),
@@ -1598,7 +1614,7 @@ class SublinkManager {
         return;
       }
       session.reliabilitySeq += 1;
-      await _saveProblems(session.link.token, names);
+      await _saveProblems(session.link.token, problems);
     } catch (error) {
       commonPrint.log(
         'sublink reliability error: $error',
