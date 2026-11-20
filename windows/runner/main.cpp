@@ -2,6 +2,8 @@
 #include <flutter/flutter_view_controller.h>
 #include <windows.h>
 
+#include <shobjidl_core.h>
+
 #include <app_links/app_links_plugin_c_api.h>
 #include <proxy/proxy_plugin_c_api.h>
 #include <window/window_plugin_c_api.h>
@@ -15,8 +17,14 @@
 // path is what normally turns the system proxy off.
 constexpr char kClearStaleProxyArgument[] = "--clear-stale-proxy";
 
+// The window, its taskbar button, and the shortcuts the installer writes share
+// this identity, so a pinned or grouped icon never falls back to a blank one.
+constexpr wchar_t kAppUserModelId[] = L"SNKP.FlClash";
+
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
                       _In_ wchar_t *command_line, _In_ int show_command) {
+  ::SetCurrentProcessExplicitAppUserModelID(kAppUserModelId);
+
   std::vector<std::string> command_line_arguments =
       GetCommandLineArguments();
   if (std::find(command_line_arguments.begin(), command_line_arguments.end(),

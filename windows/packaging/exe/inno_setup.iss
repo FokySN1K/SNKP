@@ -176,8 +176,10 @@ Source: "{{SOURCE_DIR}}\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdi
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{autoprograms}\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECUTABLE_NAME}}"
-Name: "{autodesktop}\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECUTABLE_NAME}}"; Tasks: desktopicon
+; The app names this id in windows/runner/main.cpp; a shortcut without it would
+; pin a taskbar button that shows no icon.
+Name: "{autoprograms}\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECUTABLE_NAME}}"; AppUserModelID: "SNKP.FlClash"
+Name: "{autodesktop}\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECUTABLE_NAME}}"; AppUserModelID: "SNKP.FlClash"; Tasks: desktopicon
 ; No skipifsilent: the app installs its own update with /SILENT and quits,
 ; so this entry is what starts it again once the files are in place.
 [Run]
