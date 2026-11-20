@@ -1395,6 +1395,15 @@ class _CommonPopupBoxState extends State<CommonPopupBox> {
     if (boundary is! RenderRepaintBoundary || !boundary.hasSize) {
       return;
     }
+    // The control is captured a frame after its down, when its swell may be
+    // on the way. The press drops to rest and the frame that paints it there
+    // is captured instead, so the popup starts from the control untouched.
+    if (ElasticPress.settleInside(context)) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _captureSource(route, snapshot),
+      );
+      return;
+    }
     final pixelRatio = MediaQuery.devicePixelRatioOf(context);
     snapshot.value = LiquidGlass.withoutPanes(
       () => boundary.toImageSync(pixelRatio: pixelRatio),

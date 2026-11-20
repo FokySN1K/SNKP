@@ -54,6 +54,9 @@ const double _glowPeak = 0.06;
 const double _glowWash = 0.7;
 const double _overdrag = 0.35;
 const double _pullLimit = 7 / 32;
+// A hand on a mouse and a finger on glass both read a pixel or two of
+// noise; a pull holds still until the pointer leaves this ring.
+const double _pullSlop = 3;
 const double _pullStretch = 0.5;
 const _flingProjection = Duration(milliseconds: 100);
 final _trackSpring = SpringDescription.withDurationAndBounce(
@@ -63,6 +66,13 @@ final _pressSpring = SpringDescription.withDampingRatio(
   mass: 1,
   stiffness: 311,
   ratio: 0.593,
+);
+// A pointer that never left the glass does not ring like a tapped lens: a
+// mouse press settles without an overshoot that would rock the button.
+final _mouseSpring = SpringDescription.withDampingRatio(
+  mass: 1,
+  stiffness: 900,
+  ratio: 1,
 );
 final _followSpring = SpringDescription.withDampingRatio(
   mass: 1,
@@ -500,6 +510,22 @@ class ElasticPress extends StatefulWidget {
     return 0;
   }
 
+  /// Drops every press inside [context] straight to rest, for a snapshot that
+  /// must not catch a swell part way. Returns whether any was moving.
+  static bool settleInside(BuildContext context) {
+    var settled = false;
+    void visit(Element element) {
+      final state = element is StatefulElement ? element.state : null;
+      if (state is _ElasticPressState) {
+        settled = state.settleAtRest() || settled;
+      }
+      element.visitChildren(visit);
+    }
+
+    context.visitChildElements(visit);
+    return settled;
+  }
+
   @override
   State<ElasticPress> createState() => _ElasticPressState();
 }
@@ -529,9 +555,14 @@ class _ElasticPressState extends State<ElasticPress>
     _pullY,
   ]);
   int? _pointer;
+  PointerDeviceKind? _kind;
   var _hovers = 0;
   Offset _origin = Offset.zero;
   bool _releasing = false;
+
+  // The spring a press rides: a mouse gets no overshoot to rock the button.
+  SpringDescription get _swellSpring =>
+      _kind == PointerDeviceKind.mouse ? _mouseSpring : _pressSpring;
 
   @override
   void initState() {
@@ -551,7 +582,7 @@ class _ElasticPressState extends State<ElasticPress>
   void _swell(Offset origin) {
     _origin = origin;
     _releasing = false;
-    _lift.springTo(1, _pressSpring);
+    _lift.springTo(1, _swellSpring);
   }
 
   void _handlePointerDown(PointerDownEvent event) {
@@ -561,6 +592,7 @@ class _ElasticPressState extends State<ElasticPress>
       return;
     }
     _pointer = event.pointer;
+    _kind = event.kind;
     _swell(event.localPosition);
   }
 
@@ -573,7 +605,7 @@ class _ElasticPressState extends State<ElasticPress>
     _pullToward(event.localPosition);
   }
 
-  void _pullToward(Offset position) {
+  void _pullToward(Offset position, {bool slop = true}) {
     final box = context.findRenderObject()! as RenderBox;
     final panel = widget.panelOf?.call(box) ?? Offset.zero & box.size;
     final limit = widget.maxPull ?? panel.shortestSide * _pullLimit;
@@ -584,8 +616,20 @@ class _ElasticPressState extends State<ElasticPress>
                 position.dy.clamp(panel.top, panel.bottom),
               )
         : position - _origin;
-    _pullX.springTo(_rubberBand(pull.dx, limit), _trackSpring);
-    _pullY.springTo(_rubberBand(pull.dy, limit), _trackSpring);
+    final held = slop ? _holdStill(pull) : pull;
+    _pullX.springTo(_rubberBand(held.dx, limit), _trackSpring);
+    _pullY.springTo(_rubberBand(held.dy, limit), _trackSpring);
+  }
+
+  // The pull holds still inside a [_pullSlop] ring around the press, then
+  // eases in from the ring's edge: a hand that reads a pixel or two of noise
+  // never shakes the button, and leaving the ring brings no step.
+  Offset _holdStill(Offset pull) {
+    final distance = pull.distance;
+    if (distance <= _pullSlop) {
+      return Offset.zero;
+    }
+    return pull * ((distance - _pullSlop) / distance);
   }
 
   void _handlePointerEnd(PointerEvent event) {
@@ -597,8 +641,8 @@ class _ElasticPressState extends State<ElasticPress>
 
   void _release() {
     _pointer = null;
-    _pullX.springTo(0, _pressSpring);
-    _pullY.springTo(0, _pressSpring);
+    _pullX.springTo(0, _swellSpring);
+    _pullY.springTo(0, _swellSpring);
     _releasing = true;
     _settle();
   }
@@ -610,11 +654,27 @@ class _ElasticPressState extends State<ElasticPress>
       return;
     }
     _releasing = false;
-    _lift.springTo(0, _pressSpring);
+    _lift.springTo(0, _swellSpring);
   }
 
   Offset _localOf(Offset position) =>
       (context.findRenderObject()! as RenderBox).globalToLocal(position);
+
+  /// Drops the press straight to rest, without a spring: a snapshot taken
+  /// after this shows the control as it rests, not part way through a swell.
+  bool settleAtRest() {
+    final moving =
+        _pointer != null ||
+        _lift.value != 0 ||
+        _pullX.value != 0 ||
+        _pullY.value != 0;
+    _pointer = null;
+    _releasing = false;
+    _lift.jumpTo(0);
+    _pullX.jumpTo(0);
+    _pullY.jumpTo(0);
+    return moving;
+  }
 
   @override
   void press(Offset position) {
@@ -625,7 +685,7 @@ class _ElasticPressState extends State<ElasticPress>
   }
 
   @override
-  void drag(Offset position) => _pullToward(_localOf(position));
+  void drag(Offset position) => _pullToward(_localOf(position), slop: false);
 
   @override
   void release() => _release();

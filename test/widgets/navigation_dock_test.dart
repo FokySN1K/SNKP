@@ -622,6 +622,81 @@ void main() {
     expect(painted(), resting);
   });
 
+  testWidgets('a mouse press swells without rocking the button', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const TestApp(
+        child: Center(
+          child: ElasticPress(
+            child: ColoredBox(
+              color: Colors.blue,
+              child: SizedBox.square(dimension: 40),
+            ),
+          ),
+        ),
+      ),
+    );
+    final press = find.byType(ElasticPress);
+    final resting = tester.getRect(press);
+    Rect painted() => _painted(tester, tester.renderObject(press), resting);
+
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await mouse.addPointer(location: Offset.zero);
+    await mouse.down(resting.center);
+    var swollen = resting.width;
+    for (var i = 0; i < 15; i++) {
+      await tester.pump(const Duration(milliseconds: 16));
+      swollen = math.max(swollen, painted().width);
+    }
+    expect(swollen, greaterThan(resting.width * 1.24));
+    expect(swollen, lessThanOrEqualTo(resting.width * 1.2501));
+
+    await mouse.up();
+    await tester.pumpAndSettle();
+    expect(painted(), resting);
+    await mouse.removePointer();
+  });
+
+  testWidgets('a pull holds still until the pointer leaves its ring', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const TestApp(
+        child: Center(
+          child: ElasticPress(
+            child: ColoredBox(
+              color: Colors.blue,
+              child: SizedBox.square(dimension: 40),
+            ),
+          ),
+        ),
+      ),
+    );
+    final press = find.byType(ElasticPress);
+    final resting = tester.getRect(press);
+    Rect painted() => _painted(tester, tester.renderObject(press), resting);
+
+    final gesture = await tester.startGesture(resting.center);
+    await tester.pump(const Duration(milliseconds: 16));
+    final still = painted().center;
+
+    await gesture.moveTo(resting.center + const Offset(2, 0));
+    await tester.pump(const Duration(milliseconds: 16));
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(painted().center.dx, moreOrLessEquals(still.dx, epsilon: 1e-6));
+    expect(painted().center.dy, moreOrLessEquals(still.dy, epsilon: 1e-6));
+
+    await gesture.moveTo(resting.center + const Offset(20, 0));
+    for (var i = 0; i < 12; i++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    expect(painted().center.dx, greaterThan(still.dx + 2));
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('a pointer lifts a tonal button part way, with no state layer', (
     tester,
   ) async {
