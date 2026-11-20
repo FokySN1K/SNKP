@@ -2,6 +2,39 @@
   "schemaVersion": 2,
   "versions": [
     {
+      "version": "1.0.66",
+      "tag": "v1.0.66",
+      "date": "2026-11-20",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "feat",
+          "entries": [
+            {
+              "id": "8fcd0fe",
+              "scope": "core",
+              "text": "The bundled core keeps a healthy pool from being retested and marks a node failed only when its connection ended without an answer."
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "entries": [
+            {
+              "id": "1c622b3",
+              "scope": "home",
+              "text": "A page that comes or goes in the navigation no longer leaves the content area blank."
+            },
+            {
+              "id": "679d872",
+              "scope": "proxies",
+              "text": "The node details now show the dial time the core measured."
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.65",
       "tag": "v1.0.65",
       "date": "2026-11-20",

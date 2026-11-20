@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.0.66 (2026-11-20)
+
+**Features**
+
+- **core** The bundled core keeps a healthy pool from being retested and marks a node failed only when its connection ended without an answer. (8fcd0fe)
+
+**Bug Fixes**
+
+- **home** A page that comes or goes in the navigation no longer leaves the content area blank. (1c622b3)
+- **proxies** The node details now show the dial time the core measured. (679d872)
+
 ## v1.0.65 (2026-11-20)
 
 **Features**
