@@ -2,6 +2,34 @@
   "schemaVersion": 2,
   "versions": [
     {
+      "version": "1.0.65",
+      "tag": "v1.0.65",
+      "date": "2026-11-20",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "feat",
+          "entries": [
+            {
+              "id": "49f66c9",
+              "scope": "proxies",
+              "text": "The node details show the dial time beside the full delay, and the bundled core reports it."
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "entries": [
+            {
+              "id": "cd01034",
+              "scope": "app",
+              "text": "The app forgets the delays of the previous profile, waits for the core state before calling it, and keeps its pattern cache bounded."
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.64",
       "tag": "v1.0.64",
       "date": "2026-11-20",

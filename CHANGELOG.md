@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.0.65 (2026-11-20)
+
+**Features**
+
+- **proxies** The node details show the dial time beside the full delay, and the bundled core reports it. (49f66c9)
+
+**Bug Fixes**
+
+- **app** The app forgets the delays of the previous profile, waits for the core state before calling it, and keeps its pattern cache bounded. (cd01034)
+
 ## v1.0.64 (2026-11-20)
 
 **Bug Fixes**
