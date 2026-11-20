@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fl_clash/core/desktop/model.dart';
 import 'package:fl_clash/core/lib.dart';
 import 'package:fl_clash/core/method.dart';
@@ -19,6 +21,8 @@ class _FakeService implements Service {
 
   String initError = '';
   String syncError = '';
+  final syncStarted = Completer<void>();
+  Completer<void>? syncGate;
   bool shutdownResult = true;
   bool startResult = true;
   bool stopResult = true;
@@ -35,6 +39,10 @@ class _FakeService implements Service {
   @override
   Future<String> syncState(SharedState state) async {
     calls.add('syncState');
+    if (!syncStarted.isCompleted) {
+      syncStarted.complete();
+    }
+    await syncGate?.future;
     return syncError;
   }
 
@@ -276,6 +284,50 @@ void main() {
         await lib.invokeMethod<String>(method: CoreMethod.getProxies),
         'payload',
       );
+    });
+
+    test('waits for the shared state to be applied', () async {
+      service.syncGate = Completer<void>();
+      service.onInvokeMethod = (call) =>
+          CoreMethodResponse(id: call.id, result: 'ok');
+      final starting = lib.start();
+      await service.syncStarted.future;
+
+      Object? result = 'unset';
+      final pending = lib
+          .invokeMethod<String>(method: CoreMethod.getProxies)
+          .then((value) => result = value);
+      await Future<void>.delayed(Duration.zero);
+      expect(service.invokedCalls, isEmpty);
+
+      service.syncGate!.complete();
+      await starting;
+      await pending;
+
+      expect(result, 'ok');
+      expect(service.invokedCalls, hasLength(1));
+    });
+
+    test('a stop releases the invoke that waited for the sync', () async {
+      service.syncGate = Completer<void>();
+      service.onInvokeMethod = (call) =>
+          CoreMethodResponse(id: call.id, result: 'ok');
+      final starting = lib.start();
+      await service.syncStarted.future;
+
+      Object? result = 'unset';
+      final pending = lib
+          .invokeMethod<String>(method: CoreMethod.getProxies)
+          .then((value) => result = value);
+
+      final stopped = await lib.stop();
+      service.syncGate!.complete();
+      await starting;
+      await pending;
+
+      expect(stopped.outcome, CoreLifecycleOutcome.applied);
+      expect(result, isNull);
+      expect(service.invokedCalls, isEmpty);
     });
 
     test('resolves to null when the service answers nothing', () async {

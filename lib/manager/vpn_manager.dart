@@ -76,13 +76,16 @@ class _VpnContainerState extends ConsumerState<VpnManager> {
 
   void _showRestartTip() {
     _reapplyTimer?.cancel();
+    // The tip outlives this widget: an action that reads the provider after a
+    // rebuild would touch a disposed ref.
+    final setupAction = ref.read(setupActionProvider.notifier);
     dialogs.showNotifier(
       currentAppLocalizations.vpnConfigChangeDetected,
       level: MessageLevel.warning,
       actionState: MessageActionState(
         actionText: currentAppLocalizations.restart,
         action: () async {
-          await ref.read(setupActionProvider.notifier).restartVpn();
+          await setupAction.restartVpn();
         },
       ),
     );

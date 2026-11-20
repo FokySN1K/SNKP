@@ -163,11 +163,36 @@ class ProcessRuleEntry {
   int get hashCode => Object.hash(kind, pattern, target);
 }
 
+/// A profile with many distinct process patterns would otherwise keep every
+/// compiled expression for the life of the process. The cap sits far above the
+/// patterns one profile holds, so in practice a hit stays a hit.
+const _processPatternCacheLimit = 256;
+
 final _processRegexCache = <String, RegExp?>{};
 final _processWildcardCache = <String, RegExp>{};
 
+/// A hit moves to the end, so dropping the first key sheds the least recently
+/// used pattern once the cache is full.
+V _rememberProcessPattern<V>(
+  Map<String, V> cache,
+  String pattern,
+  V Function() compile,
+) {
+  if (cache.containsKey(pattern)) {
+    final cached = cache.remove(pattern) as V;
+    cache[pattern] = cached;
+    return cached;
+  }
+  final compiled = compile();
+  if (cache.length >= _processPatternCacheLimit) {
+    cache.remove(cache.keys.first);
+  }
+  cache[pattern] = compiled;
+  return compiled;
+}
+
 RegExp? _processRegex(String pattern) {
-  return _processRegexCache.putIfAbsent(pattern, () {
+  return _rememberProcessPattern(_processRegexCache, pattern, () {
     try {
       // The Core compiles every process regex with IgnoreCase.
       return RegExp(pattern, caseSensitive: false);
@@ -180,7 +205,7 @@ RegExp? _processRegex(String pattern) {
 /// `*` takes any run of characters and `?` exactly one, anchored and case
 /// blind, as the Core's wildcard matcher does.
 RegExp _processWildcard(String pattern) {
-  return _processWildcardCache.putIfAbsent(pattern, () {
+  return _rememberProcessPattern(_processWildcardCache, pattern, () {
     final source = StringBuffer('^');
     for (final rune in pattern.runes) {
       switch (String.fromCharCode(rune)) {

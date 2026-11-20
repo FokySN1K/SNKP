@@ -11,6 +11,8 @@ class UpdatingAction extends _$UpdatingAction {
   @override
   void build() {
     ref.onDispose(_cancelSweep);
+    // A key that was added before this action was first read has no listener
+    // to hear it, and without the initial call its sweep timer never starts.
     ref.listen(updatingKeysProvider, (_, next) {
       _elapsed.removeWhere((key, _) => !next.contains(key));
       if (next.isEmpty) {
@@ -18,7 +20,7 @@ class UpdatingAction extends _$UpdatingAction {
         return;
       }
       _sweepTimer ??= Timer.periodic(updatingSweepInterval, (_) => _sweep());
-    });
+    }, fireImmediately: true);
   }
 
   void _cancelSweep() {

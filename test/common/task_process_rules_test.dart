@@ -86,6 +86,21 @@ void main() {
     expect(rules.targetFor('com.xy.beta'), isNull);
   });
 
+  test('patterns keep matching after the cache sheds old entries', () {
+    final rules = resolveProcessRules([
+      r'PROCESS-NAME-REGEX,^com\.cached\.app$,DIRECT',
+    ]);
+    expect(rules.targetFor('com.cached.app'), 'DIRECT');
+
+    for (var i = 0; i < 300; i++) {
+      resolveProcessRules([
+        'PROCESS-NAME-WILDCARD,com.example.tool$i.*,REJECT',
+      ]).targetFor('com.example.tool$i.worker');
+    }
+
+    expect(rules.targetFor('com.cached.app'), 'DIRECT');
+  });
+
   test('rules apply in order across kinds', () {
     final rules = resolveProcessRules([
       'PROCESS-NAME,com.example.exact,Proxy',

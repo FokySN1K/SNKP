@@ -17,6 +17,10 @@ class CoreLib extends CoreHandlerInterface {
   final Service? _service;
 
   Completer<bool> _connectedCompleter = Completer<bool>();
+
+  /// Methods only run against a Core whose shared state has been applied: the
+  /// connection gate opens before the sync, so it cannot guard them as well.
+  Completer<bool> _readyCompleter = Completer<bool>();
   Future<CoreLifecycleResult>? _closeOperation;
   int _lifecycleRevision = 0;
   int _methodCallId = 0;
@@ -49,21 +53,44 @@ class CoreLib extends CoreHandlerInterface {
         outcome: CoreLifecycleOutcome.coalesced,
       );
     }
+    final connected = _connectedCompleter;
+    final ready = _readyCompleter;
     final initializationError = await _service?.init() ?? '';
     if (initializationError.isNotEmpty) {
       throw StateError(initializationError);
     }
     await globalState.container.read(vpnOptionsProvider.future);
-    _connectedCompleter.complete(true);
-    final syncError =
-        await _service?.syncState(
-          globalState.container.read(sharedStateProvider),
-        ) ??
-        '';
-    if (syncError.isNotEmpty) {
-      _connectedCompleter = Completer<bool>();
+    connected.complete(true);
+    try {
+      final syncError =
+          await _service?.syncState(
+            globalState.container.read(sharedStateProvider),
+          ) ??
+          '';
+      if (syncError.isNotEmpty) {
+        throw StateError(syncError);
+      }
+    } catch (_) {
+      // A stop that ran during the sync has already opened fresh gates; only
+      // the generation that started here may close itself.
+      if (identical(_connectedCompleter, connected)) {
+        _connectedCompleter = Completer<bool>();
+      }
+      if (identical(_readyCompleter, ready)) {
+        _readyCompleter = Completer<bool>();
+      }
+      if (!ready.isCompleted) {
+        ready.complete(false);
+      }
       await _service?.shutdown();
-      throw StateError(syncError);
+      rethrow;
+    }
+    if (identical(_readyCompleter, ready)) {
+      ready.complete(true);
+    } else if (!ready.isCompleted) {
+      // A stop replaced the gates while the sync was in flight: the state it
+      // applied belongs to a generation that is already gone.
+      ready.complete(false);
     }
     return CoreLifecycleResult(
       revision: revision,
@@ -91,7 +118,12 @@ class CoreLib extends CoreHandlerInterface {
         outcome: CoreLifecycleOutcome.coalesced,
       );
     }
+    final ready = _readyCompleter;
     _connectedCompleter = Completer<bool>();
+    _readyCompleter = Completer<bool>();
+    if (!ready.isCompleted) {
+      ready.complete(false);
+    }
     final stopped = await _service?.shutdown() ?? true;
     if (!stopped) {
       throw StateError('Android Core service shutdown failed');
@@ -148,7 +180,12 @@ class CoreLib extends CoreHandlerInterface {
     Object? arguments,
   }) async {
     try {
-      await _connectedCompleter.future.timeout(coreConnectionWaitDuration);
+      final ready = await _readyCompleter.future.timeout(
+        coreConnectionWaitDuration,
+      );
+      if (!ready) {
+        return null;
+      }
     } catch (error) {
       commonPrint.log(
         'Invoke method ${method.name} before connection timed out: $error',

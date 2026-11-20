@@ -201,6 +201,26 @@ void main() {
       });
     });
 
+    test('clearDelays forgets the shown and the saved values', () async {
+      await mockPreferences({
+        proxyDelaysKey: json.encode({
+          _testUrl: {'HK-01': 90},
+        }),
+      });
+      when(core.getProxies).thenAnswer((_) async => _proxiesDataKeeping(0, 0));
+      final container = _delayContainer(buildContainer);
+      await actionOf(container).updateGroups();
+      expect(container.read(delayDataSourceProvider)[_testUrl]?['HK-01'], 90);
+
+      await actionOf(container).clearDelays();
+
+      expect(container.read(delayDataSourceProvider), isEmpty);
+      expect(await preferences.getDelays(), isEmpty);
+
+      await actionOf(container).updateGroups();
+      expect(container.read(delayDataSourceProvider), isEmpty);
+    });
+
     test('a value the Core kept outranks the saved failure', () async {
       await mockPreferences({
         proxyDelaysKey: json.encode({
@@ -1268,6 +1288,22 @@ void main() {
         expect(container.read(isUpdatingProvider('provider_geo')), isFalse);
       },
     );
+
+    testWidgets('a key that predates the action is still swept', (
+      tester,
+    ) async {
+      final container = buildContainer();
+      container
+          .read(updatingKeysProvider.notifier)
+          .start('provider_geo', scope: UpdatingScope.core);
+      container.read(updatingActionProvider.notifier);
+
+      await tester.pump(updatingStaleTimeout + updatingSweepInterval);
+
+      expect(container.read(isUpdatingProvider('provider_geo')), isFalse);
+
+      await tester.pump(Duration.zero);
+    });
 
     testWidgets('the stale sweep does not interrupt the provider update', (
       tester,

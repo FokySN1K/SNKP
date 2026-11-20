@@ -236,7 +236,8 @@ class CommonAction extends _$CommonAction {
       if (!isUser && ref.read(appSettingProvider).autoDownloadUpdate) {
         unawaited(downloadRelease(data));
       }
-      final context = globalState.navigatorKey.currentContext!;
+      final context = globalState.navigatorKey.currentContext;
+      if (context == null) return;
       final res = await dialogs.showMessage(
         title: currentAppLocalizations.discoverNewVersion,
         message: _releaseSpan(

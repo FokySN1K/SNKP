@@ -198,6 +198,15 @@ class ProxiesAction extends _$ProxiesAction {
     await preferences.saveDelays(delayMap);
   }
 
+  /// Forgets every measured value, on screen and on disk: a profile switch must
+  /// not let the next pull seed the page from what the previous profile left.
+  Future<void> clearDelays() async {
+    debouncer.cancel(FunctionTag.saveDelays);
+    _savedDelays = const {};
+    ref.read(delayDataSourceProvider.notifier).value = {};
+    await preferences.saveDelays(const <String, Map<String, int?>>{});
+  }
+
   void updateGroupsDebounce([Duration? duration]) {
     debouncer.call(FunctionTag.updateGroups, updateGroups, duration: duration);
   }
