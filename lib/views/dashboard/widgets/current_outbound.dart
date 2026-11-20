@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/service_probe.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/features/features.dart';
 import 'package:fl_clash/features/ip_quality/labels.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/ip_quality.dart';
@@ -162,6 +161,21 @@ class _CurrentOutboundCardState extends ConsumerState<CurrentOutboundCard>
                             tone: chipTone,
                             dot: isStart,
                           ),
+                        ],
+                        // A phone opens the sheet by its card, as every other
+                        // summary does; a pointer needs a control to press.
+                        trailing: [
+                          if (density.isDesktop)
+                            Transform.translate(
+                              offset: const Offset(8, 0),
+                              child: DashboardIconButton(
+                                glyph: AppGlyphs.info,
+                                tooltip: appLocalizations.details(
+                                  appLocalizations.status,
+                                ),
+                                onPressed: () => showVpnInfoSheet(context),
+                              ),
+                            ),
                         ],
                       ),
                       SizedBox(height: metrics.ipTop),
@@ -329,7 +343,7 @@ class _ExitRow extends StatelessWidget {
               shape: AppShape.xs,
               standsOff: true,
               child: InkWell(
-                onTap: () => showIpQualitySheet(context, ip: info.ip),
+                onTap: () => showVpnInfoSheet(context),
                 customBorder: AppShape.xs,
                 hoverColor: Colors.transparent,
                 splashColor: Colors.transparent,

@@ -139,10 +139,30 @@ class _ProxyInfoSheet extends ConsumerWidget {
                     title: appLocalizations.pinSkipped,
                     value: Text(pinSkipReason(context, group)),
                   ),
-                if (group.poolSize != null)
+                if (group.poolSize case final size?)
                   DetailRow(
                     title: appLocalizations.poolRotation,
-                    value: Text('${group.aliveInPool} / ${group.poolSize}'),
+                    value: PoolRotationValue(
+                      inPool: group.pool.contains(proxy.name),
+                      alive: group.aliveInPool,
+                      size: size,
+                    ),
+                  ),
+                if (group.isSuspicious(proxy.name) ||
+                    group.isDataSilent(proxy.name))
+                  DetailRow(
+                    title: appLocalizations.status,
+                    value: Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      alignment: WrapAlignment.end,
+                      children: [
+                        if (group.isSuspicious(proxy.name))
+                          MetaChip(label: appLocalizations.suspiciousNode),
+                        if (group.isDataSilent(proxy.name))
+                          MetaChip(label: appLocalizations.dataSilentNode),
+                      ],
+                    ),
                   ),
                 if (group.dataSilent.isNotEmpty)
                   DetailRow(

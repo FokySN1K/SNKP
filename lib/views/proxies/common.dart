@@ -2,8 +2,9 @@ import 'package:fl_clash/common/context.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/typography.dart';
-import 'package:flutter/widgets.dart';
+import 'package:material_ui/material_ui.dart';
 
 const proxyGridSpacing = 8.0;
 
@@ -17,6 +18,38 @@ String pinSkipReason(BuildContext context, Group group) {
     final reason? => reason,
     null => appLocalizations.pinSkippedUnavailable,
   };
+}
+
+/// Whether a pool routes through a member, and how many of its members can
+/// carry traffic now: a check or a cross beside the share.
+class PoolRotationValue extends StatelessWidget {
+  const PoolRotationValue({
+    super.key,
+    required this.inPool,
+    required this.alive,
+    required this.size,
+  });
+
+  final bool inPool;
+  final int alive;
+  final int size;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      spacing: 6,
+      children: [
+        GlyphIcon(
+          inPool ? AppGlyphs.check : AppGlyphs.close,
+          size: 16,
+          color: inPool ? colorScheme.primary : colorScheme.onSurfaceVariant,
+        ),
+        Text('$alive / $size'),
+      ],
+    );
+  }
 }
 
 double get listHeaderHeight {

@@ -99,6 +99,7 @@ Widget _app(
   List<RouteHit> hits = const [],
   bool running = false,
   bool suspended = false,
+  List<Group> groups = const [],
 }) {
   final stamp = hits.isEmpty
       ? null
@@ -125,6 +126,7 @@ Widget _app(
         }),
       ),
       ipQualityProvider.overrideWith(quality),
+      groupsProvider.overrideWithValue(groups),
       proxyDefinitionProvider.overrideWith((_, _) async => null),
     ],
     child: _card(density: density),
@@ -169,6 +171,13 @@ Finder _clover() => find.ancestor(
     (widget) => widget is InkResponse && widget.runtimeType == InkResponse,
   ),
 );
+
+Future<void> _openQuality(WidgetTester tester) async {
+  await tester.ensureVisible(find.text('Quality'));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Quality'));
+  await tester.pumpAndSettle();
+}
 
 double _cloverTurn(WidgetTester tester) => tester
     .widget<ShapeBadge>(
@@ -319,7 +328,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('opens its details from the address, not the card', (
+    testWidgets('opens the exit sheet from the address, not the card', (
       tester,
     ) async {
       _useTallView(tester);
@@ -332,6 +341,10 @@ void main() {
 
       await tester.tap(find.text(_ip));
       await tester.pumpAndSettle();
+      expect(find.text('VPN'), findsOneWidget);
+      expect(find.text('Residential · Good'), findsOneWidget);
+
+      await _openQuality(tester);
 
       expect(find.text('Good'), findsOneWidget);
       expect(find.text('Residential'), findsNWidgets(2));
@@ -370,12 +383,13 @@ void main() {
 
       await tester.tap(find.byTooltip('Outbound IP details'));
       await tester.pumpAndSettle();
+      await _openQuality(tester);
 
       expect(find.text("Couldn't determine the IP type"), findsOneWidget);
       expect(find.text('Different outbound IP'), findsOneWidget);
       expect(find.text('Rate limited'), findsOneWidget);
 
-      await tester.tap(find.byTooltip('Check again'));
+      await tester.tap(find.byTooltip('Check again').last);
       await tester.pumpAndSettle();
 
       expect(calls, 2);
@@ -388,6 +402,7 @@ void main() {
 
       await tester.tap(find.byTooltip('Outbound IP details'));
       await tester.pumpAndSettle();
+      await _openQuality(tester);
       await tester.scrollUntilVisible(
         find.text('Hide IP'),
         100,
@@ -398,7 +413,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text(_ip), findsNothing);
-      expect(find.text('*****'), findsNWidgets(2));
+      expect(find.text('*****'), findsNWidgets(3));
       final container = ProviderScope.containerOf(
         tester.element(find.byType(CurrentOutboundCard)),
       );
@@ -525,6 +540,37 @@ void main() {
 
       expect(find.text('VPN'), findsOneWidget);
       expect(find.text('Connection'), findsOneWidget);
+    });
+
+    testWidgets('names the group that picks the exit and its pool', (
+      tester,
+    ) async {
+      _useTallView(tester);
+      const group = Group(
+        name: 'HK Pool',
+        type: GroupType.URLTest,
+        now: 'HK 01',
+        pool: ['HK 01', 'HK 02'],
+        poolSize: 2,
+        suspicious: ['HK 01'],
+      );
+      await tester.pumpWidget(
+        _app(
+          (_, _) async => _residential,
+          hits: const [hit],
+          running: true,
+          groups: const [group],
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text(label));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Group state'), findsOneWidget);
+      expect(find.text('HK Pool'), findsOneWidget);
+      expect(find.text('1 / 2'), findsOneWidget);
+      expect(find.text('Suspicious node'), findsOneWidget);
     });
 
     testWidgets('stays away while the route names no node', (tester) async {

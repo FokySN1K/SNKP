@@ -137,6 +137,17 @@ class ProxyCard extends ConsumerWidget {
           label: appLocalizations.addToLocalProxies,
           onPressed: () => _handleAddToLocalProxies(ref),
         ),
+      CommonPopupMenuItem(
+        glyph: AppGlyphs.info,
+        label: appLocalizations.basicInfo,
+        onPressed: () => showProxyInfoSheet(
+          context,
+          proxy: proxy,
+          groupName: groupName,
+          groupType: groupType,
+          testUrl: testUrl,
+        ),
+      ),
     ];
   }
 
