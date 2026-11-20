@@ -2,6 +2,44 @@
   "schemaVersion": 2,
   "versions": [
     {
+      "version": "1.0.63",
+      "tag": "v1.0.63",
+      "date": "2026-11-20",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "feat",
+          "entries": [
+            {
+              "id": "c66489d",
+              "scope": "proxies",
+              "text": "on desktop, the proxy card now carries an info button that opens the exit sheet, which names the group, the rotation in the pool and the node marks."
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "entries": [
+            {
+              "id": "d79c788",
+              "scope": "dock",
+              "text": "the dock button no longer rocks under a mouse press, and the popup opens from its resting frame."
+            }
+          ]
+        },
+        {
+          "type": "perf",
+          "entries": [
+            {
+              "id": "e1d1cc4",
+              "scope": "core",
+              "text": "calls, games and QUIC traffic cost less CPU, a pool with many nodes opens new connections faster, applying a profile no longer freezes traffic, and HTTPUpgrade links convert correctly."
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.62",
       "tag": "v1.0.62",
       "date": "2026-11-19",

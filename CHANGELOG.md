@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.0.63 (2026-11-20)
+
+**Features**
+
+- **proxies** on desktop, the proxy card now carries an info button that opens the exit sheet, which names the group, the rotation in the pool and the node marks. (c66489d)
+
+**Bug Fixes**
+
+- **dock** the dock button no longer rocks under a mouse press, and the popup opens from its resting frame. (d79c788)
+
+**Performance**
+
+- **core** calls, games and QUIC traffic cost less CPU, a pool with many nodes opens new connections faster, applying a profile no longer freezes traffic, and HTTPUpgrade links convert correctly. (e1d1cc4)
+
 ## v1.0.62 (2026-11-19)
 
 **Bug Fixes**
