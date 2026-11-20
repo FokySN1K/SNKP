@@ -502,6 +502,15 @@ void main() {
       expect(container.read(appSettingProvider).openLogs, isTrue);
       expect(find.byType(GeneralView), findsOneWidget);
       expect(tester.takeException(), isNull);
+      // The page behind the new item keeps its route and stays in the
+      // viewport: a kept page left in its old slot once left the area empty.
+      expect(find.byType(GeneralView).hitTestable(), findsOneWidget);
+      final pageView = tester.widget<PageView>(find.byType(PageView));
+      expect(pageView.controller?.page, 4);
+      expect(
+        tester.getRect(find.byType(GeneralView)).left,
+        greaterThanOrEqualTo(tester.getRect(find.byType(PageView)).left),
+      );
     },
   );
 

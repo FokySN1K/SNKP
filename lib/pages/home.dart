@@ -243,6 +243,8 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
 
   List<int>? _order;
   int _slide = 0;
+  int _generation = 0;
+  final Map<PageLabel, GlobalKey> _pageKeys = {};
 
   @override
   void initState() {
@@ -262,8 +264,13 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
       _labelsOf(oldWidget.navigationItems),
       _labelsOf(widget.navigationItems),
     )) {
-      _order = null;
-      _updatePageController();
+      // A page appears or disappears with a setting, and every page behind
+      // it changes its index. The page view keeps its children alive by
+      // index, so the kept pages stay in their old slots and the viewport
+      // lands on an empty one: the content area goes blank. Start the page
+      // view over with a fresh controller, and let each page move over by
+      // its global key, which keeps its routes and its state.
+      _restartPageView();
     }
   }
 
@@ -298,10 +305,14 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
     final current = _order?[page] ?? page;
     if (_order != null) {
       setState(() => _order = null);
-      _pageController.jumpToPage(current);
+      if (_pageController.hasClients) {
+        _pageController.jumpToPage(current);
+      }
     }
     if (!isMobile || ignoreAnimateTo) {
-      _pageController.jumpToPage(index);
+      if (_pageController.hasClients) {
+        _pageController.jumpToPage(index);
+      }
       return;
     }
     // As TabBarView does, so no page between is built and painted on the way.
@@ -325,9 +336,20 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
     }
   }
 
-  void _updatePageController() {
-    final pageLabel = ref.read(currentPageLabelProvider);
-    _toPage(pageLabel, true);
+  Key _keyOf(PageLabel label) => _pageKeys.putIfAbsent(
+    label,
+    () => GlobalKey(debugLabel: 'home_page_${label.name}'),
+  );
+
+  void _restartPageView() {
+    final previous = _pageController;
+    final index = _pageIndex;
+    _order = null;
+    _generation++;
+    _pageController = PageController(initialPage: index < 0 ? 0 : index);
+    // The previous controller keeps its position until this frame rebuilds
+    // the page view, so it can only be disposed once the frame is done.
+    WidgetsBinding.instance.addPostFrameCallback((_) => previous.dispose());
   }
 
   @override
@@ -347,6 +369,7 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
       ),
     );
     return PageView.builder(
+      key: ValueKey(_generation),
       controller: _pageController,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: itemCount,
@@ -363,13 +386,17 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
         return _order?.indexOf(index) ?? index;
       },
       itemBuilder: (context, index) {
-        final page = widget.pageBuilder(context, _order?[index] ?? index);
+        final pageIndex = _order?[index] ?? index;
+        final page = widget.pageBuilder(context, pageIndex);
         return _FadeTabPage(
           key: page.key,
           controller: _pageController,
           position: index,
           enabled: fade,
-          child: page,
+          child: KeyedSubtree(
+            key: _keyOf(widget.navigationItems[pageIndex].label),
+            child: page,
+          ),
         );
       },
     );
