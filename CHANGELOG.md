@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.64 (2026-11-20)
+
+**Bug Fixes**
+
+- **windows** Name the taskbar id so a pinned icon keeps its page (79b13bd)
+- **buttons** Keep a hover from greying and rocking a tonal button (2ee738b)
+
 ## v1.0.63 (2026-11-20)
 
 **Features**

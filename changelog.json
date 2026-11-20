@@ -2,6 +2,29 @@
   "schemaVersion": 2,
   "versions": [
     {
+      "version": "1.0.64",
+      "tag": "v1.0.64",
+      "date": "2026-11-20",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "fix",
+          "entries": [
+            {
+              "id": "79b13bd",
+              "scope": "windows",
+              "text": "Name the taskbar id so a pinned icon keeps its page"
+            },
+            {
+              "id": "2ee738b",
+              "scope": "buttons",
+              "text": "Keep a hover from greying and rocking a tonal button"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.63",
       "tag": "v1.0.63",
       "date": "2026-11-20",
