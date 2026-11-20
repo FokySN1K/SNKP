@@ -16,10 +16,13 @@ type ProxyDetailsParams struct {
 
 // DelaySample is one entry of a node's check history. Time is Unix
 // milliseconds so the app can say when the last check ran; a zero Delay is a
-// check that failed.
+// check that failed. RTT is the dial round trip the check measured before the
+// request went out, so the app can tell a slow server from a slow node; a
+// check that never reached the proxy reports none.
 type DelaySample struct {
 	Time  int64  `json:"time"`
 	Delay uint16 `json:"delay"`
+	RTT   uint16 `json:"rtt,omitempty"`
 }
 
 // ProxyDetails is what a card has no room for: whether the last check of the
@@ -71,7 +74,7 @@ func delayState(proxy constant.Proxy, testUrl string) (bool, []constant.DelayHis
 func delaySamples(history []constant.DelayHistory) []DelaySample {
 	samples := make([]DelaySample, len(history))
 	for i, record := range history {
-		samples[i] = DelaySample{Time: record.Time.UnixMilli(), Delay: record.Delay}
+		samples[i] = DelaySample{Time: record.Time.UnixMilli(), Delay: record.Delay, RTT: record.RTT}
 	}
 	return samples
 }

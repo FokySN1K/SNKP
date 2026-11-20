@@ -52,6 +52,9 @@ func TestProxyDetailsFollowTheTestTarget(t *testing.T) {
 		if sample.Delay == 0 || sample.Time == 0 {
 			t.Errorf("sample = %+v, want a delay and a timestamp", sample)
 		}
+		if sample.RTT == 0 {
+			t.Errorf("sample = %+v, want the dial RTT the check measured", sample)
+		}
 	}
 
 	details, err = handleProxyDetails(ProxyDetailsParams{ProxyName: "node-a", TestUrl: second.URL})
@@ -88,8 +91,8 @@ func TestProxyDetailsMarkAFailedCheckDead(t *testing.T) {
 	if details.Alive {
 		t.Error("a node whose last check failed is reported alive")
 	}
-	if len(details.History) != 1 || details.History[0].Delay != 0 {
-		t.Errorf("history = %+v, want the one failed check", details.History)
+	if len(details.History) != 1 || details.History[0].Delay != 0 || details.History[0].RTT != 0 {
+		t.Errorf("history = %+v, want the one failed check without a dial RTT", details.History)
 	}
 }
 
