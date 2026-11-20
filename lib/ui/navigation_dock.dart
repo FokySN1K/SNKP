@@ -91,9 +91,10 @@ final _jellySpring = SpringDescription.withDampingRatio(
   stiffness: 100,
   ratio: 0.4,
 );
+// A hover settles without a ring that would rock the button, as a mouse
+// press on it does.
 final _settleSpring = SpringDescription.withDurationAndBounce(
   duration: const Duration(milliseconds: 500),
-  bounce: 0.32,
 );
 final _hoverSpring = SpringDescription.withDurationAndBounce(
   duration: const Duration(milliseconds: 260),

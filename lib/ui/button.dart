@@ -503,6 +503,10 @@ class TonalButtonTheme extends StatelessWidget {
                   : null,
               disabledBackgroundColor: grouped ? fill : null,
               disabledForegroundColor: grouped ? disabledForeground : null,
+              // The fill is transparent, so a Material raised under the
+              // pointer would paint its shadow through the button as a grey
+              // pill; the swell alone answers a hover.
+              elevation: 0,
               minimumSize: Size.square(size.button),
               padding: const EdgeInsets.symmetric(horizontal: 14),
               shape: AppShape.full,
