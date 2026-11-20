@@ -282,11 +282,12 @@ class RouteTarget {
 /// measured. A zero [delay] is a check that failed.
 @immutable
 class DelaySample {
-  const DelaySample({required this.time, required this.delay});
+  const DelaySample({required this.time, required this.delay, this.rtt = 0});
 
   factory DelaySample.fromJson(Map<String, Object?> json) => DelaySample(
     time: (json['time'] as num?)?.toInt() ?? 0,
     delay: (json['delay'] as num?)?.toInt() ?? 0,
+    rtt: (json['rtt'] as num?)?.toInt() ?? 0,
   );
 
   /// Unix milliseconds of the check.
@@ -295,17 +296,24 @@ class DelaySample {
   /// What the check measured in milliseconds; zero when it failed.
   final int delay;
 
+  /// How long the road to the node took before the server answered, in
+  /// milliseconds; zero when the dial never completed.
+  final int rtt;
+
   DateTime get checkedAt => DateTime.fromMillisecondsSinceEpoch(time);
 
   @override
   bool operator ==(Object other) =>
-      other is DelaySample && other.time == time && other.delay == delay;
+      other is DelaySample &&
+      other.time == time &&
+      other.delay == delay &&
+      other.rtt == rtt;
 
   @override
-  int get hashCode => Object.hash(time, delay);
+  int get hashCode => Object.hash(time, delay, rtt);
 
   @override
-  String toString() => 'DelaySample($time, $delay)';
+  String toString() => 'DelaySample($time, $delay, $rtt)';
 }
 
 /// The node to describe and the target its group tests against.

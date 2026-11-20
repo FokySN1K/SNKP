@@ -15,8 +15,8 @@ class _MockCore extends Mock implements CoreHandlerInterface {}
 const _details = ProxyDetails(
   alive: true,
   history: [
-    DelaySample(time: 1700000000000, delay: 41),
-    DelaySample(time: 1700000060000, delay: 42),
+    DelaySample(time: 1700000000000, delay: 41, rtt: 12),
+    DelaySample(time: 1700000060000, delay: 42, rtt: 13),
   ],
   udp: true,
   xudp: true,
@@ -62,6 +62,7 @@ void main() {
     );
 
     expect(details?.history.map((sample) => sample.delay), [41, 42]);
+    expect(details?.history.map((sample) => sample.rtt), [12, 13]);
     expect(details?.last?.checkedAt.millisecondsSinceEpoch, 1700000060000);
     expect(details?.transports, ['UDP', 'XUDP', 'SMUX']);
     verify(

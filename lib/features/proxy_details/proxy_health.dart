@@ -57,6 +57,17 @@ class ProxyHealthSection extends ConsumerWidget {
           testUrl: testUrl,
           history: history,
         ),
+        // The full delay decides which node the pool picks; RTT explains
+        // where that delay comes from, so an interactive user can tell a
+        // close node from a fast server.
+        if (last != null && last.rtt > 0)
+          DetailRow(
+            title: 'RTT',
+            value: Text(
+              '${last.rtt} ms',
+              style: TextStyle(color: context.colorScheme.onSurfaceVariant),
+            ),
+          ),
         if (last != null)
           DetailRow(
             title: appLocalizations.lastUpdated,

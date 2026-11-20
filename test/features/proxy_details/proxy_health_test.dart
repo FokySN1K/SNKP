@@ -13,8 +13,8 @@ const _proxy = Proxy(name: 'Proxy', type: 'ss');
 const _healthy = ProxyDetails(
   alive: true,
   history: [
-    DelaySample(time: 1700000000000, delay: 41),
-    DelaySample(time: 1700000060000, delay: 42),
+    DelaySample(time: 1700000000000, delay: 41, rtt: 12),
+    DelaySample(time: 1700000060000, delay: 42, rtt: 13),
   ],
   udp: true,
   tfo: true,
@@ -44,6 +44,8 @@ void main() {
     expect(find.text('Health check'), findsOneWidget);
     expect(find.text('Available'), findsOneWidget);
     expect(find.text('42 ms'), findsOneWidget);
+    expect(find.text('RTT'), findsOneWidget);
+    expect(find.text('13 ms'), findsOneWidget);
     expect(find.text('Last updated'), findsOneWidget);
     expect(find.text('Transport'), findsOneWidget);
     expect(find.text('UDP'), findsOneWidget);
@@ -55,7 +57,7 @@ void main() {
     await tester.pumpWidget(
       _app(
         const ProxyDetails(
-          history: [DelaySample(time: 1700000000000, delay: 0)],
+          history: [DelaySample(time: 1700000000000, delay: 0, rtt: 0)],
         ),
       ),
     );
@@ -63,6 +65,7 @@ void main() {
 
     expect(find.text('Unavailable'), findsOneWidget);
     expect(find.text('Failed'), findsOneWidget);
+    expect(find.text('RTT'), findsNothing);
     expect(find.byType(LineChart), findsNothing);
   });
 
@@ -72,6 +75,7 @@ void main() {
 
     expect(find.text('Health check'), findsOneWidget);
     expect(find.text('No info'), findsNWidgets(2));
+    expect(find.text('RTT'), findsNothing);
     expect(find.text('Last updated'), findsNothing);
     expect(find.text('Transport'), findsNothing);
   });
