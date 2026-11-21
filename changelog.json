@@ -2,6 +2,24 @@
   "schemaVersion": 2,
   "versions": [
     {
+      "version": "1.0.68",
+      "tag": "v1.0.68",
+      "date": "2026-11-21",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "feat",
+          "entries": [
+            {
+              "id": "c65baf4",
+              "scope": "proxies",
+              "text": "Open the full explanation of the metrics from the menu"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.67",
       "tag": "v1.0.67",
       "date": "2026-11-21",

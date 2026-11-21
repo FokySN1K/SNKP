@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.68 (2026-11-21)
+
+**Features**
+
+- **proxies** Open the full explanation of the metrics from the menu (c65baf4)
+
 ## v1.0.67 (2026-11-21)
 
 **Features**
