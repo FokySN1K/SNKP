@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.67 (2026-11-21)
+
+**Features**
+
+- **proxies** Show the road time beside the delay and sort by it (72e2733)
+
 ## v1.0.66 (2026-11-20)
 
 **Features**

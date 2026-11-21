@@ -2,6 +2,24 @@
   "schemaVersion": 2,
   "versions": [
     {
+      "version": "1.0.67",
+      "tag": "v1.0.67",
+      "date": "2026-11-21",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "feat",
+          "entries": [
+            {
+              "id": "72e2733",
+              "scope": "proxies",
+              "text": "Show the road time beside the delay and sort by it"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.66",
       "tag": "v1.0.66",
       "date": "2026-11-20",
