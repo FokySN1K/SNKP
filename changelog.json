@@ -2,6 +2,24 @@
   "schemaVersion": 2,
   "versions": [
     {
+      "version": "1.0.69",
+      "tag": "v1.0.69",
+      "date": "2026-11-21",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "feat",
+          "entries": [
+            {
+              "id": "f23f25f",
+              "scope": "proxies",
+              "text": "the test all button is back in the proxies bar; the delay chart now breaks on failed checks and overlays the road time"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.68",
       "tag": "v1.0.68",
       "date": "2026-11-21",

@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.69 (2026-11-21)
+
+**Features**
+
+- **proxies** the test all button is back in the proxies bar; the delay chart now breaks on failed checks and overlays the road time (f23f25f)
+
 ## v1.0.68 (2026-11-21)
 
 **Features**
