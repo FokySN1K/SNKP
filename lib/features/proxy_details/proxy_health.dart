@@ -62,7 +62,7 @@ class ProxyHealthSection extends ConsumerWidget {
         // close node from a fast server.
         if (last != null && last.rtt > 0)
           DetailRow(
-            title: 'RTT',
+            title: appLocalizations.rtt,
             value: Text(
               '${last.rtt} ms',
               style: TextStyle(color: context.colorScheme.onSurfaceVariant),
@@ -128,6 +128,8 @@ class _DelayHistoryRow extends ConsumerWidget {
         ) !=
         null;
     final shown = delay ?? (history.isEmpty ? null : history.last.delay);
+    final colorScheme = context.colorScheme;
+    final lastDelay = _lastMeasuredDelay(history);
     return DetailRow(
       title: appLocalizations.delay,
       value: Row(
@@ -151,13 +153,25 @@ class _DelayHistoryRow extends ConsumerWidget {
               width: 88,
               height: 24,
               child: LineChart(
-                values: [for (final sample in history) sample.delay.toDouble()],
+                values: [
+                  for (final sample in history)
+                    sample.delay > 0 ? sample.delay.toDouble() : null,
+                ],
+                secondary: history.any((sample) => sample.rtt > 0)
+                    ? [
+                        for (final sample in history)
+                          sample.rtt > 0 ? sample.rtt.toDouble() : null,
+                      ]
+                    : null,
                 revision: history.last.time,
                 capacity: math.max(history.length, 10),
                 minScale: 200,
-                color:
-                    context.colorScheme.delayColor(history.last.delay) ??
-                    context.colorScheme.primary,
+                color: lastDelay == null
+                    ? colorScheme.onSurfaceVariant
+                    : colorScheme.delayColor(lastDelay) ??
+                          colorScheme.onSurfaceVariant,
+                secondaryColor: colorScheme.onSurfaceVariant,
+                failureColor: colorScheme.error,
                 baselineRatio: 0.9,
               ),
             ),
@@ -173,4 +187,15 @@ class _DelayHistoryRow extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// The delay of the last check that measured one: a run of failures keeps the
+/// chart the colour of the traffic it broke away from.
+int? _lastMeasuredDelay(List<DelaySample> history) {
+  for (final sample in history.reversed) {
+    if (sample.delay > 0) {
+      return sample.delay;
+    }
+  }
+  return null;
 }

@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 const _color = Color(0xFF3366FF);
+const _secondaryColor = Color(0xFF00AA55);
+const _failureColor = Color(0xFFCC0000);
 
 final _canvas = find.descendant(
   of: find.byType(LineChart),
@@ -10,9 +12,12 @@ final _canvas = find.descendant(
 );
 
 Widget _chart(
-  List<double> values, {
+  List<double?> values, {
   required int revision,
   double baselineRatio = 1,
+  List<double?>? secondary,
+  Color? secondaryColor,
+  Color? failureColor,
 }) {
   return Center(
     child: SizedBox(
@@ -20,10 +25,13 @@ Widget _chart(
       height: 100,
       child: LineChart(
         values: values,
+        secondary: secondary,
         revision: revision,
         capacity: 30,
         minScale: 1,
         color: _color,
+        secondaryColor: secondaryColor,
+        failureColor: failureColor,
         baselineRatio: baselineRatio,
       ),
     ),
@@ -88,6 +96,64 @@ void main() {
     expect(_lineBounds(tester).height, greaterThan(0));
 
     await tester.pumpWidget(_chart(const [], revision: 0));
-    expect(_lineBounds(tester).height, 0);
+    expect(
+      tester.renderObject(_canvas),
+      isNot(paints..path(style: PaintingStyle.stroke)),
+    );
+  });
+
+  testWidgets('a failed check breaks the line and marks the baseline', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _chart([10, 12, null, 8, 9], revision: 5, failureColor: _failureColor),
+    );
+
+    expect(
+      tester.renderObject(_canvas),
+      paints
+        ..path(style: PaintingStyle.fill)
+        ..path(color: _color, style: PaintingStyle.stroke)
+        ..path(style: PaintingStyle.fill)
+        ..path(color: _color, style: PaintingStyle.stroke)
+        ..circle(color: _failureColor),
+    );
+  });
+
+  testWidgets('a second series is dashed over the first', (tester) async {
+    await tester.pumpWidget(
+      _chart(
+        [10, 11, 12, 13],
+        revision: 4,
+        secondary: [4, 4, 5, 5],
+        secondaryColor: _secondaryColor,
+      ),
+    );
+
+    final dashes = <Rect>[];
+    expect(
+      tester.renderObject(_canvas),
+      // An "everything" step, unlike "something", keeps calling the predicate
+      // after the first hit, so every dash is counted. Paint.color
+      // round-trips through float32, so colours are compared in 8-bit space.
+      paints..everything((method, arguments) {
+        if (method == #drawPath &&
+            (arguments[1] as Paint).color.toARGB32() ==
+                _secondaryColor.toARGB32()) {
+          dashes.add((arguments[0] as Path).getBounds());
+        }
+        return true;
+      }),
+    );
+    expect(
+      dashes.length,
+      greaterThan(1),
+      reason: 'the overlay is drawn as dashes, not one solid stroke',
+    );
+    expect(
+      dashes.every((bounds) => bounds.top >= 0 && bounds.bottom <= 100.01),
+      isTrue,
+      reason: 'the overlay shares the scale of the primary series',
+    );
   });
 }

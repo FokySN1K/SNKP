@@ -128,15 +128,30 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
     ];
   }
 
+  /// The manual test: a tab measures its own group, and the list measures
+  /// every group at once, as the tray and the hotkey do, so the bar keeps a
+  /// bolt in either style.
   IconButtonData? _buildPrimaryAction() {
-    if (!_isTab) {
-      return null;
+    if (_isTab) {
+      final isDelayTesting = ref.watch(currentGroupDelayTestingProvider);
+      return IconButtonData(
+        glyph: AppGlyphs.bolt,
+        onPressed: () {
+          _proxiesTabKey.currentState?.delayTestCurrentGroup();
+        },
+        tooltip: context.appLocalizations.delayTest,
+        isLoading: isDelayTesting,
+      );
     }
-    final isDelayTesting = ref.watch(currentGroupDelayTestingProvider);
+    final isDelayTesting = ref.watch(
+      delayTestingGroupsProvider.select((state) => state.isNotEmpty),
+    );
     return IconButtonData(
       glyph: AppGlyphs.bolt,
       onPressed: () {
-        _proxiesTabKey.currentState?.delayTestCurrentGroup();
+        ref
+            .read(proxiesActionProvider.notifier)
+            .delayTestGroups(ref.read(groupsProvider));
       },
       tooltip: context.appLocalizations.delayTest,
       isLoading: isDelayTesting,
