@@ -80,6 +80,8 @@ class ProxiesAction extends _$ProxiesAction {
 
   Map<String, Map<String, int>>? _savedDelays;
 
+  Map<String, Map<String, int>>? _savedRtts;
+
   @override
   void build() {
     ref.onDispose(() {
@@ -152,6 +154,7 @@ class ProxiesAction extends _$ProxiesAction {
       // The value lands first, so a card that drops its spinner in the same
       // frame already shows the number it was waiting for.
       ref.read(delayDataSourceProvider.notifier).setDelays(delays);
+      ref.read(rttDataSourceProvider.notifier).setRtts(delays);
       _scheduleDelaysSave();
       for (final job in _groupDelayTestJobs) {
         for (final delay in delays) {
@@ -182,6 +185,10 @@ class ProxiesAction extends _$ProxiesAction {
     return _savedDelays ??= await preferences.getDelays();
   }
 
+  Future<Map<String, Map<String, int>>> _readSavedRtts() async {
+    return _savedRtts ??= await preferences.getRtts();
+  }
+
   void _scheduleDelaysSave() {
     debouncer.call(
       FunctionTag.saveDelays,
@@ -194,8 +201,13 @@ class ProxiesAction extends _$ProxiesAction {
   Future<void> saveDelays() async {
     debouncer.cancel(FunctionTag.saveDelays);
     final delayMap = ref.read(delayDataSourceProvider);
-    if (delayMap.isEmpty) return;
-    await preferences.saveDelays(delayMap);
+    if (delayMap.isNotEmpty) {
+      await preferences.saveDelays(delayMap);
+    }
+    final rttMap = ref.read(rttDataSourceProvider);
+    if (rttMap.isNotEmpty) {
+      await preferences.saveRtts(rttMap);
+    }
   }
 
   /// Forgets every measured value, on screen and on disk: a profile switch must
@@ -203,8 +215,11 @@ class ProxiesAction extends _$ProxiesAction {
   Future<void> clearDelays() async {
     debouncer.cancel(FunctionTag.saveDelays);
     _savedDelays = const {};
+    _savedRtts = const {};
     ref.read(delayDataSourceProvider.notifier).value = {};
+    ref.read(rttDataSourceProvider.notifier).value = {};
     await preferences.saveDelays(const <String, Map<String, int?>>{});
+    await preferences.saveRtts(const <String, Map<String, int?>>{});
   }
 
   void updateGroupsDebounce([Duration? duration]) {
@@ -239,6 +254,9 @@ class ProxiesAction extends _$ProxiesAction {
           final sortType = ref.read(
             proxiesStyleSettingProvider.select((state) => state.sortType),
           );
+          final metric = ref.read(
+            proxiesStyleSettingProvider.select((state) => state.metric),
+          );
           final testUrl = ref.read(
             patchClashConfigProvider.select((state) => state.testUrl),
           );
@@ -253,11 +271,16 @@ class ProxiesAction extends _$ProxiesAction {
             final delaySource = ref.read(delayDataSourceProvider.notifier);
             delaySource.seedDelays(proxiesData.lastDelays);
             delaySource.seedDelays(await _readSavedDelays());
+            final rttSource = ref.read(rttDataSourceProvider.notifier);
+            rttSource.seedRtts(proxiesData.lastRtts);
+            rttSource.seedRtts(await _readSavedRtts());
             return await toGroupsTask(
               ComputeGroupsState(
                 proxiesData: proxiesData,
                 sortType: sortType,
+                metric: metric,
                 delayMap: ref.read(delayDataSourceProvider),
+                rttMap: ref.read(rttDataSourceProvider),
                 selectedMap: selectedMap,
                 defaultTestUrl: testUrl,
               ),

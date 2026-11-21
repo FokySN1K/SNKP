@@ -200,6 +200,19 @@ int? delay(Ref ref, {required String proxyName, String? testUrl}) {
 }
 
 @riverpod
+int? rtt(Ref ref, {required String proxyName, String? testUrl}) {
+  final currentTestUrl = ref.watch(realTestUrlProvider(testUrl));
+  final proxyState = ref.watch(realSelectedProxyStateProvider(proxyName));
+  final effectiveTestUrl = proxyState.testUrl.takeFirstValid([currentTestUrl]);
+  final effectiveProxyName = proxyState.proxyName;
+  return ref.watch(
+    rttDataSourceProvider.select(
+      (state) => state[effectiveTestUrl]?[effectiveProxyName],
+    ),
+  );
+}
+
+@riverpod
 DelayTestPhase? delayTestPhase(
   Ref ref, {
   required String proxyName,
@@ -292,9 +305,8 @@ String? selectedProxyName(Ref ref, String groupName) {
 }
 
 @riverpod
-({bool isProxies, int sortNum, ProxiesSortType sortType}) needUpdateGroups(
-  Ref ref,
-) {
+({bool isProxies, int sortNum, ProxiesSortType sortType, ProxyMetric metric})
+needUpdateGroups(Ref ref) {
   final isProxies = ref.watch(
     currentPageLabelProvider.select((state) => state == PageLabel.proxies),
   );
@@ -302,5 +314,13 @@ String? selectedProxyName(Ref ref, String groupName) {
   final sortType = ref.watch(
     proxiesStyleSettingProvider.select((state) => state.sortType),
   );
-  return (isProxies: isProxies, sortNum: sortNum, sortType: sortType);
+  final metric = ref.watch(
+    proxiesStyleSettingProvider.select((state) => state.metric),
+  );
+  return (
+    isProxies: isProxies,
+    sortNum: sortNum,
+    sortType: sortType,
+    metric: metric,
+  );
 }

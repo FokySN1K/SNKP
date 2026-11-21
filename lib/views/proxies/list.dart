@@ -840,17 +840,40 @@ class _SelectedProxyName extends ConsumerWidget {
     final delay = ref.watch(
       delayProvider(proxyName: proxyName, testUrl: group.testUrl),
     );
-    final delayText = delay == null
-        ? null
-        : Text(
-            delay > 0
-                ? '$delay ms'
-                : delayFailureText(delay, context.appLocalizations),
-            maxLines: 1,
-            style: AppTextStyle.caption1
-                .of(context, emphasized: true)
-                .copyWith(color: context.colorScheme.delayColor(delay)),
-          );
+    final metric = ref.watch(
+      proxiesStyleSettingProvider.select((state) => state.metric),
+    );
+    final rtt = ref.watch(
+      rttProvider(proxyName: proxyName, testUrl: group.testUrl),
+    );
+    final delayStyle = AppTextStyle.caption1.of(context, emphasized: true);
+    final Widget? delayText;
+    if (delay == null) {
+      delayText = null;
+    } else if (delay <= 0) {
+      delayText = Text(
+        delayFailureText(delay, context.appLocalizations),
+        maxLines: 1,
+        style: delayStyle.copyWith(color: context.colorScheme.delayColor(delay)),
+      );
+    } else if (metric == ProxyMetric.rtt) {
+      final measuredRtt = rtt ?? 0;
+      delayText = Text(
+        measuredRtt > 0 ? '$measuredRtt ms' : '—',
+        maxLines: 1,
+        style: delayStyle.copyWith(
+          color: measuredRtt > 0
+              ? context.colorScheme.delayColor(measuredRtt)
+              : context.colorScheme.onSurfaceVariant,
+        ),
+      );
+    } else {
+      delayText = Text(
+        '$delay ms',
+        maxLines: 1,
+        style: delayStyle.copyWith(color: context.colorScheme.delayColor(delay)),
+      );
+    }
     final iconSize = globalState.measure.textHeight(AppTextStyle.caption1);
     // A pin the group routes around must not read as the user's own pick: the
     // header says the route moved and why. A pin the group still follows, but

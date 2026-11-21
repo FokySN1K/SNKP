@@ -1136,6 +1136,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "memoryReleasedSize": m47,
     "messageTest": MessageLookupByLibrary.simpleMessage("메시지 테스트"),
     "messageTestTip": MessageLookupByLibrary.simpleMessage("이것은 메시지입니다."),
+    "metricHelp": MessageLookupByLibrary.simpleMessage("지연과 RTT"),
+    "metricHelpBody": MessageLookupByLibrary.simpleMessage(
+      "지연은 응답까지의 시간이고, RTT는 연결 자체의 왕복 시간입니다.",
+    ),
+    "metricNoRtt": MessageLookupByLibrary.simpleMessage("RTT가 아직 측정되지 않음"),
     "minimize": MessageLookupByLibrary.simpleMessage("최소화"),
     "minimizeOnExit": MessageLookupByLibrary.simpleMessage("종료 시 최소화"),
     "minutes": MessageLookupByLibrary.simpleMessage("분"),
@@ -1393,6 +1398,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "routeAddress": MessageLookupByLibrary.simpleMessage("라우팅 주소"),
     "routeExcludeAddress": MessageLookupByLibrary.simpleMessage("라우팅 제외 주소"),
     "routingMark": MessageLookupByLibrary.simpleMessage("라우팅 마크"),
+    "rtt": MessageLookupByLibrary.simpleMessage("RTT"),
     "ru": MessageLookupByLibrary.simpleMessage("러시아어"),
     "rule": MessageLookupByLibrary.simpleMessage("규칙"),
     "ruleActionAndDesc": MessageLookupByLibrary.simpleMessage("논리 규칙 AND"),
@@ -1601,6 +1607,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "show": MessageLookupByLibrary.simpleMessage("표시"),
     "showLess": MessageLookupByLibrary.simpleMessage("접기"),
+    "showMetric": MessageLookupByLibrary.simpleMessage("표시"),
     "showMore": MessageLookupByLibrary.simpleMessage("펼치기"),
     "showNotificationStopAction": MessageLookupByLibrary.simpleMessage(
       "알림에 중지 버튼 표시",

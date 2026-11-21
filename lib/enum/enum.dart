@@ -223,6 +223,10 @@ enum NavigationItemMode { mobile, desktop, more, moreFull }
 
 enum ProxiesSortType { none, delay, name }
 
+/// What the proxies page reads off a measured node. The choice drives both
+/// the number a card shows and the sort that orders the page.
+enum ProxyMetric { delay, rtt }
+
 enum TunStack { gvisor, system, mixed, mips }
 
 enum AccessControlMode { acceptSelected, rejectSelected }

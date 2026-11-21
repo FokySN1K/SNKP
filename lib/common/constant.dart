@@ -139,6 +139,7 @@ const systemDnsRecordKey = 'system_dns_record';
 const bootRecordKey = 'boot_record';
 const appliedConfigMd5Key = 'applied_config_md5';
 const proxyDelaysKey = 'proxy_delays';
+const proxyRttsKey = 'proxy_rtts';
 const defaultSystemDnsFallback = '223.5.5.5';
 const repository = 'FokySN1K/SNKP';
 const maxMobileWidth = 600;

@@ -453,6 +453,86 @@ void main() {
     });
   });
 
+  group('RttDataSource provider', () {
+    test('stores the road time by url and proxy name', () {
+      container.read(rttDataSourceProvider.notifier).setRtts([
+        const Delay(
+          name: 'Proxy',
+          url: 'https://test.example',
+          value: 120,
+          rtt: 42,
+        ),
+      ]);
+
+      expect(container.read(rttDataSourceProvider), {
+        'https://test.example': {'Proxy': 42},
+      });
+    });
+
+    test('keeps same state instance when the road time is unchanged', () {
+      final notifier = container.read(rttDataSourceProvider.notifier);
+      const delay = Delay(
+        name: 'Proxy',
+        url: 'https://test.example',
+        value: 1,
+        rtt: 1,
+      );
+      notifier.setRtts([delay]);
+      final state = container.read(rttDataSourceProvider);
+
+      notifier.setRtts([delay]);
+
+      expect(identical(container.read(rttDataSourceProvider), state), isTrue);
+    });
+
+    test('a failed check stores zero instead of a stale road time', () {
+      const url = 'https://test.example';
+      final notifier = container.read(rttDataSourceProvider.notifier);
+      notifier.setRtts([
+        const Delay(name: 'A', url: url, value: 100, rtt: 40),
+      ]);
+
+      notifier.setRtts([
+        const Delay(name: 'A', url: url, value: 0),
+      ]);
+
+      expect(container.read(rttDataSourceProvider), {
+        url: {'A': 0},
+      });
+    });
+
+    test('seeds only the road times it does not know yet', () {
+      const url = 'https://test.example';
+      final notifier = container.read(rttDataSourceProvider.notifier);
+      notifier.setRtts([
+        const Delay(name: 'A', url: url, value: 100, rtt: 40),
+      ]);
+
+      notifier.seedRtts({
+        url: {'A': 80, 'B': 60},
+      });
+
+      expect(container.read(rttDataSourceProvider), {
+        url: {'A': 40, 'B': 60},
+      });
+    });
+
+    test('seeding nothing new publishes no state change', () {
+      const url = 'https://test.example';
+      final notifier = container.read(rttDataSourceProvider.notifier);
+      notifier.seedRtts({
+        url: {'A': 60},
+      });
+      final state = container.read(rttDataSourceProvider);
+
+      notifier.seedRtts({
+        url: {'A': 50},
+      });
+
+      expect(identical(container.read(rttDataSourceProvider), state), isTrue);
+    });
+  });
+
   group('Loading provider', () {
     test('stop without start sets loading false immediately', () async {
       final notifier = container.read(

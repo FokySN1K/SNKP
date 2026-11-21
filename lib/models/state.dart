@@ -205,7 +205,9 @@ abstract class ComputeGroupsState with _$ComputeGroupsState {
   const factory ComputeGroupsState({
     required ProxiesData proxiesData,
     required ProxiesSortType sortType,
+    @Default(ProxyMetric.delay) ProxyMetric metric,
     required DelayMap delayMap,
+    @Default({}) DelayMap rttMap,
     required Map<String, String> selectedMap,
     required String defaultTestUrl,
   }) = _ComputeGroupsState;

@@ -137,53 +137,69 @@ class Preferences {
 
   /// The last state of every node, by test URL: a restart that takes the
   /// Core's own history with it leaves the page with the same picture.
-  Future<Map<String, Map<String, int>>> getDelays() async {
+  Future<Map<String, Map<String, int>>> getDelays() =>
+      _getMeasurements(proxyDelaysKey, 'getDelays');
+
+  /// The road times of the last checks, by test URL and then proxy name.
+  Future<Map<String, Map<String, int>>> getRtts() =>
+      _getMeasurements(proxyRttsKey, 'getRtts');
+
+  /// Writes what the cards show, a failed check included, so the next
+  /// launch does not blank a node the last run had already measured.
+  Future<void> saveDelays(DelayMap delays) =>
+      _saveMeasurements(proxyDelaysKey, delays);
+
+  Future<void> saveRtts(DelayMap rtts) =>
+      _saveMeasurements(proxyRttsKey, rtts);
+
+  Future<Map<String, Map<String, int>>> _getMeasurements(
+    String key,
+    String label,
+  ) async {
     try {
       final store = await _store.value;
-      final raw = store?.getString(proxyDelaysKey);
+      final raw = store?.getString(key);
       if (raw == null) return {};
       final decoded = json.decode(raw);
       if (decoded is! Map) return {};
-      final delays = <String, Map<String, int>>{};
+      final measurements = <String, Map<String, int>>{};
       for (final entry in decoded.entries) {
         final url = entry.key;
         final values = entry.value;
         if (url is! String || values is! Map) continue;
-        final urlDelays = <String, int>{};
-        for (final delay in values.entries) {
-          final name = delay.key;
-          final value = delay.value;
-          if (name is! String || value is! int || value == 0) continue;
-          urlDelays[name] = value;
+        final urlValues = <String, int>{};
+        for (final value in values.entries) {
+          final name = value.key;
+          final measured = value.value;
+          if (name is! String || measured is! int || measured == 0) continue;
+          urlValues[name] = measured;
         }
-        if (urlDelays.isNotEmpty) {
-          delays[url] = urlDelays;
+        if (urlValues.isNotEmpty) {
+          measurements[url] = urlValues;
         }
       }
-      return delays;
+      return measurements;
     } catch (e) {
       commonPrint.log(
-        'getDelays error ${e.toString()}',
+        '$label error ${e.toString()}',
         logLevel: LogLevel.warning,
       );
       return {};
     }
   }
 
-  /// Writes what the cards show, a failed check included, so the next
-  /// launch does not blank a node the last run had already measured.
-  Future<void> saveDelays(DelayMap delays) async {
+  Future<void> _saveMeasurements(String key, DelayMap measurements) async {
     final store = await _store.value;
     if (store == null) return;
     final measured = <String, Map<String, int>>{};
-    for (final entry in delays.entries) {
-      for (final delay in entry.value.entries) {
-        final value = delay.value;
-        if (value == null || value == 0) continue;
-        (measured[entry.key] ??= {})[delay.key] = value;
+    for (final entry in measurements.entries) {
+      for (final value in entry.value.entries) {
+        final measuredValue = value.value;
+        if (measuredValue == null || measuredValue == 0) continue;
+        (measured[entry.key] ??= {})[value.key] = measuredValue;
       }
     }
-    await store.setString(proxyDelaysKey, json.encode(measured));
+    await store.setString(key, json.encode(measured));
   }
 
   Future<SystemDnsRecord?> getSystemDnsRecord() async {

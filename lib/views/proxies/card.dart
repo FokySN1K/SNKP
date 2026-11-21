@@ -391,6 +391,8 @@ class _DelayTextState extends ConsumerState<_DelayText> {
   Widget _buildDelaySlot(
     BuildContext context,
     int? delay,
+    int? rtt,
+    ProxyMetric metric,
     DelayTestPhase? phase,
   ) {
     final size = globalState.measure.textHeight(AppTextStyle.caption2);
@@ -422,23 +424,38 @@ class _DelayTextState extends ConsumerState<_DelayText> {
         }),
       );
     }
+    final style = AppTextStyle.caption2
+        .of(context, emphasized: true)
+        .copyWith(overflow: TextOverflow.ellipsis);
+    // A node that failed keeps saying so under either metric: it has no road
+    // time to show, and the failure is what the card must tell.
+    final Widget label;
+    if (delay <= 0) {
+      label = Text(
+        delayFailureText(delay, context.appLocalizations),
+        maxLines: 1,
+        style: style.copyWith(color: context.colorScheme.delayColor(delay)),
+      );
+    } else if (metric == ProxyMetric.rtt && (rtt ?? 0) <= 0) {
+      label = Tooltip(
+        message: context.appLocalizations.metricNoRtt,
+        child: Text(
+          '—',
+          maxLines: 1,
+          style: style.copyWith(color: context.colorScheme.onSurfaceVariant),
+        ),
+      );
+    } else {
+      final shown = metric == ProxyMetric.rtt ? rtt! : delay;
+      label = Text(
+        '$shown ms',
+        maxLines: 1,
+        style: style.copyWith(color: context.colorScheme.delayColor(shown)),
+      );
+    }
     return GestureDetector(
       onTap: _handleTestCurrentDelay,
-      child: _withFocusRing(
-        context,
-        Text(
-          delay > 0
-              ? '$delay ms'
-              : delayFailureText(delay, context.appLocalizations),
-          maxLines: 1,
-          style: AppTextStyle.caption2
-              .of(context, emphasized: true)
-              .copyWith(
-                overflow: TextOverflow.ellipsis,
-                color: context.colorScheme.delayColor(delay),
-              ),
-        ),
-      ),
+      child: _withFocusRing(context, label),
     );
   }
 
@@ -447,6 +464,12 @@ class _DelayTextState extends ConsumerState<_DelayText> {
     final measure = globalState.measure;
     final delay = ref.watch(
       delayProvider(proxyName: widget.proxy.name, testUrl: widget.testUrl),
+    );
+    final rtt = ref.watch(
+      rttProvider(proxyName: widget.proxy.name, testUrl: widget.testUrl),
+    );
+    final metric = ref.watch(
+      proxiesStyleSettingProvider.select((state) => state.metric),
     );
     final phase = ref.watch(
       delayTestPhaseProvider(
@@ -470,7 +493,7 @@ class _DelayTextState extends ConsumerState<_DelayText> {
           height: measure.textHeight(AppTextStyle.caption2),
           child: FadeBox(
             alignment: widget.alignment,
-            child: _buildDelaySlot(context, delay, phase),
+            child: _buildDelaySlot(context, delay, rtt, metric, phase),
           ),
         ),
       ),

@@ -4851,6 +4851,41 @@ class AppLocalizations {
     return Intl.message('Delay test', name: 'delayTest', desc: '', args: []);
   }
 
+  /// `RTT`
+  String get rtt {
+    return Intl.message('RTT', name: 'rtt', desc: '', args: []);
+  }
+
+  /// `Show`
+  String get showMetric {
+    return Intl.message('Show', name: 'showMetric', desc: '', args: []);
+  }
+
+  /// `Delay and RTT`
+  String get metricHelp {
+    return Intl.message(
+      'Delay and RTT',
+      name: 'metricHelp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The delay counts the time to a response, the RTT only the round trip of the connection.`
+  String get metricHelpBody {
+    return Intl.message(
+      'The delay counts the time to a response, the RTT only the round trip of the connection.',
+      name: 'metricHelpBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No RTT yet`
+  String get metricNoRtt {
+    return Intl.message('No RTT yet', name: 'metricNoRtt', desc: '', args: []);
+  }
+
   /// `Proxy group is empty`
   String get proxyGroupEmpty {
     return Intl.message(
@@ -8038,8 +8073,7 @@ class AppLocalizations {
   String customImportDroppedSubRules(num count, Object label) {
     return Intl.plural(
       count,
-      one:
-          '1 SUB-RULE rule was dropped, since custom profiles do not support sub-rules',
+      one: '1 SUB-RULE rule was dropped, since custom profiles do not support sub-rules',
       other:
           '$label SUB-RULE rules were dropped, since custom profiles do not support sub-rules',
       name: 'customImportDroppedSubRules',
@@ -8708,14 +8742,9 @@ class AppLocalizations {
     );
   }
 
-  /// `In rotation`
+  /// `In pool`
   String get poolRotation {
-    return Intl.message(
-      'In rotation',
-      name: 'poolRotation',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('In pool', name: 'poolRotation', desc: '', args: []);
   }
 
   /// `Silent nodes`

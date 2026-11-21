@@ -3748,9 +3748,9 @@ mixin _$Group {
 /// check or the mark's lifetime clears them.
  List<String> get suspicious;/// The members a pool keeps in rotation, out of `all`.
  List<String> get pool;/// How many members a pool keeps in rotation.
- int? get poolSize;/// The member a user pinned: the group routes through it while a check
-/// says it can carry traffic, and routes around it while one says it
-/// cannot.
+ int? get poolSize;/// The member a user pinned: while one is set the group routes through
+/// it, even when a check marks it out of play, so the route follows the
+/// user's pick until it is cleared or the member leaves the list.
  String? get fixed;/// Whether the pin is the member the group routes through now.
  bool get fixedActive;/// Why the group routes where it does, as the Core names it. A host shows
 /// a value it has no words for as it is.
@@ -4011,9 +4011,9 @@ class _Group implements Group {
 
 /// How many members a pool keeps in rotation.
 @override final  int? poolSize;
-/// The member a user pinned: the group routes through it while a check
-/// says it can carry traffic, and routes around it while one says it
-/// cannot.
+/// The member a user pinned: while one is set the group routes through
+/// it, even when a check marks it out of play, so the route follows the
+/// user's pick until it is cleared or the member leaves the list.
 @override final  String? fixed;
 /// Whether the pin is the member the group routes through now.
 @override@JsonKey() final  bool fixedActive;

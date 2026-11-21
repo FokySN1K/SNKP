@@ -56,6 +56,31 @@ func delayValue(delay uint16, timedOut bool) int32 {
 	}
 }
 
+// newDelay is the result of one measurement. The road time rides along only
+// with a measured delay: a node that failed or timed out has a dial time the
+// app must not show as if the node had answered.
+func newDelay(url, name string, delay uint16, rtt uint16, timedOut bool) *Delay {
+	result := &Delay{Url: url, Name: name, Value: delayValue(delay, timedOut)}
+	if result.Value > 0 {
+		result.Rtt = int32(rtt)
+	}
+	return result
+}
+
+// lastMeasuredRtt is the road time of the last check of url on proxy. The
+// probe queue reports only the delay, but every probe writes its history, and
+// the history keeps the dial time next to it.
+func lastMeasuredRtt(proxy constant.Proxy, url string) int32 {
+	if proxy == nil {
+		return 0
+	}
+	history := proxy.ExtraDelayHistories()[url].History
+	if len(history) == 0 {
+		return 0
+	}
+	return int32(history[len(history)-1].RTT)
+}
+
 // A name the tunnel does not know is what an apply that fell back to the
 // default config looks like: every node of the profile fails its test. Say so
 // once a second, not once per node, so the log names the real failure.
@@ -101,6 +126,9 @@ func handleTestDelay(params *TestDelayParams) *Delay {
 		delay = 0
 	}
 	result.Value = delayValue(delay, ctx.Err() != nil)
+	if result.Value > 0 {
+		result.Rtt = lastMeasuredRtt(proxy, url)
+	}
 	return result
 }
 
@@ -147,21 +175,29 @@ func handleTestGroupDelay(params *TestDelayParams) *Delay {
 		result.Value = delayValue(0, ctx.Err() != nil)
 		return result
 	}
-	result.Value = delayValue(groupDelay(results, group.Now()), ctx.Err() != nil)
+	delay, member := groupRoute(results, group.Now())
+	result.Value = delayValue(delay, ctx.Err() != nil)
+	if result.Value > 0 {
+		result.Rtt = lastMeasuredRtt(lookupProxy(member), url)
+	}
 	return result
 }
 
 // The delay of a group is the delay of the route it now uses; when this check
-// left that member out, the fastest measured one stands in.
-func groupDelay(results map[string]uint16, now string) uint16 {
+// left that member out, the fastest measured one stands in. The name comes
+// back with the delay, so the road time is read from the member the delay
+// describes: a load balancer names no single route, and its fastest member is
+// what its delay already reports.
+func groupRoute(results map[string]uint16, now string) (uint16, string) {
 	if delay, ok := results[now]; ok {
-		return delay
+		return delay, now
 	}
 	var best uint16
-	for _, delay := range results {
+	bestName := ""
+	for name, delay := range results {
 		if best == 0 || delay < best {
-			best = delay
+			best, bestName = delay, name
 		}
 	}
-	return best
+	return best, bestName
 }

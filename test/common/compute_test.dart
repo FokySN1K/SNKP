@@ -210,6 +210,76 @@ void main() {
       );
       expect(state.delay, 80);
     });
+
+    test('in RTT mode a live node shows the road time', () {
+      final groups = [
+        const Group(
+          name: 'auto',
+          type: GroupType.URLTest,
+          all: [Proxy(name: 'proxy-a', type: 'ss')],
+        ),
+      ];
+      final state = computeProxyDelayState(
+        proxyName: 'auto',
+        testUrl: 'http://test.com',
+        groups: groups,
+        selectedMap: {'auto': 'proxy-a'},
+        delayMap: <String, Map<String, int?>>{
+          'http://test.com': {'proxy-a': 80},
+        },
+        rttMap: <String, Map<String, int?>>{
+          'http://test.com': {'proxy-a': 35},
+        },
+        metric: ProxyMetric.rtt,
+      );
+      expect(state.delay, 35);
+    });
+
+    test('in RTT mode a node with no road time yet sorts as zero', () {
+      final groups = [
+        const Group(
+          name: 'auto',
+          type: GroupType.URLTest,
+          all: [Proxy(name: 'proxy-a', type: 'ss')],
+        ),
+      ];
+      final state = computeProxyDelayState(
+        proxyName: 'auto',
+        testUrl: 'http://test.com',
+        groups: groups,
+        selectedMap: {'auto': 'proxy-a'},
+        delayMap: <String, Map<String, int?>>{
+          'http://test.com': {'proxy-a': 80},
+        },
+        rttMap: const {},
+        metric: ProxyMetric.rtt,
+      );
+      expect(state.delay, 0);
+    });
+
+    test('in RTT mode a dead node keeps its delay and stays last', () {
+      final groups = [
+        const Group(
+          name: 'auto',
+          type: GroupType.URLTest,
+          all: [Proxy(name: 'proxy-a', type: 'ss')],
+        ),
+      ];
+      final state = computeProxyDelayState(
+        proxyName: 'auto',
+        testUrl: 'http://test.com',
+        groups: groups,
+        selectedMap: {'auto': 'proxy-a'},
+        delayMap: <String, Map<String, int?>>{
+          'http://test.com': {'proxy-a': -1},
+        },
+        rttMap: <String, Map<String, int?>>{
+          'http://test.com': {'proxy-a': 35},
+        },
+        metric: ProxyMetric.rtt,
+      );
+      expect(state.delay, -1);
+    });
   });
 
   group('computeSort', () {
@@ -273,6 +343,50 @@ void main() {
       );
       final names = result[0].all.map((p) => p.name).toList();
       expect(names.indexOf('proxy-b'), lessThan(names.indexOf('proxy-a')));
+    });
+
+    test('ProxiesSortType.delay sorts by RTT when the metric is RTT', () {
+      // The delay order here is the reverse of the RTT order, so the test
+      // proves the sort really reads the road time and not the delay.
+      final result = computeSort(
+        groups: [
+          const Group(
+            name: 'proxies',
+            type: GroupType.Selector,
+            all: [
+              Proxy(name: 'fast-road', type: 'ss'),
+              Proxy(name: 'slow-road', type: 'ss'),
+              Proxy(name: 'no-road', type: 'ss'),
+              Proxy(name: 'dead', type: 'ss'),
+            ],
+          ),
+        ],
+        sortType: ProxiesSortType.delay,
+        delayMap: <String, Map<String, int?>>{
+          'http://test.com': {
+            'fast-road': 120,
+            'slow-road': 40,
+            'no-road': 60,
+            'dead': -1,
+          },
+        },
+        rttMap: <String, Map<String, int?>>{
+          'http://test.com': {
+            'fast-road': 10,
+            'slow-road': 30,
+            'no-road': 0,
+          },
+        },
+        metric: ProxyMetric.rtt,
+        selectedMap: {},
+        defaultTestUrl: 'http://test.com',
+      );
+      expect(result[0].all.map((p) => p.name).toList(), [
+        'fast-road',
+        'slow-road',
+        'no-road',
+        'dead',
+      ]);
     });
 
     test('ProxiesSortType.delay keeps equal members where they were', () {

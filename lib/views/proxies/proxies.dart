@@ -58,11 +58,25 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
         value: style.sortType,
         textOf: (type) => switch (type) {
           ProxiesSortType.none => appLocalizations.defaultText,
-          ProxiesSortType.delay => appLocalizations.delay,
+          ProxiesSortType.delay => style.metric == ProxyMetric.rtt
+              ? appLocalizations.rtt
+              : appLocalizations.delay,
           ProxiesSortType.name => appLocalizations.name,
         },
         onSelected: (type) =>
             _updateStyle((state) => state.copyWith(sortType: type)),
+      ),
+      _optionsMenuItem(
+        glyph: AppGlyphs.speed,
+        label: appLocalizations.showMetric,
+        options: ProxyMetric.values,
+        value: style.metric,
+        textOf: (metric) => switch (metric) {
+          ProxyMetric.delay => appLocalizations.delay,
+          ProxyMetric.rtt => appLocalizations.rtt,
+        },
+        onSelected: (metric) =>
+            _updateStyle((state) => state.copyWith(metric: metric)),
       ),
       _optionsMenuItem(
         glyph: AppGlyphs.dashboard,
@@ -156,10 +170,30 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
     final isLoading = ref.watch(loadingProvider(LoadingTag.proxies));
     final picker = widget.picker;
     final primaryAction = _buildPrimaryAction();
+    final metricAction = _MetricMenuButton(
+      metric: style.metric,
+      tooltip: context.appLocalizations.showMetric,
+      onSelected: (metric) =>
+          _updateStyle((state) => state.copyWith(metric: metric)),
+    );
     return CommonScaffold(
       isLoading: isLoading,
       resizeToAvoidBottomInset: false,
-      primaryAction: primaryAction,
+      // The test and the metric share one filled pill: the bar holds three
+      // widgets, and a pill of two sits where a pill and a button do not.
+      // The bar swells the pill, so the group does not swell it again.
+      actions: [
+        if (primaryAction != null)
+          TonalButtonGroup(
+            elastic: false,
+            children: [
+              AppBarActionButton(data: primaryAction),
+              metricAction,
+            ],
+          )
+        else
+          metricAction,
+      ],
       searchActions: [?primaryAction],
       iconActions: [
         if (_isTab && !picker)
@@ -178,6 +212,54 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
         ProxiesType.tab => _tabView,
         ProxiesType.list => const ProxiesListView(),
       },
+    );
+  }
+}
+
+/// Picks what a card reads off a node, and says what the two figures are: a
+/// press opens the choice, so no page of settings keeps it.
+class _MetricMenuButton extends StatelessWidget {
+  const _MetricMenuButton({
+    required this.metric,
+    required this.tooltip,
+    required this.onSelected,
+  });
+
+  final ProxyMetric metric;
+  final String tooltip;
+  final ValueSetter<ProxyMetric> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    return CommonPopupBox(
+      targetBuilder: (open) => AppBarActionButton(
+        data: IconButtonData(
+          glyph: AppGlyphs.speed,
+          onPressed: open,
+          tooltip: tooltip,
+        ),
+      ),
+      popupBuilder: (_) => CommonPopupMenu(
+        items: [
+          CommonPopupMenuItem(
+            label: appLocalizations.delay,
+            checked: metric == ProxyMetric.delay,
+            onPressed: () => onSelected(ProxyMetric.delay),
+          ),
+          CommonPopupMenuItem(
+            label: appLocalizations.rtt,
+            checked: metric == ProxyMetric.rtt,
+            onPressed: () => onSelected(ProxyMetric.rtt),
+          ),
+          CommonPopupMenuItem(
+            glyph: AppGlyphs.warning,
+            label: appLocalizations.metricHelp,
+            subtitle: appLocalizations.metricHelpBody,
+            section: const CommonPopupMenuSection(),
+          ),
+        ],
+      ),
     );
   }
 }

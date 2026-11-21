@@ -1196,9 +1196,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Saisissez le contenu de la règle",
     ),
     "installNow": MessageLookupByLibrary.simpleMessage("Installer"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "L’autorisation de la liste des apps a été refusée ; les apps installées ne peuvent donc pas être listées. Veuillez l’accorder manuellement dans les réglages du système.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "L’autorisation de la liste des apps a été refusée ; les apps installées ne peuvent donc pas être listées. Veuillez l’accorder manuellement dans les réglages du système.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Ce système masque la liste des apps installées tant que l’autorisation n’est pas accordée. Accordez-la pour configurer le proxy par app.",
     ),
@@ -1423,6 +1424,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageTest": MessageLookupByLibrary.simpleMessage("Test de message"),
     "messageTestTip": MessageLookupByLibrary.simpleMessage(
       "Ceci est un message.",
+    ),
+    "metricHelp": MessageLookupByLibrary.simpleMessage("Latence et RTT"),
+    "metricHelpBody": MessageLookupByLibrary.simpleMessage(
+      "La latence mesure le temps jusqu’à la réponse ; le RTT, seulement l’aller-retour de la connexion.",
+    ),
+    "metricNoRtt": MessageLookupByLibrary.simpleMessage(
+      "RTT pas encore mesuré",
     ),
     "minimize": MessageLookupByLibrary.simpleMessage("Réduire"),
     "minimizeOnExit": MessageLookupByLibrary.simpleMessage(
@@ -1769,6 +1777,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Adresses de route exclues",
     ),
     "routingMark": MessageLookupByLibrary.simpleMessage("Marque de routage"),
+    "rtt": MessageLookupByLibrary.simpleMessage("RTT"),
     "ru": MessageLookupByLibrary.simpleMessage("Russe"),
     "rule": MessageLookupByLibrary.simpleMessage("Règle"),
     "ruleActionAndDesc": MessageLookupByLibrary.simpleMessage(
@@ -2025,6 +2034,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "show": MessageLookupByLibrary.simpleMessage("Afficher"),
     "showLess": MessageLookupByLibrary.simpleMessage("Réduire"),
+    "showMetric": MessageLookupByLibrary.simpleMessage("Afficher"),
     "showMore": MessageLookupByLibrary.simpleMessage("Développer"),
     "showNotificationStopAction": MessageLookupByLibrary.simpleMessage(
       "Bouton Arrêter dans la notification",

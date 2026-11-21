@@ -47,7 +47,9 @@ Future<List<Group>> buildGroups(ComputeGroupsState state) async {
   final proxiesData = state.proxiesData;
   final all = proxiesData.all;
   final sortType = state.sortType;
+  final metric = state.metric;
   final delayMap = state.delayMap;
+  final rttMap = state.rttMap;
   final selectedMap = state.selectedMap;
   final defaultTestUrl = state.defaultTestUrl;
   final proxies = proxiesData.proxies;
@@ -67,7 +69,9 @@ Future<List<Group>> buildGroups(ComputeGroupsState state) async {
   return computeSort(
     groups: groups,
     sortType: sortType,
+    metric: metric,
     delayMap: delayMap,
+    rttMap: rttMap,
     selectedMap: selectedMap,
     defaultTestUrl: defaultTestUrl,
   );

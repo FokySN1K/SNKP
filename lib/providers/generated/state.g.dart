@@ -2427,6 +2427,86 @@ final class DelayFamily extends $Family
   String toString() => r'delayProvider';
 }
 
+@ProviderFor(rtt)
+final rttProvider = RttFamily._();
+
+final class RttProvider extends $FunctionalProvider<int?, int?, int?>
+    with $Provider<int?> {
+  RttProvider._({
+    required RttFamily super.from,
+    required ({String proxyName, String? testUrl}) super.argument,
+  }) : super(
+         retry: null,
+         name: r'rttProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$rttHash();
+
+  @override
+  String toString() {
+    return r'rttProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<int?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  int? create(Ref ref) {
+    final argument = this.argument as ({String proxyName, String? testUrl});
+    return rtt(ref, proxyName: argument.proxyName, testUrl: argument.testUrl);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(int? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<int?>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is RttProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$rttHash() => r'1bb1e58cd2c236c11e7217add7bc8dac7ae2f72e';
+
+final class RttFamily extends $Family
+    with
+        $FunctionalFamilyOverride<int?, ({String proxyName, String? testUrl})> {
+  RttFamily._()
+    : super(
+        retry: null,
+        name: r'rttProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  RttProvider call({required String proxyName, String? testUrl}) =>
+      RttProvider._(
+        argument: (proxyName: proxyName, testUrl: testUrl),
+        from: this,
+      );
+
+  @override
+  String toString() => r'rttProvider';
+}
+
 @ProviderFor(delayTestPhase)
 final delayTestPhaseProvider = DelayTestPhaseFamily._();
 
@@ -2856,11 +2936,34 @@ final needUpdateGroupsProvider = NeedUpdateGroupsProvider._();
 final class NeedUpdateGroupsProvider
     extends
         $FunctionalProvider<
-          ({bool isProxies, int sortNum, ProxiesSortType sortType}),
-          ({bool isProxies, int sortNum, ProxiesSortType sortType}),
-          ({bool isProxies, int sortNum, ProxiesSortType sortType})
+          ({
+            bool isProxies,
+            ProxyMetric metric,
+            int sortNum,
+            ProxiesSortType sortType,
+          }),
+          ({
+            bool isProxies,
+            ProxyMetric metric,
+            int sortNum,
+            ProxiesSortType sortType,
+          }),
+          ({
+            bool isProxies,
+            ProxyMetric metric,
+            int sortNum,
+            ProxiesSortType sortType,
+          })
         >
-    with $Provider<({bool isProxies, int sortNum, ProxiesSortType sortType})> {
+    with
+        $Provider<
+          ({
+            bool isProxies,
+            ProxyMetric metric,
+            int sortNum,
+            ProxiesSortType sortType,
+          })
+        > {
   NeedUpdateGroupsProvider._()
     : super(
         from: null,
@@ -2877,29 +2980,48 @@ final class NeedUpdateGroupsProvider
 
   @$internal
   @override
-  $ProviderElement<({bool isProxies, int sortNum, ProxiesSortType sortType})>
+  $ProviderElement<
+    ({
+      bool isProxies,
+      ProxyMetric metric,
+      int sortNum,
+      ProxiesSortType sortType,
+    })
+  >
   $createElement($ProviderPointer pointer) => $ProviderElement(pointer);
 
   @override
-  ({bool isProxies, int sortNum, ProxiesSortType sortType}) create(Ref ref) {
+  ({bool isProxies, ProxyMetric metric, int sortNum, ProxiesSortType sortType})
+  create(Ref ref) {
     return needUpdateGroups(ref);
   }
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(
-    ({bool isProxies, int sortNum, ProxiesSortType sortType}) value,
+    ({
+      bool isProxies,
+      ProxyMetric metric,
+      int sortNum,
+      ProxiesSortType sortType,
+    })
+    value,
   ) {
     return $ProviderOverride(
       origin: this,
       providerOverride:
           $SyncValueProvider<
-            ({bool isProxies, int sortNum, ProxiesSortType sortType})
+            ({
+              bool isProxies,
+              ProxyMetric metric,
+              int sortNum,
+              ProxiesSortType sortType,
+            })
           >(value),
     );
   }
 }
 
-String _$needUpdateGroupsHash() => r'90b7cb35c96bda157cf436e32f251e58721ef757';
+String _$needUpdateGroupsHash() => r'2332512d8a131b28f0c7a344fc99937004d98816';
 
 @ProviderFor(navigationItemsState)
 final navigationItemsStateProvider = NavigationItemsStateProvider._();

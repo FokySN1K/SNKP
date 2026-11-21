@@ -429,8 +429,12 @@ abstract class CoreEvent with _$CoreEvent {
 
 @freezed
 abstract class Delay with _$Delay {
-  const factory Delay({required String name, required String url, int? value}) =
-      _Delay;
+  const factory Delay({
+    required String name,
+    required String url,
+    int? value,
+    @Default(0) int rtt,
+  }) = _Delay;
 
   factory Delay.fromJson(Map<String, Object?> json) => _$DelayFromJson(json);
 }
@@ -589,8 +593,14 @@ abstract class ProxiesData with _$ProxiesData {
 
 extension ProxiesDataExt on ProxiesData {
   /// What the Core last measured, by test URL and then proxy name.
-  Map<String, Map<String, int>> get lastDelays {
-    final delays = <String, Map<String, int>>{};
+  Map<String, Map<String, int>> get lastDelays => _historyValues('delay');
+
+  /// The road time of the last check, by test URL and then proxy name. A check
+  /// the Core recorded before it measured the road time carries none.
+  Map<String, Map<String, int>> get lastRtts => _historyValues('rtt');
+
+  Map<String, Map<String, int>> _historyValues(String key) {
+    final values = <String, Map<String, int>>{};
     for (final entry in proxies.entries) {
       final raw = entry.value;
       if (raw is! Map) continue;
@@ -604,13 +614,13 @@ extension ProxiesDataExt on ProxiesData {
         if (history is! List || history.isEmpty) continue;
         final last = history.last;
         if (last is! Map) continue;
-        final delay = last['delay'];
-        if (delay is! num) continue;
-        final value = delay.toInt();
-        if (value <= 0) continue; // a failed check is recorded as zero
-        (delays[url] ??= {})[entry.key] = value;
+        final value = last[key];
+        if (value is! num) continue;
+        final measured = value.toInt();
+        if (measured <= 0) continue; // a failed check is recorded as zero
+        (values[url] ??= {})[entry.key] = measured;
       }
     }
-    return delays;
+    return values;
   }
 }

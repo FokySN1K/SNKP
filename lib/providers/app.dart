@@ -417,6 +417,63 @@ class DelayDataSource extends _$DelayDataSource with AutoDisposeNotifierMixin {
   }
 }
 
+@Riverpod(keepAlive: true)
+class RttDataSource extends _$RttDataSource with AutoDisposeNotifierMixin {
+  DelayMap? _owned;
+  DelayMap? _published;
+
+  @override
+  DelayMap build() {
+    return {};
+  }
+
+  /// Publishes a live view, so a dependent that keeps the map must copy it.
+  void setRtts(Iterable<Delay> delays) {
+    final rttMap = _ownedRttMap();
+    var changed = false;
+    for (final delay in delays) {
+      if (rttMap[delay.url]?[delay.name] == delay.rtt) {
+        continue;
+      }
+      (rttMap[delay.url] ??= {})[delay.name] = delay.rtt;
+      changed = true;
+    }
+    if (changed) {
+      value = _published = UnmodifiableMapView(rttMap);
+    }
+  }
+
+  /// Seeds what the Core measured itself; a measured value always wins.
+  void seedRtts(Map<String, Map<String, int>> seed) {
+    final rttMap = _ownedRttMap();
+    var changed = false;
+    for (final entry in seed.entries) {
+      final urlRtts = rttMap[entry.key] ??= {};
+      for (final rtt in entry.value.entries) {
+        final current = urlRtts[rtt.key];
+        if (current != null && current > 0) {
+          continue;
+        }
+        urlRtts[rtt.key] = rtt.value;
+        changed = true;
+      }
+    }
+    if (changed) {
+      value = _published = UnmodifiableMapView(rttMap);
+    }
+  }
+
+  DelayMap _ownedRttMap() {
+    final owned = _owned;
+    if (owned != null && identical(state, _published)) {
+      return owned;
+    }
+    return _owned = {
+      for (final entry in state.entries) entry.key: {...entry.value},
+    };
+  }
+}
+
 /// A probe of a group's own check is measured in the Core, which reports the
 /// start and the result of every probe on its own. A start that no result
 /// follows (a lost message, a Core that went away) must not leave a card

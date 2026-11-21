@@ -317,6 +317,9 @@ _ProxiesStyleProps _$ProxiesStylePropsFromJson(Map<String, dynamic> json) =>
           ? ProxyCardType.standard
           : proxyCardTypeSafeFromJson(json['cardType']),
       hideTimeoutProxies: json['hideTimeoutProxies'] as bool? ?? false,
+      metric:
+          $enumDecodeNullable(_$ProxyMetricEnumMap, json['metric']) ??
+          ProxyMetric.delay,
     );
 
 Map<String, dynamic> _$ProxiesStylePropsToJson(_ProxiesStyleProps instance) =>
@@ -327,6 +330,7 @@ Map<String, dynamic> _$ProxiesStylePropsToJson(_ProxiesStyleProps instance) =>
       'iconStyle': _$ProxiesIconStyleEnumMap[instance.iconStyle]!,
       'cardType': _$ProxyCardTypeEnumMap[instance.cardType]!,
       'hideTimeoutProxies': instance.hideTimeoutProxies,
+      'metric': _$ProxyMetricEnumMap[instance.metric]!,
     };
 
 const _$ProxiesTypeEnumMap = {ProxiesType.tab: 'tab', ProxiesType.list: 'list'};
@@ -341,6 +345,11 @@ const _$ProxiesLayoutEnumMap = {
   ProxiesLayout.loose: 'loose',
   ProxiesLayout.standard: 'standard',
   ProxiesLayout.tight: 'tight',
+};
+
+const _$ProxyMetricEnumMap = {
+  ProxyMetric.delay: 'delay',
+  ProxyMetric.rtt: 'rtt',
 };
 
 const _$ProxiesIconStyleEnumMap = {

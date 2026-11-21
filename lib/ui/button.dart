@@ -80,10 +80,16 @@ class TonalButtonGroup extends StatefulWidget {
   const TonalButtonGroup({
     super.key,
     this.size = TonalButtonSize.bar,
+    this.elastic = true,
     required this.children,
   });
 
   final TonalButtonSize size;
+
+  /// Whether a press swells the group. A bar that swells the widgets it is
+  /// handed turns this off, so one press does not swell the pill twice.
+  final bool elastic;
+
   final List<Widget> children;
 
   @override
@@ -126,33 +132,31 @@ class _TonalButtonGroupState extends State<TonalButtonGroup>
           ? row
           : _HoverMarkScope(mark: mark, child: mark.build(context, row)),
     );
-    if (GooSurface.of(context)) {
-      return ElasticPress(child: GooPane(child: buttons));
-    }
-    return ElasticPress(
-      child: TonalButtonTheme.glassOf(context)
-          ? Listener(
-              onPointerDown: _handlePointerDown,
-              onPointerUp: _handlePointerEnd,
-              onPointerCancel: _handlePointerEnd,
-              child: ValueListenableBuilder(
-                valueListenable: _pointer,
-                builder: (_, pointer, child) => LiquidGlass(
-                  style: LiquidGlassStyle.regular(colorScheme),
-                  pressed: pointer != null,
-                  child: child,
-                ),
-                child: buttons,
-              ),
-            )
-          : DecoratedBox(
-              decoration: ShapeDecoration(
-                color: context.raisedSurfaceLevel.colorOf(colorScheme),
-                shape: AppShape.full,
+    final Widget panel = GooSurface.of(context)
+        ? GooPane(child: buttons)
+        : TonalButtonTheme.glassOf(context)
+        ? Listener(
+            onPointerDown: _handlePointerDown,
+            onPointerUp: _handlePointerEnd,
+            onPointerCancel: _handlePointerEnd,
+            child: ValueListenableBuilder(
+              valueListenable: _pointer,
+              builder: (_, pointer, child) => LiquidGlass(
+                style: LiquidGlassStyle.regular(colorScheme),
+                pressed: pointer != null,
+                child: child,
               ),
               child: buttons,
             ),
-    );
+          )
+        : DecoratedBox(
+            decoration: ShapeDecoration(
+              color: context.raisedSurfaceLevel.colorOf(colorScheme),
+              shape: AppShape.full,
+            ),
+            child: buttons,
+          );
+    return widget.elastic ? ElasticPress(child: panel) : panel;
   }
 }
 

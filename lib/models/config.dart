@@ -470,6 +470,7 @@ abstract class ProxiesStyleProps with _$ProxiesStyleProps {
     @JsonKey(fromJson: proxyCardTypeSafeFromJson)
     ProxyCardType cardType,
     @Default(false) bool hideTimeoutProxies,
+    @Default(ProxyMetric.delay) ProxyMetric metric,
   }) = _ProxiesStyleProps;
 
   factory ProxiesStyleProps.fromJson(Map<String, Object?>? json) => json == null

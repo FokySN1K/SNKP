@@ -205,6 +205,10 @@ type Delay struct {
 	Url   string `json:"url"`
 	Name  string `json:"name"`
 	Value int32  `json:"value"`
+	// Rtt is the road to the node apart from the server time Value adds to
+	// it: how long the connection setup took. Zero means the dial never
+	// completed, so a host that shows the road has nothing to show.
+	Rtt int32 `json:"rtt"`
 }
 
 // A probe that has just begun. A group check decides on its own which members

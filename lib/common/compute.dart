@@ -6,6 +6,8 @@ List<Group> computeSort({
   required List<Group> groups,
   required ProxiesSortType sortType,
   required DelayMap delayMap,
+  DelayMap rttMap = const {},
+  ProxyMetric metric = ProxyMetric.delay,
   required Map<String, String> selectedMap,
   required String defaultTestUrl,
 }) {
@@ -13,6 +15,8 @@ List<Group> computeSort({
     required List<Group> groups,
     required List<Proxy> proxies,
     required DelayMap delayMap,
+    required DelayMap rttMap,
+    required ProxyMetric metric,
     required Map<String, String> selectedMap,
     required String testUrl,
   }) {
@@ -24,6 +28,8 @@ List<Group> computeSort({
           groups: groups,
           selectedMap: selectedMap,
           delayMap: delayMap,
+          rttMap: rttMap,
+          metric: metric,
         ),
     };
     return _stableSort(
@@ -46,6 +52,8 @@ List<Group> computeSort({
     required List<Group> groups,
     required List<Proxy> proxies,
     required DelayMap delayMap,
+    required DelayMap rttMap,
+    required ProxyMetric metric,
     required Map<String, String> selectedMap,
     required String testUrl,
   }) {
@@ -60,6 +68,8 @@ List<Group> computeSort({
           if (!pinned(proxy)) proxy,
       ],
       delayMap: delayMap,
+      rttMap: rttMap,
+      metric: metric,
       selectedMap: selectedMap,
       testUrl: testUrl,
     );
@@ -79,6 +89,8 @@ List<Group> computeSort({
         groups: groups,
         proxies: proxies,
         delayMap: delayMap,
+        rttMap: rttMap,
+        metric: metric,
         selectedMap: selectedMap,
         testUrl: testUrl,
       ),
@@ -276,20 +288,28 @@ const _coreProbeMarker = '\u0002';
 
 String coreProbeKey(String proxyName) => '$_coreProbeMarker$proxyName';
 
+/// The value a card shows, and the sort places it by. Under [ProxyMetric.rtt]
+/// only a node that answered has a road time: one that did not keeps the
+/// delay it has, so a dead node still sorts after every live one.
 DelayState computeProxyDelayState({
   required String proxyName,
   required String testUrl,
   required List<Group> groups,
   required Map<String, String> selectedMap,
   required DelayMap delayMap,
+  DelayMap rttMap = const {},
+  ProxyMetric metric = ProxyMetric.delay,
 }) {
   final state = computeRealSelectedProxyState(
     proxyName,
     groups: groups,
     selectedMap: selectedMap,
   );
-  final currentDelayMap =
-      delayMap[state.testUrl.takeFirstValid([testUrl])] ?? {};
-  final delay = currentDelayMap[state.proxyName];
-  return DelayState(delay: delay ?? 0, group: state.group);
+  final effectiveTestUrl = state.testUrl.takeFirstValid([testUrl]);
+  final delay = delayMap[effectiveTestUrl]?[state.proxyName] ?? 0;
+  if (metric != ProxyMetric.rtt || delay <= 0) {
+    return DelayState(delay: delay, group: state.group);
+  }
+  final rtt = rttMap[effectiveTestUrl]?[state.proxyName] ?? 0;
+  return DelayState(delay: rtt, group: state.group);
 }

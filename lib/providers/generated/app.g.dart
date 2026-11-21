@@ -1537,9 +1537,61 @@ final class DelayDataSourceProvider
   }
 }
 
-String _$delayDataSourceHash() => r'0d0fb2faccb3ce4539ce683b1a2bc4dcb8c8f3c0';
+String _$delayDataSourceHash() => r'2d790a43befe3956a09cc20b45c2a5a08d82fe8b';
 
 abstract class _$DelayDataSource extends $Notifier<DelayMap> {
+  DelayMap build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<DelayMap, DelayMap>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<DelayMap, DelayMap>,
+              DelayMap,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(RttDataSource)
+final rttDataSourceProvider = RttDataSourceProvider._();
+
+final class RttDataSourceProvider
+    extends $NotifierProvider<RttDataSource, DelayMap> {
+  RttDataSourceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'rttDataSourceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$rttDataSourceHash();
+
+  @$internal
+  @override
+  RttDataSource create() => RttDataSource();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DelayMap value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DelayMap>(value),
+    );
+  }
+}
+
+String _$rttDataSourceHash() => r'508af3e655f2fa030743cb30c23780f667e6c9ab';
+
+abstract class _$RttDataSource extends $Notifier<DelayMap> {
   DelayMap build();
   @$mustCallSuper
   @override

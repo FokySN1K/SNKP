@@ -195,6 +195,26 @@ void main() {
       final delay = Delay.fromJson({'name': 'P1', 'url': 'test.com'});
       expect(delay.value, null);
     });
+
+    test('rtt comes from the event', () {
+      final delay = Delay.fromJson({
+        'name': 'P1',
+        'url': 'test.com',
+        'value': 42,
+        'rtt': 12,
+      });
+      expect(delay.value, 42);
+      expect(delay.rtt, 12);
+    });
+
+    test('rtt defaults to zero when the Core did not send one', () {
+      final delay = Delay.fromJson({
+        'name': 'P1',
+        'url': 'test.com',
+        'value': 42,
+      });
+      expect(delay.rtt, 0);
+    });
   });
 
   group('ProxiesData', () {
@@ -280,6 +300,43 @@ void main() {
       });
 
       expect(data.lastDelays, isEmpty);
+    });
+
+    test('lastRtts reads the road times the Core kept per URL', () {
+      final data = ProxiesData.fromJson({
+        'proxies': {
+          'HK-01': {
+            'name': 'HK-01',
+            'type': 'ss',
+            'extra': {
+              'https://a.example': {
+                'alive': true,
+                'history': [
+                  {'time': '2026-01-01T00:00:00Z', 'delay': 120, 'rtt': 80},
+                  {'time': '2026-01-01T00:01:00Z', 'delay': 90, 'rtt': 41},
+                ],
+              },
+            },
+          },
+          'HK-02': {
+            'name': 'HK-02',
+            'type': 'ss',
+            'extra': {
+              'https://a.example': {
+                'alive': true,
+                'history': [
+                  {'time': '2026-01-01T00:00:00Z', 'delay': 55},
+                ],
+              },
+            },
+          },
+        },
+        'all': ['HK-01', 'HK-02'],
+      });
+
+      expect(data.lastRtts, {
+        'https://a.example': {'HK-01': 41},
+      });
     });
   });
 
