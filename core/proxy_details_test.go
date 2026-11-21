@@ -52,8 +52,10 @@ func TestProxyDetailsFollowTheTestTarget(t *testing.T) {
 		if sample.Delay == 0 || sample.Time == 0 {
 			t.Errorf("sample = %+v, want a delay and a timestamp", sample)
 		}
-		if sample.RTT == 0 {
-			t.Errorf("sample = %+v, want the dial RTT the check measured", sample)
+		// The target is on this host, so the dial never crossed the network:
+		// the sample keeps the road it does not have at zero.
+		if sample.RTT != 0 {
+			t.Errorf("sample = %+v, want no road from a dial that never left the host", sample)
 		}
 	}
 
