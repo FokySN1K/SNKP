@@ -58,9 +58,10 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
         value: style.sortType,
         textOf: (type) => switch (type) {
           ProxiesSortType.none => appLocalizations.defaultText,
-          ProxiesSortType.delay => style.metric == ProxyMetric.rtt
-              ? appLocalizations.rtt
-              : appLocalizations.delay,
+          ProxiesSortType.delay =>
+            style.metric == ProxyMetric.rtt
+                ? appLocalizations.rtt
+                : appLocalizations.delay,
           ProxiesSortType.name => appLocalizations.name,
         },
         onSelected: (type) =>
@@ -217,7 +218,9 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
 }
 
 /// Picks what a card reads off a node, and says what the two figures are: a
-/// press opens the choice, so no page of settings keeps it.
+/// press opens the choice, and the note under it opens the full explanation,
+/// which also says why the road time is worth choosing. No page of settings
+/// keeps either.
 class _MetricMenuButton extends StatelessWidget {
   const _MetricMenuButton({
     required this.metric,
@@ -253,10 +256,16 @@ class _MetricMenuButton extends StatelessWidget {
             onPressed: () => onSelected(ProxyMetric.rtt),
           ),
           CommonPopupMenuItem(
-            glyph: AppGlyphs.warning,
+            glyph: AppGlyphs.info,
             label: appLocalizations.metricHelp,
             subtitle: appLocalizations.metricHelpBody,
             section: const CommonPopupMenuSection(),
+            onPressed: () {
+              dialogs.showAlert(
+                title: appLocalizations.metricHelp,
+                message: TextSpan(text: appLocalizations.metricHelpDetail),
+              );
+            },
           ),
         ],
       ),

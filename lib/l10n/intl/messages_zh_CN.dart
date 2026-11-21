@@ -1057,10 +1057,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageTest": MessageLookupByLibrary.simpleMessage("消息测试"),
     "messageTestTip": MessageLookupByLibrary.simpleMessage("这是一条消息。"),
     "metricHelp": MessageLookupByLibrary.simpleMessage("延迟与 RTT"),
-    "metricHelpBody": MessageLookupByLibrary.simpleMessage(
-      "延迟计算到响应的时间，RTT 只计算连接本身的往返时间。",
+    "metricHelpBody": MessageLookupByLibrary.simpleMessage("每个数字算什么、影响什么"),
+    "metricHelpDetail": MessageLookupByLibrary.simpleMessage(
+      "延迟是从请求到响应的总时间：到服务器的去程、服务器处理和回程。RTT 只是往返路程。\n\n为什么要看 RTT。延迟既受距离影响，也受服务器负载影响：服务器繁忙时响应慢，即使路很近。RTT 不会掩盖这一点——它显示谁是真的远，谁只是回答得慢。所以看 RTT 就能知道谁的路更好：游戏、通话和响应速度取决于路程，而不是测试请求被回答得多快。\n\n选择影响什么：\n• 卡片——显示哪个数字；\n• 排序——按哪个数字排序；\n• 组和池选择节点——始终按完整延迟，RTT 不影响路由。\n\n「—」表示路程尚未测量：保持连接的节点（Hysteria2、VLESS gRPC）在建立会话时记住路程；直连没有路程。",
     ),
-    "metricNoRtt": MessageLookupByLibrary.simpleMessage("尚未测量 RTT"),
+    "metricNoRtt": MessageLookupByLibrary.simpleMessage("路程尚未测量"),
     "minimize": MessageLookupByLibrary.simpleMessage("最小化"),
     "minimizeOnExit": MessageLookupByLibrary.simpleMessage("退出时最小化"),
     "minutes": MessageLookupByLibrary.simpleMessage("分钟"),

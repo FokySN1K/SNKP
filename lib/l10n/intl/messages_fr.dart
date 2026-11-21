@@ -1196,10 +1196,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Saisissez le contenu de la règle",
     ),
     "installNow": MessageLookupByLibrary.simpleMessage("Installer"),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "L’autorisation de la liste des apps a été refusée ; les apps installées ne peuvent donc pas être listées. Veuillez l’accorder manuellement dans les réglages du système.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "L’autorisation de la liste des apps a été refusée ; les apps installées ne peuvent donc pas être listées. Veuillez l’accorder manuellement dans les réglages du système.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Ce système masque la liste des apps installées tant que l’autorisation n’est pas accordée. Accordez-la pour configurer le proxy par app.",
     ),
@@ -1427,10 +1426,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "metricHelp": MessageLookupByLibrary.simpleMessage("Latence et RTT"),
     "metricHelpBody": MessageLookupByLibrary.simpleMessage(
-      "La latence mesure le temps jusqu’à la réponse ; le RTT, seulement l’aller-retour de la connexion.",
+      "Ce que compte chaque valeur et ce qu’elle change",
+    ),
+    "metricHelpDetail": MessageLookupByLibrary.simpleMessage(
+      "Le délai est le temps entre une requête et sa réponse : le trajet vers le serveur, son traitement et le retour. Le RTT n’est que le trajet aller-retour.\n\nPourquoi regarder le RTT. Le délai augmente avec la distance et avec la charge du serveur : un serveur occupé répond lentement même si le trajet est court. Le RTT ne le cache pas : il montre qui est vraiment loin et qui répond simplement lentement. Le RTT indique donc quel trajet est le meilleur ; pour les jeux, les appels et la réactivité, c’est le trajet qui compte, pas la vitesse de réponse au test.\n\nCe que le choix change :\n• les cartes : la valeur affichée ;\n• le tri : la valeur qui sert au tri ;\n• le nœud choisi par un groupe ou un pool : toujours le délai complet, le RTT ne change jamais la route.\n\n« — » signifie que le trajet n’est pas encore mesuré : sur un nœud à session persistante (Hysteria2, VLESS gRPC), il est mémorisé à l’ouverture de la session, et une connexion directe n’a pas de trajet.",
     ),
     "metricNoRtt": MessageLookupByLibrary.simpleMessage(
-      "RTT pas encore mesuré",
+      "Trajet pas encore mesuré",
     ),
     "minimize": MessageLookupByLibrary.simpleMessage("Réduire"),
     "minimizeOnExit": MessageLookupByLibrary.simpleMessage(

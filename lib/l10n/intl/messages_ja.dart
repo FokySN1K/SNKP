@@ -1154,10 +1154,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageTest": MessageLookupByLibrary.simpleMessage("メッセージテスト"),
     "messageTestTip": MessageLookupByLibrary.simpleMessage("これはメッセージです。"),
     "metricHelp": MessageLookupByLibrary.simpleMessage("遅延と RTT"),
-    "metricHelpBody": MessageLookupByLibrary.simpleMessage(
-      "遅延は応答までの時間、RTT は接続そのものの往復時間です。",
+    "metricHelpBody": MessageLookupByLibrary.simpleMessage("各数値が何を数え、何に影響するか"),
+    "metricHelpDetail": MessageLookupByLibrary.simpleMessage(
+      "遅延はリクエストから応答までの時間です。サーバーへの道のり、サーバーの処理、戻りの道のりを含みます。RTT は往復の道のりだけです。\n\nRTT を見る理由。遅延は距離だけでなくサーバーの負荷でも伸びます。混んでいるサーバーは道が短くても応答が遅くなります。RTT はそれを隠しません——本当に遠いのか、ただ応答が遅いだけなのかが分かります。ゲームや通話、操作の応答性に効くのは道のりであり、テスト要求への応答の速さではありません。\n\n選択が影響するもの：\n• カード——表示する数値；\n• 並べ替え——どの数値で並べ替えるか；\n• グループやプールが選ぶノード——常に完全な遅延で、RTT は経路に影響しません。\n\n「—」は道のりが未測定です。セッションを保つノード（Hysteria2、VLESS gRPC）ではセッション確立時に記憶され、直接接続には道のりがありません。",
     ),
-    "metricNoRtt": MessageLookupByLibrary.simpleMessage("RTT は未測定です"),
+    "metricNoRtt": MessageLookupByLibrary.simpleMessage("道のりは未測定"),
     "minimize": MessageLookupByLibrary.simpleMessage("最小化"),
     "minimizeOnExit": MessageLookupByLibrary.simpleMessage("終了時に最小化"),
     "minutes": MessageLookupByLibrary.simpleMessage("分"),

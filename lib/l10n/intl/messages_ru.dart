@@ -1158,10 +1158,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Введите содержимое правила",
     ),
     "installNow": MessageLookupByLibrary.simpleMessage("Установить"),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Эта система не выдаёт список установленных приложений без разрешения. Предоставьте его, чтобы настроить прокси для отдельных приложений.",
     ),
@@ -1385,9 +1384,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageTestTip": MessageLookupByLibrary.simpleMessage("Это сообщение."),
     "metricHelp": MessageLookupByLibrary.simpleMessage("Задержка и RTT"),
     "metricHelpBody": MessageLookupByLibrary.simpleMessage(
-      "Задержка считает время до ответа, RTT — только дорогу до сервера и обратно.",
+      "Что считает каждое число и на что влияет",
     ),
-    "metricNoRtt": MessageLookupByLibrary.simpleMessage("RTT ещё не измерен"),
+    "metricHelpDetail": MessageLookupByLibrary.simpleMessage(
+      "Задержка — время от запроса до ответа: дорога до сервера, его обработка и обратный путь. RTT — только дорога туда и обратно.\n\nЗачем RTT. Задержка растёт и от расстояния, и от нагрузки на сервер: перегруженный сервер отвечает медленно, хотя дорога до него короткая. RTT этого не скрывает — он показывает, кто действительно далеко, а кто просто медленно отвечает. Поэтому по RTT видно, у кого лучше путь: для игр, звонков и отзывчивости важна именно дорога, а не скорость ответа на тестовый запрос.\n\nНа что влияет выбор:\n• карточки — какое число показывать;\n• сортировка — по какому числу сортировать;\n• выбор узла в группах и пулах — всегда по полной задержке, RTT на маршрут не влияет.\n\n«—» — дорога ещё не измерена: у узлов с постоянным соединением (Hysteria2, VLESS gRPC) она запоминается при установке сессии, а у прямого соединения дороги нет.",
+    ),
+    "metricNoRtt": MessageLookupByLibrary.simpleMessage(
+      "Дорога ещё не измерена",
+    ),
     "minimize": MessageLookupByLibrary.simpleMessage("Свернуть"),
     "minimizeOnExit": MessageLookupByLibrary.simpleMessage(
       "Сворачивать при выходе",

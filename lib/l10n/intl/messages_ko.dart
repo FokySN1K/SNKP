@@ -1138,9 +1138,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageTestTip": MessageLookupByLibrary.simpleMessage("이것은 메시지입니다."),
     "metricHelp": MessageLookupByLibrary.simpleMessage("지연과 RTT"),
     "metricHelpBody": MessageLookupByLibrary.simpleMessage(
-      "지연은 응답까지의 시간이고, RTT는 연결 자체의 왕복 시간입니다.",
+      "각 숫자가 무엇을 재고 무엇에 영향을 주는지",
     ),
-    "metricNoRtt": MessageLookupByLibrary.simpleMessage("RTT가 아직 측정되지 않음"),
+    "metricHelpDetail": MessageLookupByLibrary.simpleMessage(
+      "지연은 요청부터 응답까지의 시간입니다. 서버까지의 경로, 서버 처리, 돌아오는 경로를 포함합니다. RTT는 왕복 경로만 셉니다.\n\nRTT를 보는 이유. 지연은 거리와 서버 부하 모두로 늘어납니다. 붐비는 서버는 경로가 짧아도 응답이 느립니다. RTT는 이를 감추지 않습니다——누가 정말 먼지, 누가 그저 느리게 응답하는지 보여 줍니다. 게임, 통화, 반응성에 중요한 것은 경로이지 테스트 요청에 얼마나 빨리 응답했는지가 아닙니다.\n\n선택이 영향을 주는 것:\n• 카드——표시할 숫자;\n• 정렬——어떤 숫자로 정렬할지;\n• 그룹과 풀이 고르는 노드——항상 전체 지연이며 RTT는 경로에 영향을 주지 않습니다.\n\n‘—’는 경로가 아직 측정되지 않았다는 뜻입니다. 세션을 유지하는 노드(Hysteria2, VLESS gRPC)는 세션을 열 때 경로를 기억하며, 직접 연결에는 경로가 없습니다.",
+    ),
+    "metricNoRtt": MessageLookupByLibrary.simpleMessage("경로가 아직 측정되지 않음"),
     "minimize": MessageLookupByLibrary.simpleMessage("최소화"),
     "minimizeOnExit": MessageLookupByLibrary.simpleMessage("종료 시 최소화"),
     "minutes": MessageLookupByLibrary.simpleMessage("분"),

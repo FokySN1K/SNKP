@@ -1122,10 +1122,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Enter the rule content",
     ),
     "installNow": MessageLookupByLibrary.simpleMessage("Install"),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "This system hides the installed app list until the permission is granted. Authorize it to configure the per-app proxy.",
     ),
@@ -1333,9 +1332,14 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "metricHelp": MessageLookupByLibrary.simpleMessage("Delay and RTT"),
     "metricHelpBody": MessageLookupByLibrary.simpleMessage(
-      "The delay counts the time to a response, the RTT only the round trip of the connection.",
+      "What each number counts, and what it affects",
     ),
-    "metricNoRtt": MessageLookupByLibrary.simpleMessage("No RTT yet"),
+    "metricHelpDetail": MessageLookupByLibrary.simpleMessage(
+      "Delay is the time from a request to its response: the road to the server, its processing and the way back. RTT is only the road there and back.\n\nWhy RTT. Delay grows with distance and with server load alike: a busy server answers slowly even though the road to it is short. RTT does not hide that — it shows who is really far and who just answers slowly. So RTT tells whose path is better: games, calls and responsiveness depend on the road, not on how fast the test request was answered.\n\nWhat the choice affects:\n• cards — which number they show;\n• the sort option — which number it sorts by;\n• the node a group or pool picks — always the full delay, RTT never changes the route.\n\n“—” means the road is not measured yet: on a node with a persistent session (Hysteria2, VLESS gRPC) it is remembered when the session is established, and a direct connection has no road at all.",
+    ),
+    "metricNoRtt": MessageLookupByLibrary.simpleMessage(
+      "Road time not measured yet",
+    ),
     "minimize": MessageLookupByLibrary.simpleMessage("Minimize"),
     "minimizeOnExit": MessageLookupByLibrary.simpleMessage("Minimize on exit"),
     "minutes": MessageLookupByLibrary.simpleMessage("minutes"),

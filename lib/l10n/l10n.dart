@@ -4871,19 +4871,34 @@ class AppLocalizations {
     );
   }
 
-  /// `The delay counts the time to a response, the RTT only the round trip of the connection.`
+  /// `What each number counts, and what it affects`
   String get metricHelpBody {
     return Intl.message(
-      'The delay counts the time to a response, the RTT only the round trip of the connection.',
+      'What each number counts, and what it affects',
       name: 'metricHelpBody',
       desc: '',
       args: [],
     );
   }
 
-  /// `No RTT yet`
+  /// `Delay is the time from a request to its response: the road to the server, its processing and the way back. RTT is only the road there and back.\n\nWhy RTT. Delay grows with distance and with server load alike: a busy server answers slowly even though the road to it is short. RTT does not hide that — it shows who is really far and who just answers slowly. So RTT tells whose path is better: games, calls and responsiveness depend on the road, not on how fast the test request was answered.\n\nWhat the choice affects:\n• cards — which number they show;\n• the sort option — which number it sorts by;\n• the node a group or pool picks — always the full delay, RTT never changes the route.\n\n“—” means the road is not measured yet: on a node with a persistent session (Hysteria2, VLESS gRPC) it is remembered when the session is established, and a direct connection has no road at all.`
+  String get metricHelpDetail {
+    return Intl.message(
+      'Delay is the time from a request to its response: the road to the server, its processing and the way back. RTT is only the road there and back.\n\nWhy RTT. Delay grows with distance and with server load alike: a busy server answers slowly even though the road to it is short. RTT does not hide that — it shows who is really far and who just answers slowly. So RTT tells whose path is better: games, calls and responsiveness depend on the road, not on how fast the test request was answered.\n\nWhat the choice affects:\n• cards — which number they show;\n• the sort option — which number it sorts by;\n• the node a group or pool picks — always the full delay, RTT never changes the route.\n\n“—” means the road is not measured yet: on a node with a persistent session (Hysteria2, VLESS gRPC) it is remembered when the session is established, and a direct connection has no road at all.',
+      name: 'metricHelpDetail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Road time not measured yet`
   String get metricNoRtt {
-    return Intl.message('No RTT yet', name: 'metricNoRtt', desc: '', args: []);
+    return Intl.message(
+      'Road time not measured yet',
+      name: 'metricNoRtt',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Proxy group is empty`
@@ -8073,7 +8088,8 @@ class AppLocalizations {
   String customImportDroppedSubRules(num count, Object label) {
     return Intl.plural(
       count,
-      one: '1 SUB-RULE rule was dropped, since custom profiles do not support sub-rules',
+      one:
+          '1 SUB-RULE rule was dropped, since custom profiles do not support sub-rules',
       other:
           '$label SUB-RULE rules were dropped, since custom profiles do not support sub-rules',
       name: 'customImportDroppedSubRules',

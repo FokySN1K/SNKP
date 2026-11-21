@@ -1195,10 +1195,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Introduce el contenido de la regla",
     ),
     "installNow": MessageLookupByLibrary.simpleMessage("Instalar"),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "Se denegó el permiso de lista de apps, por lo que no se pueden mostrar las apps instaladas. Concédelo manualmente en los ajustes del sistema.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "Se denegó el permiso de lista de apps, por lo que no se pueden mostrar las apps instaladas. Concédelo manualmente en los ajustes del sistema.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Este sistema oculta la lista de apps instaladas hasta que se concede el permiso. Autorízalo para configurar el proxy por app.",
     ),
@@ -1428,9 +1427,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "metricHelp": MessageLookupByLibrary.simpleMessage("Latencia y RTT"),
     "metricHelpBody": MessageLookupByLibrary.simpleMessage(
-      "La latencia mide el tiempo hasta la respuesta; el RTT, solo el viaje de la conexión.",
+      "Qué cuenta cada cifra y a qué afecta",
     ),
-    "metricNoRtt": MessageLookupByLibrary.simpleMessage("RTT aún sin medir"),
+    "metricHelpDetail": MessageLookupByLibrary.simpleMessage(
+      "La latencia es el tiempo desde una petición hasta su respuesta: el camino al servidor, su procesamiento y la vuelta. El RTT es solo el camino de ida y vuelta.\n\nPor qué mirar el RTT. La latencia crece con la distancia y con la carga del servidor: un servidor ocupado responde despacio aunque el camino sea corto. El RTT no lo oculta: muestra quién está realmente lejos y quién solo responde despacio. Por eso el RTT indica qué camino es mejor; en juegos, llamadas y respuesta ágil importa el camino, no lo rápido que se contestó la prueba.\n\nA qué afecta la elección:\n• tarjetas: qué cifra muestran;\n• el orden: por qué cifra ordena;\n• el nodo que elige un grupo o un pool: siempre la latencia completa; el RTT nunca cambia la ruta.\n\n«—» significa que el camino aún no se ha medido: en un nodo con sesión permanente (Hysteria2, VLESS gRPC) se recuerda al abrir la sesión, y una conexión directa no tiene camino.",
+    ),
+    "metricNoRtt": MessageLookupByLibrary.simpleMessage("Camino aún sin medir"),
     "minimize": MessageLookupByLibrary.simpleMessage("Minimizar"),
     "minimizeOnExit": MessageLookupByLibrary.simpleMessage(
       "Minimizar al salir",
